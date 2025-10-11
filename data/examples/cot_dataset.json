@@ -1,0 +1,542 @@
+[
+  {
+    "question": "Bir kutuda 33 adet top var. Toplam 29 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 33 adet top var\n2. Toplam 29 kutu var\n3. Toplam top sayısını bulmak için: 33 × 29\n4. 33 × 29 = 957\n5. Sonuç: Toplam 957 adet top var.",
+    "answer": "957",
+    "type": "math"
+  },
+  {
+    "question": "kuş tavşan'den daha yavaş. tavşan kedi'ten daha yavaş. En yavaş olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kuş > tavşan (yavaş açısından)\n   - tavşan > kedi (yavaş açısından)\n2. Mantıksal sıralama:\n   - En yavaş: kuş\n   - Orta: tavşan  \n   - En az yavaş: kedi\n3. Sonuç: En yavaş olan hayvan kuş'dir.",
+    "answer": "kuş",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Fena değil, ortalama bir film.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Fena değil, ortalama bir film.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: nötr\n4. Sonuç: Bu metin nötr duygu içeriyor.",
+    "answer": "nötr",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Berbat bir deneyimdi, hiç beğenmedim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Berbat bir deneyimdi, hiç beğenmedim.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "Sarah'ın 25 adet elması var. Ali ona 35 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 25 adet elması var\n2. Ali ona 35 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 25 + 35\n4. 25 + 35 = 60\n5. Sonuç: Sarah'ın şimdi 60 adet elması var.",
+    "answer": "60",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Fena değil, ortalama bir film.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Fena değil, ortalama bir film.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: nötr\n4. Sonuç: Bu metin nötr duygu içeriyor.",
+    "answer": "nötr",
+    "type": "analysis"
+  },
+  {
+    "question": "Bir kutuda 50 adet top var. Toplam 11 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 50 adet top var\n2. Toplam 11 kutu var\n3. Toplam top sayısını bulmak için: 50 × 11\n4. 50 × 11 = 550\n5. Sonuç: Toplam 550 adet top var.",
+    "answer": "550",
+    "type": "math"
+  },
+  {
+    "question": "Sarah'ın 30 adet elması var. Ali ona 43 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 30 adet elması var\n2. Ali ona 43 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 30 + 43\n4. 30 + 43 = 73\n5. Sonuç: Sarah'ın şimdi 73 adet elması var.",
+    "answer": "73",
+    "type": "math"
+  },
+  {
+    "question": "tavşan kedi'den daha küçük. kedi köpek'ten daha küçük. En küçük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > kedi (küçük açısından)\n   - kedi > köpek (küçük açısından)\n2. Mantıksal sıralama:\n   - En küçük: tavşan\n   - Orta: kedi  \n   - En az küçük: köpek\n3. Sonuç: En küçük olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'\n2. Anahtar kelimeler:\n   - Pozitif: harika, keyifli, muhteşem\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'\n2. Anahtar kelimeler:\n   - Pozitif: harika, keyifli, muhteşem\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bir kutuda 28 adet top var. Toplam 45 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 28 adet top var\n2. Toplam 45 kutu var\n3. Toplam top sayısını bulmak için: 28 × 45\n4. 28 × 45 = 1260\n5. Sonuç: Toplam 1260 adet top var.",
+    "answer": "1260",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Muhteşem oyunculuk ve senaryo!'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Muhteşem oyunculuk ve senaryo!'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bir kutuda 12 adet top var. Toplam 15 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 12 adet top var\n2. Toplam 15 kutu var\n3. Toplam top sayısını bulmak için: 12 × 15\n4. 12 × 15 = 180\n5. Sonuç: Toplam 180 adet top var.",
+    "answer": "180",
+    "type": "math"
+  },
+  {
+    "question": "tavşan kedi'den daha hızlı. kedi kuş'ten daha hızlı. En hızlı olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > kedi (hızlı açısından)\n   - kedi > kuş (hızlı açısından)\n2. Mantıksal sıralama:\n   - En hızlı: tavşan\n   - Orta: kedi  \n   - En az hızlı: kuş\n3. Sonuç: En hızlı olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Vakit kaybıydı, tavsiye etmem.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Vakit kaybıydı, tavsiye etmem.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Berbat bir deneyimdi, hiç beğenmedim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Berbat bir deneyimdi, hiç beğenmedim.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bir kutuda 11 adet top var. Toplam 47 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 11 adet top var\n2. Toplam 47 kutu var\n3. Toplam top sayısını bulmak için: 11 × 47\n4. 11 × 47 = 517\n5. Sonuç: Toplam 517 adet top var.",
+    "answer": "517",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'\n2. Anahtar kelimeler:\n   - Pozitif: harika, keyifli, muhteşem\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bir kutuda 20 adet top var. Toplam 15 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 20 adet top var\n2. Toplam 15 kutu var\n3. Toplam top sayısını bulmak için: 20 × 15\n4. 20 × 15 = 300\n5. Sonuç: Toplam 300 adet top var.",
+    "answer": "300",
+    "type": "math"
+  },
+  {
+    "question": "Sarah'ın 40 adet elması var. Ali ona 26 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 40 adet elması var\n2. Ali ona 26 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 40 + 26\n4. 40 + 26 = 66\n5. Sonuç: Sarah'ın şimdi 66 adet elması var.",
+    "answer": "66",
+    "type": "math"
+  },
+  {
+    "question": "Bir kutuda 21 adet top var. Toplam 10 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 21 adet top var\n2. Toplam 10 kutu var\n3. Toplam top sayısını bulmak için: 21 × 10\n4. 21 × 10 = 210\n5. Sonuç: Toplam 210 adet top var.",
+    "answer": "210",
+    "type": "math"
+  },
+  {
+    "question": "Sarah'ın 25 adet elması var. Ali ona 47 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 25 adet elması var\n2. Ali ona 47 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 25 + 47\n4. 25 + 47 = 72\n5. Sonuç: Sarah'ın şimdi 72 adet elması var.",
+    "answer": "72",
+    "type": "math"
+  },
+  {
+    "question": "balık tavşan'den daha güçlü. tavşan köpek'ten daha güçlü. En güçlü olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - balık > tavşan (güçlü açısından)\n   - tavşan > köpek (güçlü açısından)\n2. Mantıksal sıralama:\n   - En güçlü: balık\n   - Orta: tavşan  \n   - En az güçlü: köpek\n3. Sonuç: En güçlü olan hayvan balık'dir.",
+    "answer": "balık",
+    "type": "logic"
+  },
+  {
+    "question": "Bir kutuda 48 adet top var. Toplam 17 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 48 adet top var\n2. Toplam 17 kutu var\n3. Toplam top sayısını bulmak için: 48 × 17\n4. 48 × 17 = 816\n5. Sonuç: Toplam 816 adet top var.",
+    "answer": "816",
+    "type": "math"
+  },
+  {
+    "question": "Sarah'ın 5 adet elması var. Ali ona 25 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 5 adet elması var\n2. Ali ona 25 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 5 + 25\n4. 5 + 25 = 30\n5. Sonuç: Sarah'ın şimdi 30 adet elması var.",
+    "answer": "30",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Vakit kaybıydı, tavsiye etmem.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Vakit kaybıydı, tavsiye etmem.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Berbat bir deneyimdi, hiç beğenmedim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Berbat bir deneyimdi, hiç beğenmedim.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "kuş balık'den daha hızlı. balık köpek'ten daha hızlı. En hızlı olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kuş > balık (hızlı açısından)\n   - balık > köpek (hızlı açısından)\n2. Mantıksal sıralama:\n   - En hızlı: kuş\n   - Orta: balık  \n   - En az hızlı: köpek\n3. Sonuç: En hızlı olan hayvan kuş'dir.",
+    "answer": "kuş",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Vakit kaybıydı, tavsiye etmem.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Vakit kaybıydı, tavsiye etmem.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bir kutuda 22 adet top var. Toplam 3 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 22 adet top var\n2. Toplam 3 kutu var\n3. Toplam top sayısını bulmak için: 22 × 3\n4. 22 × 3 = 66\n5. Sonuç: Toplam 66 adet top var.",
+    "answer": "66",
+    "type": "math"
+  },
+  {
+    "question": "tavşan kedi'den daha güçlü. kedi balık'ten daha güçlü. En güçlü olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > kedi (güçlü açısından)\n   - kedi > balık (güçlü açısından)\n2. Mantıksal sıralama:\n   - En güçlü: tavşan\n   - Orta: kedi  \n   - En az güçlü: balık\n3. Sonuç: En güçlü olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "kuş köpek'den daha büyük. köpek balık'ten daha büyük. En büyük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kuş > köpek (büyük açısından)\n   - köpek > balık (büyük açısından)\n2. Mantıksal sıralama:\n   - En büyük: kuş\n   - Orta: köpek  \n   - En az büyük: balık\n3. Sonuç: En büyük olan hayvan kuş'dir.",
+    "answer": "kuş",
+    "type": "logic"
+  },
+  {
+    "question": "köpek kedi'den daha hızlı. kedi tavşan'ten daha hızlı. En hızlı olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - köpek > kedi (hızlı açısından)\n   - kedi > tavşan (hızlı açısından)\n2. Mantıksal sıralama:\n   - En hızlı: köpek\n   - Orta: kedi  \n   - En az hızlı: tavşan\n3. Sonuç: En hızlı olan hayvan köpek'dir.",
+    "answer": "köpek",
+    "type": "logic"
+  },
+  {
+    "question": "tavşan kedi'den daha güçlü. kedi balık'ten daha güçlü. En güçlü olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > kedi (güçlü açısından)\n   - kedi > balık (güçlü açısından)\n2. Mantıksal sıralama:\n   - En güçlü: tavşan\n   - Orta: kedi  \n   - En az güçlü: balık\n3. Sonuç: En güçlü olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "Bir kutuda 2 adet top var. Toplam 16 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 2 adet top var\n2. Toplam 16 kutu var\n3. Toplam top sayısını bulmak için: 2 × 16\n4. 2 × 16 = 32\n5. Sonuç: Toplam 32 adet top var.",
+    "answer": "32",
+    "type": "math"
+  },
+  {
+    "question": "tavşan kedi'den daha yavaş. kedi kuş'ten daha yavaş. En yavaş olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > kedi (yavaş açısından)\n   - kedi > kuş (yavaş açısından)\n2. Mantıksal sıralama:\n   - En yavaş: tavşan\n   - Orta: kedi  \n   - En az yavaş: kuş\n3. Sonuç: En yavaş olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "kuş balık'den daha hızlı. balık köpek'ten daha hızlı. En hızlı olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kuş > balık (hızlı açısından)\n   - balık > köpek (hızlı açısından)\n2. Mantıksal sıralama:\n   - En hızlı: kuş\n   - Orta: balık  \n   - En az hızlı: köpek\n3. Sonuç: En hızlı olan hayvan kuş'dir.",
+    "answer": "kuş",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Muhteşem oyunculuk ve senaryo!'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Muhteşem oyunculuk ve senaryo!'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bir kutuda 49 adet top var. Toplam 25 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 49 adet top var\n2. Toplam 25 kutu var\n3. Toplam top sayısını bulmak için: 49 × 25\n4. 49 × 25 = 1225\n5. Sonuç: Toplam 1225 adet top var.",
+    "answer": "1225",
+    "type": "math"
+  },
+  {
+    "question": "Bir kutuda 38 adet top var. Toplam 11 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 38 adet top var\n2. Toplam 11 kutu var\n3. Toplam top sayısını bulmak için: 38 × 11\n4. 38 × 11 = 418\n5. Sonuç: Toplam 418 adet top var.",
+    "answer": "418",
+    "type": "math"
+  },
+  {
+    "question": "Bir kutuda 26 adet top var. Toplam 3 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 26 adet top var\n2. Toplam 3 kutu var\n3. Toplam top sayısını bulmak için: 26 × 3\n4. 26 × 3 = 78\n5. Sonuç: Toplam 78 adet top var.",
+    "answer": "78",
+    "type": "math"
+  },
+  {
+    "question": "kuş köpek'den daha küçük. köpek kedi'ten daha küçük. En küçük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kuş > köpek (küçük açısından)\n   - köpek > kedi (küçük açısından)\n2. Mantıksal sıralama:\n   - En küçük: kuş\n   - Orta: köpek  \n   - En az küçük: kedi\n3. Sonuç: En küçük olan hayvan kuş'dir.",
+    "answer": "kuş",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'\n2. Anahtar kelimeler:\n   - Pozitif: harika, keyifli, muhteşem\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "Sarah'ın 22 adet elması var. Ali ona 35 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 22 adet elması var\n2. Ali ona 35 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 22 + 35\n4. 22 + 35 = 57\n5. Sonuç: Sarah'ın şimdi 57 adet elması var.",
+    "answer": "57",
+    "type": "math"
+  },
+  {
+    "question": "köpek kuş'den daha küçük. kuş kedi'ten daha küçük. En küçük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - köpek > kuş (küçük açısından)\n   - kuş > kedi (küçük açısından)\n2. Mantıksal sıralama:\n   - En küçük: köpek\n   - Orta: kuş  \n   - En az küçük: kedi\n3. Sonuç: En küçük olan hayvan köpek'dir.",
+    "answer": "köpek",
+    "type": "logic"
+  },
+  {
+    "question": "kedi köpek'den daha güçlü. köpek balık'ten daha güçlü. En güçlü olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kedi > köpek (güçlü açısından)\n   - köpek > balık (güçlü açısından)\n2. Mantıksal sıralama:\n   - En güçlü: kedi\n   - Orta: köpek  \n   - En az güçlü: balık\n3. Sonuç: En güçlü olan hayvan kedi'dir.",
+    "answer": "kedi",
+    "type": "logic"
+  },
+  {
+    "question": "Sarah'ın 46 adet elması var. Ali ona 23 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 46 adet elması var\n2. Ali ona 23 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 46 + 23\n4. 46 + 23 = 69\n5. Sonuç: Sarah'ın şimdi 69 adet elması var.",
+    "answer": "69",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Berbat bir deneyimdi, hiç beğenmedim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Berbat bir deneyimdi, hiç beğenmedim.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'\n2. Anahtar kelimeler:\n   - Pozitif: harika, keyifli, muhteşem\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "balık tavşan'den daha güçlü. tavşan kuş'ten daha güçlü. En güçlü olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - balık > tavşan (güçlü açısından)\n   - tavşan > kuş (güçlü açısından)\n2. Mantıksal sıralama:\n   - En güçlü: balık\n   - Orta: tavşan  \n   - En az güçlü: kuş\n3. Sonuç: En güçlü olan hayvan balık'dir.",
+    "answer": "balık",
+    "type": "logic"
+  },
+  {
+    "question": "tavşan kuş'den daha hızlı. kuş balık'ten daha hızlı. En hızlı olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > kuş (hızlı açısından)\n   - kuş > balık (hızlı açısından)\n2. Mantıksal sıralama:\n   - En hızlı: tavşan\n   - Orta: kuş  \n   - En az hızlı: balık\n3. Sonuç: En hızlı olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Fena değil, ortalama bir film.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Fena değil, ortalama bir film.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: nötr\n4. Sonuç: Bu metin nötr duygu içeriyor.",
+    "answer": "nötr",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Muhteşem oyunculuk ve senaryo!'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Muhteşem oyunculuk ve senaryo!'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "köpek tavşan'den daha hızlı. tavşan kedi'ten daha hızlı. En hızlı olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - köpek > tavşan (hızlı açısından)\n   - tavşan > kedi (hızlı açısından)\n2. Mantıksal sıralama:\n   - En hızlı: köpek\n   - Orta: tavşan  \n   - En az hızlı: kedi\n3. Sonuç: En hızlı olan hayvan köpek'dir.",
+    "answer": "köpek",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Fena değil, ortalama bir film.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Fena değil, ortalama bir film.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: nötr\n4. Sonuç: Bu metin nötr duygu içeriyor.",
+    "answer": "nötr",
+    "type": "analysis"
+  },
+  {
+    "question": "tavşan kedi'den daha hızlı. kedi kuş'ten daha hızlı. En hızlı olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > kedi (hızlı açısından)\n   - kedi > kuş (hızlı açısından)\n2. Mantıksal sıralama:\n   - En hızlı: tavşan\n   - Orta: kedi  \n   - En az hızlı: kuş\n3. Sonuç: En hızlı olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "tavşan balık'den daha büyük. balık kuş'ten daha büyük. En büyük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > balık (büyük açısından)\n   - balık > kuş (büyük açısından)\n2. Mantıksal sıralama:\n   - En büyük: tavşan\n   - Orta: balık  \n   - En az büyük: kuş\n3. Sonuç: En büyük olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "Sarah'ın 4 adet elması var. Ali ona 18 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 4 adet elması var\n2. Ali ona 18 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 4 + 18\n4. 4 + 18 = 22\n5. Sonuç: Sarah'ın şimdi 22 adet elması var.",
+    "answer": "22",
+    "type": "math"
+  },
+  {
+    "question": "tavşan köpek'den daha büyük. köpek kuş'ten daha büyük. En büyük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > köpek (büyük açısından)\n   - köpek > kuş (büyük açısından)\n2. Mantıksal sıralama:\n   - En büyük: tavşan\n   - Orta: köpek  \n   - En az büyük: kuş\n3. Sonuç: En büyük olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "tavşan kuş'den daha küçük. kuş kedi'ten daha küçük. En küçük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > kuş (küçük açısından)\n   - kuş > kedi (küçük açısından)\n2. Mantıksal sıralama:\n   - En küçük: tavşan\n   - Orta: kuş  \n   - En az küçük: kedi\n3. Sonuç: En küçük olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "kuş balık'den daha hızlı. balık tavşan'ten daha hızlı. En hızlı olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kuş > balık (hızlı açısından)\n   - balık > tavşan (hızlı açısından)\n2. Mantıksal sıralama:\n   - En hızlı: kuş\n   - Orta: balık  \n   - En az hızlı: tavşan\n3. Sonuç: En hızlı olan hayvan kuş'dir.",
+    "answer": "kuş",
+    "type": "logic"
+  },
+  {
+    "question": "tavşan balık'den daha büyük. balık köpek'ten daha büyük. En büyük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > balık (büyük açısından)\n   - balık > köpek (büyük açısından)\n2. Mantıksal sıralama:\n   - En büyük: tavşan\n   - Orta: balık  \n   - En az büyük: köpek\n3. Sonuç: En büyük olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Berbat bir deneyimdi, hiç beğenmedim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Berbat bir deneyimdi, hiç beğenmedim.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Fena değil, ortalama bir film.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Fena değil, ortalama bir film.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: nötr\n4. Sonuç: Bu metin nötr duygu içeriyor.",
+    "answer": "nötr",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Muhteşem oyunculuk ve senaryo!'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Muhteşem oyunculuk ve senaryo!'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'\n2. Anahtar kelimeler:\n   - Pozitif: harika, keyifli, muhteşem\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bir kutuda 36 adet top var. Toplam 14 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 36 adet top var\n2. Toplam 14 kutu var\n3. Toplam top sayısını bulmak için: 36 × 14\n4. 36 × 14 = 504\n5. Sonuç: Toplam 504 adet top var.",
+    "answer": "504",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Vakit kaybıydı, tavsiye etmem.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Vakit kaybıydı, tavsiye etmem.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "Sarah'ın 34 adet elması var. Ali ona 15 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 34 adet elması var\n2. Ali ona 15 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 34 + 15\n4. 34 + 15 = 49\n5. Sonuç: Sarah'ın şimdi 49 adet elması var.",
+    "answer": "49",
+    "type": "math"
+  },
+  {
+    "question": "köpek kedi'den daha hızlı. kedi tavşan'ten daha hızlı. En hızlı olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - köpek > kedi (hızlı açısından)\n   - kedi > tavşan (hızlı açısından)\n2. Mantıksal sıralama:\n   - En hızlı: köpek\n   - Orta: kedi  \n   - En az hızlı: tavşan\n3. Sonuç: En hızlı olan hayvan köpek'dir.",
+    "answer": "köpek",
+    "type": "logic"
+  },
+  {
+    "question": "balık kuş'den daha küçük. kuş tavşan'ten daha küçük. En küçük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - balık > kuş (küçük açısından)\n   - kuş > tavşan (küçük açısından)\n2. Mantıksal sıralama:\n   - En küçük: balık\n   - Orta: kuş  \n   - En az küçük: tavşan\n3. Sonuç: En küçük olan hayvan balık'dir.",
+    "answer": "balık",
+    "type": "logic"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'\n2. Anahtar kelimeler:\n   - Pozitif: harika, keyifli, muhteşem\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "kedi kuş'den daha büyük. kuş tavşan'ten daha büyük. En büyük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kedi > kuş (büyük açısından)\n   - kuş > tavşan (büyük açısından)\n2. Mantıksal sıralama:\n   - En büyük: kedi\n   - Orta: kuş  \n   - En az büyük: tavşan\n3. Sonuç: En büyük olan hayvan kedi'dir.",
+    "answer": "kedi",
+    "type": "logic"
+  },
+  {
+    "question": "kuş balık'den daha küçük. balık kedi'ten daha küçük. En küçük olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kuş > balık (küçük açısından)\n   - balık > kedi (küçük açısından)\n2. Mantıksal sıralama:\n   - En küçük: kuş\n   - Orta: balık  \n   - En az küçük: kedi\n3. Sonuç: En küçük olan hayvan kuş'dir.",
+    "answer": "kuş",
+    "type": "logic"
+  },
+  {
+    "question": "Bir kutuda 27 adet top var. Toplam 38 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 27 adet top var\n2. Toplam 38 kutu var\n3. Toplam top sayısını bulmak için: 27 × 38\n4. 27 × 38 = 1026\n5. Sonuç: Toplam 1026 adet top var.",
+    "answer": "1026",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Vakit kaybıydı, tavsiye etmem.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Vakit kaybıydı, tavsiye etmem.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: negatif\n4. Sonuç: Bu metin negatif duygu içeriyor.",
+    "answer": "negatif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Muhteşem oyunculuk ve senaryo!'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Muhteşem oyunculuk ve senaryo!'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "Bir kutuda 34 adet top var. Toplam 45 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 34 adet top var\n2. Toplam 45 kutu var\n3. Toplam top sayısını bulmak için: 34 × 45\n4. 34 × 45 = 1530\n5. Sonuç: Toplam 1530 adet top var.",
+    "answer": "1530",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Bu film gerçekten harika! Çok keyifli vakit geçirdim.'\n2. Anahtar kelimeler:\n   - Pozitif: harika, keyifli, muhteşem\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: pozitif\n4. Sonuç: Bu metin pozitif duygu içeriyor.",
+    "answer": "pozitif",
+    "type": "analysis"
+  },
+  {
+    "question": "tavşan köpek'den daha güçlü. köpek kedi'ten daha güçlü. En güçlü olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - tavşan > köpek (güçlü açısından)\n   - köpek > kedi (güçlü açısından)\n2. Mantıksal sıralama:\n   - En güçlü: tavşan\n   - Orta: köpek  \n   - En az güçlü: kedi\n3. Sonuç: En güçlü olan hayvan tavşan'dir.",
+    "answer": "tavşan",
+    "type": "logic"
+  },
+  {
+    "question": "kuş balık'den daha güçlü. balık kedi'ten daha güçlü. En güçlü olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - kuş > balık (güçlü açısından)\n   - balık > kedi (güçlü açısından)\n2. Mantıksal sıralama:\n   - En güçlü: kuş\n   - Orta: balık  \n   - En az güçlü: kedi\n3. Sonuç: En güçlü olan hayvan kuş'dir.",
+    "answer": "kuş",
+    "type": "logic"
+  },
+  {
+    "question": "Bir kutuda 40 adet top var. Toplam 7 kutu varsa, kaç adet top vardır?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Her kutuda 40 adet top var\n2. Toplam 7 kutu var\n3. Toplam top sayısını bulmak için: 40 × 7\n4. 40 × 7 = 280\n5. Sonuç: Toplam 280 adet top var.",
+    "answer": "280",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Fena değil, ortalama bir film.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Fena değil, ortalama bir film.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: nötr\n4. Sonuç: Bu metin nötr duygu içeriyor.",
+    "answer": "nötr",
+    "type": "analysis"
+  },
+  {
+    "question": "Sarah'ın 19 adet elması var. Ali ona 4 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 19 adet elması var\n2. Ali ona 4 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 19 + 4\n4. 19 + 4 = 23\n5. Sonuç: Sarah'ın şimdi 23 adet elması var.",
+    "answer": "23",
+    "type": "math"
+  },
+  {
+    "question": "Sarah'ın 47 adet elması var. Ali ona 49 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 47 adet elması var\n2. Ali ona 49 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 47 + 49\n4. 47 + 49 = 96\n5. Sonuç: Sarah'ın şimdi 96 adet elması var.",
+    "answer": "96",
+    "type": "math"
+  },
+  {
+    "question": "Bu metindeki duygu durumunu analiz et: 'Fena değil, ortalama bir film.'",
+    "reasoning": "Bu metni duygu analizi için adım adım inceleyelim:\n1. Metin: 'Fena değil, ortalama bir film.'\n2. Anahtar kelimeler:\n   - Pozitif: yok\n   - Negatif: yok\n   - Nötr: yok\n3. Genel ton: nötr\n4. Sonuç: Bu metin nötr duygu içeriyor.",
+    "answer": "nötr",
+    "type": "analysis"
+  },
+  {
+    "question": "Sarah'ın 11 adet elması var. Ali ona 14 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 11 adet elması var\n2. Ali ona 14 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 11 + 14\n4. 11 + 14 = 25\n5. Sonuç: Sarah'ın şimdi 25 adet elması var.",
+    "answer": "25",
+    "type": "math"
+  },
+  {
+    "question": "köpek kuş'den daha güçlü. kuş tavşan'ten daha güçlü. En güçlü olan hayvan hangisidir?",
+    "reasoning": "Bu mantık problemini adım adım çözelim:\n1. Verilen bilgiler:\n   - köpek > kuş (güçlü açısından)\n   - kuş > tavşan (güçlü açısından)\n2. Mantıksal sıralama:\n   - En güçlü: köpek\n   - Orta: kuş  \n   - En az güçlü: tavşan\n3. Sonuç: En güçlü olan hayvan köpek'dir.",
+    "answer": "köpek",
+    "type": "logic"
+  },
+  {
+    "question": "Sarah'ın 4 adet elması var. Ali ona 20 adet daha elma verdi. Sarah'ın şimdi toplam kaç adet elması var?",
+    "reasoning": "Bu problemi adım adım çözelim:\n1. Sarah'ın başlangıçta 4 adet elması var\n2. Ali ona 20 adet daha elma veriyor\n3. Toplam elma sayısını bulmak için: 4 + 20\n4. 4 + 20 = 24\n5. Sonuç: Sarah'ın şimdi 24 adet elması var.",
+    "answer": "24",
+    "type": "math"
+  }
+]

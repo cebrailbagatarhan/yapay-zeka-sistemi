@@ -1,0 +1,34 @@
+"""
+Web Araştırma ve Öz-Öğrenme için Gerekli Kütüphaneler
+Bu dosyayı: pip install -r requirements_web.txt ile yükleyebilirsiniz.
+"""
+
+# Temel web işlemleri
+requests>=2.31.0
+urllib3>=1.26.0
+charset-normalizer>=3.3.0
+
+# HTML parsing
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Wikipedia API
+wikipedia>=1.4.0
+
+# RSS feed parsing
+feedparser>=6.0.10
+
+# JSON işlemleri (built-in)
+# datetime işlemleri (built-in)
+# re işlemleri (built-in)
+
+# Opsiyonel: Daha gelişmiş web scraping için
+# selenium>=4.15.0
+# scrapy>=2.11.0
+
+# Opsiyonel: Daha gelişmiş NLP için
+# nltk>=3.8.0
+# spacy>=3.7.0
+
+# Opsiyonel: Google arama için
+# googlesearch-python>=1.2.3

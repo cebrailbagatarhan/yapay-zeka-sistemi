@@ -1,0 +1,24 @@
+# Mevcut CoT generator'ı kullan
+cot_generator = CoTDatasetGenerator()
+
+# Tek bir örnek oluştur
+new_example = cot_generator.generate_math_cot(n_samples=1)[0]
+print("📝 Yeni CoT Örneği:")
+print(f"Soru: {new_example['question']}")
+print(f"Düşünce: {new_example['reasoning']}")
+print(f"Cevap: {new_example['answer']}")
+
+# Kendi sorunuz için CoT oluştur
+custom_question = "15 × 8 kaç eder?"
+custom_cot = {
+    "question": custom_question,
+    "reasoning": """Bu problemi adım adım çözelim:
+1. 15 × 8 işlemini yapalım
+2. 15 × 8 = (10 + 5) × 8
+3. = 10 × 8 + 5 × 8
+4. = 80 + 40
+5. = 120""",
+    "answer": "120",
+    "type": "math"
+}
+print(f"\n🧠 Özel CoT: {custom_cot}")

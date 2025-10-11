@@ -1,0 +1,125 @@
+{
+  "system_info": {
+    "components": [
+      "CoT Generator",
+      "LoRA Model",
+      "RL Tutor",
+      "Knowledge Distillation"
+    ],
+    "total_tests": 4,
+    "timestamp": "2025-07-07 19:07:45"
+  },
+  "test_results": [
+    {
+      "question": "Python'da for döngüsü nasıl kullanılır?",
+      "user_level": "beginner",
+      "cot_reasoning": "Bu programlama sorusunu adım adım cevaplayalım:\n1. Problem analizi: Python'da for döngüsü nasıl kullanılır?\n2. Hangi Python yapıları gerekli?\n3. Kod örnekleri ile açıklama\n4. Best practices önerileri",
+      "rl_strategy": {
+        "method": "step_by_step",
+        "difficulty": 0.3,
+        "estimated_time": "8 dakika",
+        "success_probability": 0.91,
+        "hint_level": 0,
+        "interactive_elements": true
+      },
+      "selected_model": "student",
+      "confidence": 0.87,
+      "response_components": {
+        "explanation_style": "step_by_step",
+        "complexity_level": 0.3,
+        "interactive_hints": true,
+        "estimated_duration": "8 dakika"
+      },
+      "next_steps": [
+        "Temel kavramları öğren",
+        "Pratik örnekler yap",
+        "İleri konulara geç"
+      ]
+    },
+    {
+      "question": "Machine learning'de overfitting nasıl önlenir?",
+      "user_level": "intermediate",
+      "cot_reasoning": "Bu soruyu sistematik olarak inceleyelim:\n1. Sorunun temel bileşenleri: Machine learning'de overfitting nasıl önlenir?\n2. Önemli kavramları tanımlayalım\n3. Adım adım açıklama\n4. Pratik örnekler verelim",
+      "rl_strategy": {
+        "method": "guided_discovery",
+        "difficulty": 0.6,
+        "estimated_time": "11 dakika",
+        "success_probability": 0.8200000000000001,
+        "hint_level": 1,
+        "interactive_elements": true
+      },
+      "selected_model": "student",
+      "confidence": 0.87,
+      "response_components": {
+        "explanation_style": "guided_discovery",
+        "complexity_level": 0.6,
+        "interactive_hints": true,
+        "estimated_duration": "11 dakika"
+      },
+      "next_steps": [
+        "Temel kavramları öğren",
+        "Pratik örnekler yap",
+        "İleri konulara geç"
+      ]
+    },
+    {
+      "question": "45 × 23 işlemini yapin",
+      "user_level": "beginner",
+      "cot_reasoning": "Bu soruyu sistematik olarak inceleyelim:\n1. Sorunun temel bileşenleri: 45 × 23 işlemini yapin\n2. Önemli kavramları tanımlayalım\n3. Adım adım açıklama\n4. Pratik örnekler verelim",
+      "rl_strategy": {
+        "method": "step_by_step",
+        "difficulty": 0.3,
+        "estimated_time": "8 dakika",
+        "success_probability": 0.91,
+        "hint_level": 0,
+        "interactive_elements": true
+      },
+      "selected_model": "student",
+      "confidence": 0.87,
+      "response_components": {
+        "explanation_style": "step_by_step",
+        "complexity_level": 0.3,
+        "interactive_hints": true,
+        "estimated_duration": "8 dakika"
+      },
+      "next_steps": [
+        "Temel kavramları öğren",
+        "Pratik örnekler yap",
+        "İleri konulara geç"
+      ]
+    },
+    {
+      "question": "Deep learning'de attention mechanism nasıl çalışır?",
+      "user_level": "advanced",
+      "cot_reasoning": "Bu soruyu sistematik olarak inceleyelim:\n1. Sorunun temel bileşenleri: Deep learning'de attention mechanism nasıl çalışır?\n2. Önemli kavramları tanımlayalım\n3. Adım adım açıklama\n4. Pratik örnekler verelim",
+      "rl_strategy": {
+        "method": "guided_discovery",
+        "difficulty": 0.9,
+        "estimated_time": "14 dakika",
+        "success_probability": 0.73,
+        "hint_level": 2,
+        "interactive_elements": false
+      },
+      "selected_model": "teacher",
+      "confidence": 0.95,
+      "response_components": {
+        "explanation_style": "guided_discovery",
+        "complexity_level": 0.9,
+        "interactive_hints": false,
+        "estimated_duration": "14 dakika"
+      },
+      "next_steps": [
+        "Temel kavramları öğren",
+        "Pratik örnekler yap",
+        "İleri konulara geç"
+      ]
+    }
+  ],
+  "performance_summary": {
+    "avg_confidence": 0.8899999999999999,
+    "model_usage": {
+      "teacher": 1,
+      "student": 3
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "teacher": {
+    "accuracy": 95.5,
+    "parameters": 13538,
+    "model_size": "Large",
+    "inference_speed": "Slow",
+    "use_case": "High accuracy requirements"
+  },
+  "student": {
+    "accuracy": 91.25,
+    "parameters": 1234,
+    "model_size": "Small",
+    "inference_speed": "Fast",
+    "use_case": "Production deployment"
+  },
+  "distillation_results": {
+    "compression_ratio": 10.970826580226904,
+    "accuracy_retention": 95.54973821989529,
+    "parameter_reduction": 90.88491653124538
+  }
+}
