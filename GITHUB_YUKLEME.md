@@ -25,9 +25,8 @@ https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git
 PowerShell'de bu komutları çalıştırın:
 
 ```powershell
-# Remote ekle (URL'yi kendi repository URL'inizle değiştirin)
-git remote add origin git remote add origin https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git
-
+# Remote ekle
+git remote add origin https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git
 
 # Branch ismini main yap (modern GitHub standartı)
 git branch -M main
