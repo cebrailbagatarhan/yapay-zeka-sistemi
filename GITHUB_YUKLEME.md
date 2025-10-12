@@ -16,7 +16,8 @@
 
 GitHub sayfasında göreceğiniz URL'yi kopyalayın:
 ```
-https://github.com/KULLANICI_ADINIZ/yapay-zeka-sistemi.git
+https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git
+
 ```
 
 ## Adım 3: Git Remote Ekleyin ve Push Yapın
@@ -25,7 +26,8 @@ PowerShell'de bu komutları çalıştırın:
 
 ```powershell
 # Remote ekle (URL'yi kendi repository URL'inizle değiştirin)
-git remote add origin https://github.com/KULLANICI_ADINIZ/yapay-zeka-sistemi.git
+git remote add origin git remote add origin https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git
+
 
 # Branch ismini main yap (modern GitHub standartı)
 git branch -M main
