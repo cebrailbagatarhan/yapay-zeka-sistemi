@@ -234,6 +234,143 @@ class DeepWebResearcher:
         
         return self.results
     
+    def generate_professional_article(self, topic):
+        """Profesyonel makale formatında AI özet oluştur"""
+        if not self.results:
+            return "Henüz araştırma yapılmadı."
+        
+        print("\n" + "📝"*30)
+        print("PROFESYONEL MAKALE OLUŞTURULUYOR...")
+        print("📝"*30)
+        
+        # Tüm içerikleri topla
+        all_text = []
+        sources = []
+        
+        for i, result in enumerate(self.results, 1):
+            all_text.append(result.get('content', ''))
+            all_text.append(result.get('snippet', ''))
+            sources.append({
+                'number': i,
+                'title': result['title'],
+                'url': result['url'],
+                'source': result.get('source', 'Web')
+            })
+        
+        # Metni birleştir
+        combined_text = " ".join([t for t in all_text if t])
+        
+        # Anahtar kelimeleri çıkar
+        keywords = self.extract_keywords(combined_text, top_n=20)
+        
+        # Makale başlığı
+        article = []
+        article.append(f"{topic.title()}: Kapsamlı Araştırma Özeti\n")
+        article.append("=" * 80)
+        article.append("")
+        
+        # Giriş paragrafı - ilk kaynaktan
+        if self.results:
+            first_content = self.results[0].get('content', '')
+            if first_content:
+                sentences = first_content.split('.')[:3]
+                intro = '. '.join(sentences) + '.'
+                article.append(intro)
+                article.append("")
+        
+        # Ana içerik - kaynakları sentezle
+        article.append("## Genel Bakış\n")
+        
+        # Her kaynaktan önemli bilgileri çıkar
+        for result in self.results[:5]:  # İlk 5 kaynak
+            content = result.get('content', '')
+            if content:
+                # İlk paragrafı al
+                paragraphs = content.split('\n\n')
+                if paragraphs:
+                    # En uzun paragrafı seç (genellikle en bilgi içeren)
+                    main_para = max(paragraphs, key=len)
+                    if len(main_para) > 100:
+                        sentences = main_para.split('.')[:4]
+                        summary = '. '.join(sentences) + '.'
+                        article.append(summary)
+                        article.append("")
+        
+        # Anahtar noktalar
+        article.append("## Önemli Noktalar\n")
+        
+        # En önemli kelimeleri kullanarak kategorize et
+        top_keywords = [k for k, _ in keywords[:10]]
+        article.append("Bu araştırma aşağıdaki konuları kapsamaktadır:\n")
+        for i, keyword in enumerate(top_keywords[:8], 1):
+            article.append(f"**{i}. {keyword.title()}**: Bu alanda yapılan çalışmalar ve güncel gelişmeler")
+        article.append("")
+        
+        # Detaylı analiz
+        article.append("## Detaylı Analiz\n")
+        
+        for i, result in enumerate(self.results[:3], 1):
+            article.append(f"### {i}. {result['title']}\n")
+            
+            content = result.get('content', '')
+            if content:
+                # Ortadaki paragrafları al (genellikle en önemli bilgi orada)
+                paragraphs = [p.strip() for p in content.split('\n\n') if len(p.strip()) > 100]
+                if paragraphs:
+                    selected_paras = paragraphs[:2]
+                    for para in selected_paras:
+                        sentences = para.split('.')[:3]
+                        summary = '. '.join(sentences) + '.'
+                        article.append(summary)
+                        article.append("")
+            
+            article.append(f"*Kaynak: {result.get('source', 'Web')}*")
+            article.append("")
+        
+        # Sonuç ve öneriler
+        article.append("## Sonuç\n")
+        article.append(f"{topic.title()} konusunda yapılan bu kapsamlı araştırma, ")
+        article.append(f"{len(self.results)} farklı kaynaktan derlenen bilgiler ışığında ")
+        article.append(f"konunun çeşitli yönlerini ele almaktadır. ")
+        article.append(f"Özellikle {', '.join([k for k, _ in keywords[:5]])} ")
+        article.append("gibi konular ön plana çıkmaktadır.\n")
+        
+        # Kaynakça
+        article.append("\n## Kaynakça\n")
+        for src in sources[:15]:  # İlk 15 kaynak
+            article.append(f"[{src['number']}] {src['title']}")
+            article.append(f"    {src['url']}")
+            article.append(f"    ({src['source']})")
+            article.append("")
+        
+        # Arama önerileri
+        article.append("\n## İlgili Arama Önerileri\n")
+        search_suggestions = self.generate_search_suggestions(topic, keywords)
+        for suggestion in search_suggestions:
+            article.append(f"• {suggestion}")
+        
+        article.append("\n" + "=" * 80)
+        article.append(f"Bu rapor {len(self.results)} kaynaktan AI destekli olarak oluşturulmuştur.")
+        article.append(f"Oluşturulma tarihi: {time.strftime('%d.%m.%Y %H:%M')}")
+        
+        return "\n".join(article)
+    
+    def generate_search_suggestions(self, topic, keywords):
+        """İlgili arama önerileri oluştur"""
+        suggestions = []
+        
+        # Topic + top keywords kombinasyonları
+        top_keys = [k for k, _ in keywords[:5]]
+        
+        for key in top_keys[:3]:
+            suggestions.append(f"{topic} {key}")
+        
+        # Genel öneriler
+        suggestions.append(f"{topic} pratik uygulamaları")
+        suggestions.append(f"{topic} son gelişmeler")
+        
+        return suggestions
+    
     def generate_ai_summary(self, max_depth=3):
         """AI destekli derin özet oluştur - linklere girerek"""
         if not self.results:

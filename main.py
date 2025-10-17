@@ -1899,13 +1899,13 @@ def deep_web_research():
         # Araştırmayı yap
         results = researcher.deep_research(topic, max_sources=max_sources, include_links=True)
         
-        # AI destekli özet oluştur
-        print("\n" + "🧠"*30)
-        print("AI DESTEKLI ÖZET OLUŞTURULUYOR...")
-        print("🧠"*30)
+        # Profesyonel makale formatında özet oluştur
+        print("\n" + "📝"*30)
+        print("PROFESYONEL MAKALE OLUŞTURULUYOR...")
+        print("📝"*30)
         
-        ai_summary = researcher.generate_ai_summary(max_depth=3)
-        print(ai_summary)
+        professional_article = researcher.generate_professional_article(topic)
+        print("\n" + professional_article)
         
         # Kaydetme seçeneği
         save = input("\n💾 Sonuçları kaydetmek ister misiniz? (e/h): ").strip().lower()
@@ -1914,11 +1914,20 @@ def deep_web_research():
             json_filepath = researcher.save_results()
             print(f"✅ JSON sonuçları kaydedildi!")
             
-            # AI özetini de kaydet
-            summary_filename = f"ozet_{topic[:30].replace(' ', '_')}.txt"
-            with open(summary_filename, 'w', encoding='utf-8') as f:
-                f.write(ai_summary)
-            print(f"✅ AI özeti kaydedildi: {summary_filename}")
+            # Profesyonel makaleyi kaydet
+            article_filename = f"makale_{topic[:30].replace(' ', '_')}.txt"
+            with open(article_filename, 'w', encoding='utf-8') as f:
+                f.write(professional_article)
+            print(f"✅ Profesyonel makale kaydedildi: {article_filename}")
+            
+            # Detaylı AI özetini de kaydet (opsiyonel)
+            detailed = input("\n📊 Detaylı AI özeti de oluşturulsun mu? (e/h): ").strip().lower()
+            if detailed == 'e':
+                ai_summary = researcher.generate_ai_summary(max_depth=3)
+                summary_filename = f"detayli_ozet_{topic[:30].replace(' ', '_')}.txt"
+                with open(summary_filename, 'w', encoding='utf-8') as f:
+                    f.write(ai_summary)
+                print(f"✅ Detaylı AI özeti kaydedildi: {summary_filename}")
         
         print("\n" + "🎉"*30)
         print(f"✅ {len(results)} KAYNAK BAŞARIYLA TARANDIÇIKTI!")
