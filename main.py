@@ -267,7 +267,8 @@ def show_menu():
     
     # Gelişmiş reasoning menüsü
     if ADVANCED_REASONING_AVAILABLE:
-        print("18. 🧠 Senin Gibi Düşünen AI - YOLO Versiyon!")
+        print("18. 🧠 Senin Gibi Düşünen AI - YOLO Versiyon! (🔥 Derin Web Araştırma)")
+        print("    💡 Komutlar: 'araştır: [konu]' veya 'kod: [açıklama]'")
         print("19. 💻 Gelişmiş Kod Üretici")
     
     # Derin web araştırma
@@ -1703,10 +1704,11 @@ def knowledge_base_manager():
 
 
 def my_thinking_clone_demo():
-    """Senin gibi düşünen AI demo"""
+    """Senin gibi düşünen AI demo - YOLO Versiyon (Derin Web Araştırma İle)"""
     print("\n🧠 SENİN GİBİ DÜŞÜNEN AI - YOLO VERSİYON!")
     print("=" * 60)
     print("Bu AI sistemi tamamen senin gibi düşünür, araştırır ve kod yazar!")
+    print("🔥 YENİ: Derin web araştırma + Profesyonel makale üretimi!")
     print("Çıkmak için 'çıkış' yazın.\n")
     
     if not ADVANCED_REASONING_AVAILABLE:
@@ -1718,8 +1720,23 @@ def my_thinking_clone_demo():
     try:
         # Initialize the thinking clone
         reasoning_engines = create_my_thinking_clone()
+        
+        # Derin web araştırmacı ekle
+        from src.deep_web_researcher import DeepWebResearcher
+        deep_researcher = DeepWebResearcher()
+        
         print("✅ Senin gibi düşünen AI başarıyla yüklendi!")
-        print("🧠 Özellikler: Derin analiz, web araştırma, akıllı kod üretimi\n")
+        print("🧠 Özellikler:")
+        print("   • Derin analiz ve reasoning")
+        print("   • Web araştırma (Wikipedia + DuckDuckGo)")
+        print("   • 🔥 Derin web araştırma (20+ kaynak)")
+        print("   • 📝 Profesyonel makale üretimi")
+        print("   • Akıllı kod üretimi\n")
+        
+        print("💡 İpuçları:")
+        print("   • 'araştır: [konu]' → Derin web araştırma")
+        print("   • 'kod: [açıklama]' → Kod üretimi")
+        print("   • Normal soru → Derin analiz\n")
         
         session_count = 0
         
@@ -1735,63 +1752,114 @@ def my_thinking_clone_demo():
             
             session_count += 1
             
-            print(f"\n🧠 Senin gibi düşünme süreci başlıyor...")
-            print("🔍 Derin analiz yapıyorum...")
-            
-            # Context hazırla
-            context = {
-                "session": {"count": session_count, "mode": "advanced"},
-                "preferences": {"detail_level": "maximum", "examples": True}
-            }
-            
-            # Derin düşünme süreci
-            thinking_result = reasoning_engines["reasoning"].deep_think(user_query, context)
-            
-            print(f"\n🎯 **Analiz Tamamlandı!**")
-            print(f"📊 Problem tipi: {thinking_result['initial_analysis']['type']}")
-            print(f"🎚️ Karmaşıklık: {thinking_result['initial_analysis']['complexity']}")
-            print(f"🔑 Ana kavramlar: {', '.join(thinking_result['initial_analysis']['key_concepts'][:3])}")
-            
-            # Specialized handling
-            if "kod" in user_query.lower() or "code" in user_query.lower():
-                print("\n💻 Akıllı kod üretimi aktifleştiriliyor...")
-                code_result = reasoning_engines["code_generation"].intelligent_code_generation(user_query)
+            # Komut kontrolü
+            if user_query.lower().startswith("araştır:") or user_query.lower().startswith("research:"):
+                # Derin web araştırma modu
+                topic = user_query.split(":", 1)[1].strip()
                 
-                print(f"\n🤖 **Kod Üretimi Sonucu:**")
-                print(f"```python\n{code_result['code'][:500]}{'...' if len(code_result['code']) > 500 else ''}\n```")
-                print(f"\n📋 **Özellikler:**")
-                print(f"• Tip: {code_result['type']}")
-                print(f"• Karmaşıklık: {code_result['complexity']}")
-                print(f"• İyileştirmeler: {len(code_result['improvements'])} öneri")
-            
-            elif any(word in user_query.lower() for word in ["araştır", "nedir", "hakkında", "research"]):
-                print("\n🌐 Web araştırması başlatılıyor...")
-                web_results = reasoning_engines["web_browsing"].intelligent_search(user_query)
-                web_analysis = reasoning_engines["web_browsing"].analyze_search_results(web_results)
+                print(f"\n🔍 DERİN WEB ARAŞTIRMA BAŞLIYOR: '{topic}'")
+                print("🌐 Wikipedia + DuckDuckGo + 20 güvenilir kaynak taranıyor...")
+                print("="*60)
                 
-                print(f"\n🔍 **Web Araştırma Sonuçları:**")
-                print(f"• {web_analysis['total_results']} sonuç bulundu")
-                print(f"• Ortalama relevans: {web_analysis['avg_relevance']:.2f}")
-                print(f"• En iyi kaynaklar:")
-                for i, source in enumerate(web_analysis['top_sources'][:3], 1):
-                    print(f"  {i}. {source}")
+                # Araştırmayı yap
+                results = deep_researcher.deep_research(topic, max_sources=10, include_links=True)
                 
-                print(f"\n📚 **Anahtar Bulgular:**")
-                for finding in web_analysis['key_findings'][:3]:
-                    print(f"{finding}")
+                # Profesyonel makale oluştur
+                print("\n📝 Profesyonel makale oluşturuluyor...")
+                article = deep_researcher.generate_professional_article(topic)
+                
+                # Sonuçları göster
+                print("\n" + "🌟"*30)
+                print(article)
+                print("🌟"*30)
+                
+                # Kaydetme seçeneği
+                save = input("\n💾 Makaleyi kaydetmek ister misiniz? (e/h): ").strip().lower()
+                if save == 'e':
+                    filename = f"yolo_makale_{topic[:20].replace(' ', '_')}.txt"
+                    with open(filename, 'w', encoding='utf-8') as f:
+                        f.write(article)
+                    print(f"✅ Kaydedildi: {filename}")
+                
+            elif user_query.lower().startswith("kod:") or user_query.lower().startswith("code:"):
+                # Kod üretimi modu
+                code_request = user_query.split(":", 1)[1].strip()
+                
+                print(f"\n💻 AKILLI KOD ÜRETİMİ: '{code_request}'")
+                print("🧠 Kod analiz ediliyor ve üretiliyor...")
+                print("="*60)
+                
+                code_result = reasoning_engines["code_generation"].intelligent_code_generation(code_request)
+                
+                print(f"\n🤖 **Kod Üretimi Tamamlandı!**")
+                print(f"📊 Tip: {code_result['type']} | Karmaşıklık: {code_result['complexity']}")
+                print(f"\n```python\n{code_result['code']}\n```")
+                
+                if code_result['improvements']:
+                    print(f"\n� **İyileştirme Önerileri:**")
+                    for i, improvement in enumerate(code_result['improvements'][:3], 1):
+                        print(f"{i}. {improvement}")
+                
+                # Kaydetme seçeneği
+                save = input("\n💾 Kodu kaydetmek ister misiniz? (e/h): ").strip().lower()
+                if save == 'e':
+                    filename = f"yolo_kod_{code_request[:20].replace(' ', '_')}.py"
+                    with open(filename, 'w', encoding='utf-8') as f:
+                        f.write(f"# {code_request}\n\n{code_result['code']}")
+                    print(f"✅ Kaydedildi: {filename}")
             
             else:
+                # Normal derin analiz modu
+                print(f"\n🧠 Senin gibi düşünme süreci başlıyor...")
+                print("🔍 Derin analiz yapıyorum...")
+                
+                # Context hazırla
+                context = {
+                    "session": {"count": session_count, "mode": "yolo_advanced"},
+                    "preferences": {"detail_level": "maximum", "examples": True}
+                }
+                
+                # Derin düşünme süreci
+                thinking_result = reasoning_engines["reasoning"].deep_think(user_query, context)
+                
+                print(f"\n🎯 **Analiz Tamamlandı!**")
+                print(f"📊 Problem tipi: {thinking_result['initial_analysis']['type']}")
+                print(f"🎚️ Karmaşıklık: {thinking_result['initial_analysis']['complexity']}")
+                print(f"🔑 Ana kavramlar: {', '.join(thinking_result['initial_analysis']['key_concepts'][:3])}")
+                
+                # Web araştırması gerekli mi kontrol et
+                if any(word in user_query.lower() for word in ["nedir", "hakkında", "ne", "nasıl", "what", "how"]):
+                    print("\n🌐 Ek web araştırması yapılıyor...")
+                    web_results = reasoning_engines["web_browsing"].intelligent_search(user_query)
+                    web_analysis = reasoning_engines["web_browsing"].analyze_search_results(web_results)
+                    
+                    print(f"\n🔍 **Web Araştırma Sonuçları:**")
+                    print(f"• {web_analysis['total_results']} sonuç bulundu")
+                    print(f"• Ortalama relevans: {web_analysis['avg_relevance']:.2f}")
+                    
+                    if web_analysis['top_sources']:
+                        print(f"• En iyi kaynaklar:")
+                        for i, source in enumerate(web_analysis['top_sources'][:3], 1):
+                            print(f"  {i}. {source}")
+                    
+                    if web_analysis['key_findings']:
+                        print(f"\n📚 **Anahtar Bulgular:**")
+                        for finding in web_analysis['key_findings'][:3]:
+                            print(f"  • {finding}")
+                
                 # Genel analiz sonucu
                 print(f"\n🧠 **Derin Düşünce Sonucu:**")
                 print(thinking_result['final_synthesis'])
-            
-            # Context memory güncelle
-            reasoning_engines["reasoning"].update_context_memory(user_query, "Analiz tamamlandı")
+                
+                # Context memory güncelle
+                reasoning_engines["reasoning"].update_context_memory(user_query, "Analiz tamamlandı")
             
             print("\n" + "="*60)
     
     except Exception as e:
         print(f"❌ Hata: {e}")
+        import traceback
+        traceback.print_exc()
     
     input("\nDevam etmek için Enter'a basın...")
 
