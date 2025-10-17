@@ -1,0 +1,82 @@
+[
+  {
+    "question": "Machine learning ile deep learning arasındaki fark nedir?",
+    "reasoning": "Bu teknik soruyu adım adım analiz edelim:\n\n1. Tanımlar:\n   - Machine Learning: Veriden öğrenen algoritmalar\n   - Deep Learning: Çok katmanlı yapay sinir ağları kullanan ML alt dalı\n\n2. Temel Farklar:\n   - Veri İhtiyacı: Deep learning daha fazla veri gerektirir\n   - Feature Engineering: ML'de manuel, DL'de otomatik\n   - Hesaplama Gücü: DL daha yoğun GPU kullanır\n   - Model Karmaşıklığı: DL modelleri daha karmaşık\n\n3. Kullanım Alanları:\n   - ML: Tablo veriler, küçük veri setleri\n   - DL: Görüntü, ses, metin gibi karmaşık veriler\n\n4. Sonuç: Deep learning, machine learning'in özel bir alt dalıdır ve daha karmaşık problemler için uygundur.",
+    "answer": "Deep learning, machine learning'in bir alt dalıdır. ML manuel özellik mühendisliği gerektirir ve daha az veriyle çalışabilir. DL ise otomatik özellik öğrenir, daha fazla veri ve hesaplama gücü gerektirir, ancak karmaşık problemlerde (görüntü, ses) daha başarılıdır.",
+    "type": "technical_explanation",
+    "category": "AI/ML",
+    "difficulty": "intermediate"
+  },
+  {
+    "question": "Python'da list comprehension nedir ve nasıl kullanılır?",
+    "reasoning": "List comprehension konusunu adım adım açıklayalım:\n\n1. Tanım:\n   - Python'da liste oluşturmanın kısa ve okunabilir yolu\n   - Tek satırda döngü ve koşul içerebilir\n\n2. Sözdizimi:\n   [expression for item in iterable if condition]\n\n3. Örnekler:\n   a) Basit: [x*2 for x in range(5)] → [0,2,4,6,8]\n   b) Koşullu: [x for x in range(10) if x%2==0] → [0,2,4,6,8]\n   c) İç içe: [[i*j for j in range(3)] for i in range(3)]\n\n4. Avantajlar:\n   - Daha okunabilir kod\n   - Daha hızlı çalışır\n   - Daha az satır\n\n5. Sonuç: List comprehension, Python'da liste oluşturmanın Pythonic yoludur.",
+    "answer": "List comprehension, Python'da tek satırda liste oluşturma yöntemidir. Sözdizimi: [expression for item in iterable if condition]. Örnek: [x**2 for x in range(5) if x%2==0] → [0, 4, 16]. Daha okunabilir ve hızlıdır.",
+    "type": "technical_explanation",
+    "category": "Programming",
+    "difficulty": "beginner"
+  },
+  {
+    "question": "REST API nedir ve temel prensipleri nelerdir?",
+    "reasoning": "REST API konusunu detaylı inceleyelim:\n\n1. Tanım:\n   - REST: Representational State Transfer\n   - Web servisleri için mimari stil\n   - Roy Fielding tarafından tanımlandı\n\n2. Temel Prensipler:\n   a) Client-Server: İstemci ve sunucu ayrı\n   b) Stateless: Her istek bağımsız\n   c) Cacheable: Yanıtlar önbellenebilir\n   d) Uniform Interface: Standart arayüz\n   e) Layered System: Katmanlı yapı\n\n3. HTTP Metodları:\n   - GET: Veri okuma\n   - POST: Yeni veri oluşturma\n   - PUT: Veri güncelleme\n   - DELETE: Veri silme\n   - PATCH: Kısmi güncelleme\n\n4. Status Kodları:\n   - 2xx: Başarılı (200 OK, 201 Created)\n   - 4xx: İstemci hatası (404 Not Found)\n   - 5xx: Sunucu hatası (500 Internal Error)\n\n5. Sonuç: REST API, web servisleri için standart ve ölçeklenebilir bir mimaridir.",
+    "answer": "REST API, web servisleri için mimari stildir. Temel prensipleri: stateless (durumsuz), client-server ayrımı, cacheable (önbelleklenebilir), uniform interface. HTTP metodlarını (GET, POST, PUT, DELETE) kullanır ve standart status kodları döndürür.",
+    "type": "technical_explanation",
+    "category": "Web Development",
+    "difficulty": "intermediate"
+  },
+  {
+    "question": "Git'te merge ve rebase arasındaki fark nedir?",
+    "reasoning": "Git merge ve rebase farkını analiz edelim:\n\n1. Merge:\n   - İki branch'i birleştirir\n   - Yeni bir merge commit oluşturur\n   - Commit geçmişi korunur\n   - Komut: git merge feature-branch\n\n2. Rebase:\n   - Commit'leri yeniden temel alır\n   - Linear (doğrusal) geçmiş oluşturur\n   - Commit'leri yeniden yazar\n   - Komut: git rebase main\n\n3. Kullanım Senaryoları:\n   - Merge: Public branch'ler için\n   - Rebase: Local branch'ler için\n\n4. Avantajlar/Dezavantajlar:\n   Merge:\n   + Güvenli, geçmişi korur\n   - Karmaşık geçmiş\n   \n   Rebase:\n   + Temiz, linear geçmiş\n   - Riski daha yüksek\n\n5. Sonuç: Merge güvenli ve public branch'ler için, rebase temiz geçmiş ve local branch'ler için uygundur.",
+    "answer": "Merge: İki branch'i birleştirir, yeni merge commit oluşturur, geçmişi korur. Rebase: Commit'leri yeniden yazar, linear geçmiş oluşturur. Merge public branch'ler için güvenli, rebase local branch'ler için daha temiz geçmiş sağlar.",
+    "type": "technical_explanation",
+    "category": "Version Control",
+    "difficulty": "intermediate"
+  },
+  {
+    "question": "Docker container ile virtual machine arasındaki fark nedir?",
+    "reasoning": "Container ve VM farkını detaylı inceleyelim:\n\n1. Virtual Machine (VM):\n   - Tam bir işletim sistemi çalıştırır\n   - Hypervisor üzerinde çalışır\n   - Daha fazla kaynak kullanır\n   - Başlatma süresi: dakikalar\n   - İzolasyon: Hardware seviyesinde\n\n2. Docker Container:\n   - Host OS kernel'ini paylaşır\n   - Container engine kullanır\n   - Hafif ve hızlıdır\n   - Başlatma süresi: saniyeler\n   - İzolasyon: Process seviyesinde\n\n3. Kaynak Kullanımı:\n   - VM: GB'larca RAM, tam OS\n   - Container: MB'larca RAM, sadece app\n\n4. Kullanım Alanları:\n   - VM: Farklı OS'ler, tam izolasyon\n   - Container: Mikroservisler, CI/CD\n\n5. Sonuç: Container'lar daha hafif ve hızlı, VM'ler daha fazla izolasyon sağlar.",
+    "answer": "VM tam işletim sistemi çalıştırır, GB'larca kaynak kullanır, dakikalarda başlar. Container host OS kernel'ini paylaşır, MB'larca kaynak kullanır, saniyelerde başlar. Container'lar mikroservisler için, VM'ler tam izolasyon gerektiren durumlar için uygundur.",
+    "type": "technical_explanation",
+    "category": "DevOps",
+    "difficulty": "intermediate"
+  },
+  {
+    "question": "SQL injection nedir ve nasıl önlenir?",
+    "reasoning": "SQL injection konusunu güvenlik perspektifiyle inceleyelim:\n\n1. Tanım:\n   - Web uygulamalarında güvenlik açığı\n   - SQL sorgularına zararlı kod enjekte etme\n   - OWASP Top 10'da yer alır\n\n2. Nasıl Çalışır:\n   Kötü kod: \"SELECT * FROM users WHERE id = '\" + user_input + \"'\"\n   Saldırı: user_input = \"1' OR '1'='1\"\n   Sonuç: Tüm kullanıcılar listelenir\n\n3. Saldırı Türleri:\n   - Union-based: Veri çekme\n   - Boolean-based: True/False yanıtlar\n   - Time-based: Zaman gecikmesi\n   - Error-based: Hata mesajları\n\n4. Önleme Yöntemleri:\n   a) Prepared Statements (En iyi):\n      cursor.execute(\"SELECT * FROM users WHERE id = ?\", (user_id,))\n   \n   b) ORM kullanımı:\n      User.objects.get(id=user_id)\n   \n   c) Input validation:\n      - Whitelist kullan\n      - Özel karakterleri filtrele\n   \n   d) Least privilege:\n      - DB kullanıcısına minimum yetki\n\n5. Sonuç: SQL injection ciddi güvenlik riski, prepared statements ile kolayca önlenebilir.",
+    "answer": "SQL injection, SQL sorgularına zararlı kod enjekte ederek veri tabanına yetkisiz erişim sağlama saldırısıdır. Önleme: 1) Prepared statements/parameterized queries kullan, 2) ORM frameworks tercih et, 3) Input validation yap, 4) Minimum DB yetkileri ver.",
+    "type": "security_explanation",
+    "category": "Security",
+    "difficulty": "intermediate"
+  },
+  {
+    "question": "Asenkron programlama nedir ve Python'da nasıl yapılır?",
+    "reasoning": "Asenkron programlamayı Python bağlamında açıklayalım:\n\n1. Senkron vs Asenkron:\n   - Senkron: Bir işlem bitmeden diğeri başlamaz\n   - Asenkron: Birden fazla işlem eşzamanlı çalışır\n\n2. Python Async/Await:\n   - asyncio kütüphanesi\n   - async def: Asenkron fonksiyon tanımlama\n   - await: Asenkron işlemi bekleme\n\n3. Örnek Kod:\n   ```python\n   import asyncio\n   \n   async def fetch_data(url):\n       # Simulate API call\n       await asyncio.sleep(1)\n       return f\"Data from {url}\"\n   \n   async def main():\n       tasks = [fetch_data(f\"url{i}\") for i in range(3)]\n       results = await asyncio.gather(*tasks)\n       print(results)\n   \n   asyncio.run(main())\n   ```\n\n4. Kullanım Alanları:\n   - I/O bound işlemler (API calls, file operations)\n   - Web scraping\n   - Database queries\n   - Network programming\n\n5. Avantajlar:\n   - Daha hızlı (I/O için)\n   - Daha az kaynak kullanımı\n   - Scalability\n\n6. Sonuç: Async programming, I/O bound işlemlerde performans artışı sağlar.",
+    "answer": "Asenkron programlama, birden fazla işlemin eşzamanlı çalışmasını sağlar. Python'da asyncio, async/await kullanılır. I/O bound işlemler (API calls, DB queries) için idealdir. Örnek: async def func() ve await kullanarak bekleme yaparız.",
+    "type": "technical_explanation",
+    "category": "Programming",
+    "difficulty": "advanced"
+  },
+  {
+    "question": "Bir e-ticaret sitesi tasarlıyorum. Hangi veritabanını seçmeliyim: SQL mi NoSQL mi?",
+    "reasoning": "E-ticaret için veritabanı seçimini analiz edelim:\n\n1. E-ticaret Gereksinimleri:\n   - Ürün bilgileri\n   - Kullanıcı hesapları\n   - Sipariş yönetimi\n   - Stok takibi\n   - Ödeme işlemleri\n   - ACID özellikleri kritik\n\n2. SQL (İlişkisel) Avantajları:\n   + ACID garantisi (Atomicity, Consistency, Isolation, Durability)\n   + İlişkisel veri modeli (user-order-product)\n   + Karmaşık sorgular (JOIN, aggregate)\n   + Transaction desteği\n   + Veri tutarlılığı\n\n3. NoSQL Avantajları:\n   + Ölçeklenebilirlik\n   + Esnek schema\n   + Hızlı okuma/yazma\n   - ACID garantisi zayıf\n\n4. E-ticaret için Öneri:\n   Ana DB: PostgreSQL/MySQL (SQL)\n   - Sipariş yönetimi\n   - Ödeme işlemleri\n   - Kullanıcı yönetimi\n   \n   Yardımcı: Redis/MongoDB (NoSQL)\n   - Cache\n   - Session yönetimi\n   - Ürün önerileri\n\n5. Hibrit Yaklaşım:\n   - Critical data: SQL\n   - Cache/Session: NoSQL\n   - Analytics: NoSQL\n\n6. Sonuç: E-ticaret için SQL (PostgreSQL) ana veritabanı, NoSQL yardımcı olarak kullanılmalı.",
+    "answer": "E-ticaret için SQL (PostgreSQL/MySQL) önerilir. Sebepler: 1) ACID garantisi (ödeme/sipariş güvenliği), 2) İlişkisel veri modeli (user-order-product), 3) Transaction desteği, 4) Veri tutarlılığı. NoSQL (Redis/MongoDB) cache ve session için yardımcı olarak kullanılabilir.",
+    "type": "architecture_decision",
+    "category": "System Design",
+    "difficulty": "advanced"
+  },
+  {
+    "question": "Microservices mimarisinin avantajları ve dezavantajları nelerdir?",
+    "reasoning": "Microservices mimarisini kapsamlı analiz edelim:\n\n1. Tanım:\n   - Uygulamayı küçük, bağımsız servislere bölme\n   - Her servis kendi veritabanına sahip\n   - REST/gRPC ile iletişim\n\n2. Avantajlar:\n   a) Ölçeklenebilirlik:\n      - Sadece gerekli servisler scale edilir\n      - Horizontal scaling kolay\n   \n   b) Technology Diversity:\n      - Her servis farklı teknoloji kullanabilir\n      - Best tool for the job\n   \n   c) Fault Isolation:\n      - Bir servis çökerse diğerleri çalışır\n      - Circuit breaker pattern\n   \n   d) Independent Deployment:\n      - Servisler bağımsız deploy edilir\n      - CI/CD kolaylaşır\n   \n   e) Team Autonomy:\n      - Küçük takımlar, küçük servisler\n      - Faster development\n\n3. Dezavantajlar:\n   a) Karmaşıklık:\n      - Distributed system complexity\n      - Network latency\n   \n   b) Data Management:\n      - Distributed transactions zor\n      - Eventual consistency\n   \n   c) Testing:\n      - Integration testing karmaşık\n      - End-to-end testing zor\n   \n   d) Operational Overhead:\n      - Monitoring, logging gerekli\n      - Service discovery, load balancing\n   \n   e) Initial Cost:\n      - Infrastructure setup maliyetli\n\n4. Ne Zaman Kullanılmalı:\n   ✅ Uygun:\n   - Büyük, karmaşık uygulamalar\n   - Hızlı geliştirme gerekli\n   - Bağımsız ölçekleme ihtiyacı\n   \n   ❌ Uygun Değil:\n   - Küçük uygulamalar\n   - Sınırlı kaynak\n   - Basit gereksinimler\n\n5. Sonuç: Microservices büyük sistemler için güçlü ama karmaşık, monolith'ten geçerken dikkatli olunmalı.",
+    "answer": "Microservices Avantajları: Ölçeklenebilir, bağımsız deployment, fault isolation, teknoloji çeşitliliği. Dezavantajları: Karmaşık, distributed system zorlukları, test ve monitoring maliyetli. Büyük, karmaşık uygulamalar için uygun; küçük projeler için monolith daha iyi.",
+    "type": "architecture_explanation",
+    "category": "System Design",
+    "difficulty": "advanced"
+  },
+  {
+    "question": "JWT (JSON Web Token) nedir ve nasıl çalışır?",
+    "reasoning": "JWT'yi detaylı inceleyelim:\n\n1. Tanım:\n   - JSON tabanlı token standardı\n   - Stateless authentication için\n   - RFC 7519 standardı\n\n2. JWT Yapısı (3 kısım):\n   header.payload.signature\n   \n   a) Header:\n   {\n     \"alg\": \"HS256\",\n     \"typ\": \"JWT\"\n   }\n   \n   b) Payload:\n   {\n     \"sub\": \"1234567890\",\n     \"name\": \"John Doe\",\n     \"iat\": 1516239022\n   }\n   \n   c) Signature:\n   HMACSHA256(\n     base64UrlEncode(header) + \".\" +\n     base64UrlEncode(payload),\n     secret\n   )\n\n3. Çalışma Prensibi:\n   1) User login yapar\n   2) Server JWT oluşturur ve döner\n   3) Client her istekte JWT'yi gönderir\n   4) Server JWT'yi verify eder\n   5) Valid ise işlemi yapar\n\n4. Avantajlar:\n   + Stateless (scalable)\n   + Self-contained (tüm bilgi token'da)\n   + Cross-domain (CORS friendly)\n   + Mobile friendly\n\n5. Güvenlik Konuları:\n   - HTTPS kullan\n   - Short expiration time\n   - Refresh token mekanizması\n   - Secret key güvenliği\n   - XSS/CSRF koruması\n\n6. Sonuç: JWT, modern web uygulamaları için güvenli ve ölçeklenebilir authentication yöntemidir.",
+    "answer": "JWT, JSON tabanlı stateless authentication token'dır. 3 kısımdan oluşur: header, payload, signature. Çalışma: Login → Server JWT üretir → Client her istekte gönderir → Server verify eder. Avantajları: Stateless, scalable, cross-domain. Güvenlik: HTTPS, short expiration, refresh token kullanılmalı.",
+    "type": "technical_explanation",
+    "category": "Security",
+    "difficulty": "intermediate"
+  }
+]

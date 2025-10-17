@@ -1,0 +1,79 @@
+[
+  {
+    "question": "Merhaba! Yapay zeka hakkında bilgi alabilir miyim?",
+    "response": "Merhaba! 👋 Tabii ki, yapay zeka hakkında size yardımcı olabilirim.\n\nYapay Zeka (AI), makinelerin insan benzeri düşünme ve öğrenme yetenekleri göstermesini sağlayan bir teknoloji alanıdır. Temel olarak:\n\n🧠 **Ana Dallar:**\n- Machine Learning (Makine Öğrenmesi)\n- Deep Learning (Derin Öğrenme)\n- Natural Language Processing (Doğal Dil İşleme)\n- Computer Vision (Bilgisayarlı Görü)\n\n💡 **Kullanım Alanları:**\n- Chatbotlar ve asistanlar\n- Görüntü tanıma\n- Öneri sistemleri\n- Otonom araçlar\n\nHangi konuda daha detaylı bilgi almak istersiniz?",
+    "type": "greeting_info",
+    "category": "General",
+    "tone": "friendly"
+  },
+  {
+    "question": "Python öğrenmek istiyorum, nereden başlamalıyım?",
+    "response": "Harika bir seçim! 🐍 Python, öğrenmesi kolay ve güçlü bir programlama dilidir.\n\n**Öğrenme Yol Haritası:**\n\n1️⃣ **Temel Konular (1-2 hafta):**\n   - Değişkenler ve veri tipleri\n   - if-else, döngüler (for, while)\n   - Fonksiyonlar\n   - Listeler, tuple, dictionary\n\n2️⃣ **Orta Seviye (2-4 hafta):**\n   - OOP (Class, object)\n   - File operations\n   - Exception handling\n   - Modüller ve paketler\n\n3️⃣ **İleri Seviye:**\n   - List comprehension\n   - Decorators\n   - Generators\n   - Async/await\n\n**Önerilen Kaynaklar:**\n📚 Ücretsiz: Python.org tutorial, Real Python\n💻 Platform: Codecademy, freeCodeCamp\n🎥 Video: Corey Schafer YouTube kanalı\n\nHangi alanda (web, veri bilimi, otomasyon) kullanmayı planlıyorsunuz?",
+    "type": "learning_guidance",
+    "category": "Programming",
+    "tone": "encouraging"
+  },
+  {
+    "question": "Kod yazdım ama hata alıyorum, yardım eder misin?",
+    "response": "Tabii ki yardımcı olabilirim! 🛠️\n\nHatanızı çözmek için şunları paylaşabilir misiniz:\n\n1️⃣ **Hata Mesajı:** Tam hata metnini gönderin\n2️⃣ **Kod:** Hataya neden olan kod bloğunu paylaşın\n3️⃣ **Beklenen Davranış:** Ne yapmasını bekliyordunuz?\n4️⃣ **Gerçek Davranış:** Ne oluyor?\n\n**Genel Debug İpuçları:**\n✅ Hata mesajını dikkatle okuyun\n✅ Satır numarasına bakın\n✅ Print statement'larla debug yapın\n✅ Değişken değerlerini kontrol edin\n✅ Indentation'ı (girinti) kontrol edin (Python için)\n\nKodunuzu ve hatayı paylaşırsanız, birlikte çözebiliriz!",
+    "type": "help_request",
+    "category": "Debugging",
+    "tone": "supportive"
+  },
+  {
+    "question": "Makine öğrenmesi için matematik bilgisi şart mı?",
+    "response": "İyi soru! 🤔 Matematik, machine learning için önemli ama başlangıç seviyesinde çok derinlemesine bilmeseniz de başlayabilirsiniz.\n\n**Gerekli Matematik Seviyeleri:**\n\n📊 **Başlangıç Seviyesi:**\n- Temel cebir\n- Basit istatistik (ortalama, medyan)\n- Grafik okuma\n→ Scikit-learn ile model eğitebilirsiniz\n\n📐 **Orta Seviye:**\n- Linear algebra (matris, vektör)\n- İstatistik (olasılık, dağılımlar)\n- Calculus (türev, gradient)\n→ Model parametrelerini anlarsınız\n\n🔬 **İleri Seviye:**\n- Optimization theory\n- Information theory\n- Advanced statistics\n→ Kendi algoritmalarınızı yazabilirsiniz\n\n**Önerim:**\n1. Önce pratik yapın (Scikit-learn, Keras)\n2. Sonra ihtiyaç duydukça matematik öğrenin\n3. Andrew Ng'nin ML kursunda iyi dengeli anlatım var\n\nHangi seviyede çalışmak istiyorsunuz?",
+    "type": "prerequisite_question",
+    "category": "Machine Learning",
+    "tone": "informative"
+  },
+  {
+    "question": "API nedir ve neden kullanılır?",
+    "response": "Harika soru! API'ler modern yazılımın temel taşlarındandır. 🔌\n\n**API (Application Programming Interface) Nedir?**\nİki yazılımın birbirleriyle konuşması için kullanılan arayüzdür.\n\n**Gerçek Hayat Örneği:**\nRestoranda sipariş verirken:\n- Siz (client) → Garson (API) → Mutfak (server)\n- Garson, mutfağın nasıl çalıştığını bilmenize gerek kalmadan siparişinizi iletir\n\n**Neden Kullanılır:**\n\n1️⃣ **Entegrasyon:**\n   - Google Maps'i kendi sitenizde gösterme\n   - Ödeme sistemleri (Stripe, PayPal)\n   - Sosyal medya login (Google, Facebook)\n\n2️⃣ **Modülerlik:**\n   - Frontend ve backend ayrımı\n   - Microservices mimarisi\n\n3️⃣ **Güvenlik:**\n   - Sadece belirli fonksiyonlar açık\n   - Authentication/authorization\n\n4️⃣ **Ölçeklenebilirlik:**\n   - Farklı platformlar (web, mobile, IoT)\n   - Aynı backend, farklı clientlar\n\n**Örnek API İsteği:**\n```\nGET https://api.example.com/users/123\nResponse: {\"id\": 123, \"name\": \"John\"}\n```\n\nDaha detaylı anlatayım mı?",
+    "type": "concept_explanation",
+    "category": "Web Development",
+    "tone": "educational"
+  },
+  {
+    "question": "Teşekkürler, çok yardımcı oldun!",
+    "response": "Rica ederim! 😊 Yardımcı olabildiğime çok sevindim!\n\n**Başka sorularınız varsa:**\n- Kod yazarken takıldığınız bir yer\n- Öğrenmek istediğiniz yeni bir konu\n- Proje önerisi\n- Kariyer tavsiyesi\n\nHer zaman buradayım! 💡\n\nİyi çalışmalar ve başarılar dilerim! 🚀",
+    "type": "closing",
+    "category": "General",
+    "tone": "warm"
+  },
+  {
+    "question": "Git ve GitHub arasındaki fark nedir?",
+    "response": "Çok karıştırılan bir konu! Açıklayayım: 📚\n\n**Git:**\n- 🛠️ Versiyon kontrol sistemi (software)\n- 💻 Bilgisayarınızda çalışır\n- 📝 Kod değişikliklerini takip eder\n- 🌳 Branch, commit, merge yaparsınız\n- 👤 Linus Torvalds tarafından yaratıldı\n\n**GitHub:**\n- ☁️ Git için hosting servisi (website)\n- 🌐 Cloud'da çalışır\n- 👥 Collaboration özellikleri\n- 📂 Repository'leri barındırır\n- 🔄 Pull request, issues, actions\n\n**Analoji:**\n- Git = Microsoft Word (yazılım)\n- GitHub = Google Drive (dosyaları saklama yeri)\n\n**Alternatifler:**\n- GitLab\n- Bitbucket\n- Gitea\n\n**Özet:**\nGit → tool\nGitHub → platform\n\nHer ikisini de kullanarak kod versiyon kontrolü + collaboration yapabilirsiniz! 🎯",
+    "type": "comparison",
+    "category": "Version Control",
+    "tone": "clarifying"
+  },
+  {
+    "question": "Kendime bir portfolio website yapmak istiyorum, önerilerin var mı?",
+    "response": "Harika bir adım! 🌟 Portfolio, kendinizi göstermenin en iyi yolu.\n\n**Portfolio Website İçin Teknoloji Seçenekleri:**\n\n1️⃣ **En Kolay (No-code):**\n   - Wix, Squarespace, Webflow\n   - ✅ Hızlı başla\n   - ❌ Kısıtlı kontrol\n\n2️⃣ **Orta Seviye:**\n   - WordPress + tema\n   - ✅ Kolay yönetim\n   - ❌ Hosting gerekli\n\n3️⃣ **Kod İle (Statik Site):**\n   - HTML/CSS/JS\n   - Bootstrap veya Tailwind CSS\n   - ✅ Tam kontrol\n   - 🆓 GitHub Pages ile ücretsiz host\n\n4️⃣ **Modern Framework:**\n   - React + Next.js\n   - Vue + Nuxt.js\n   - ✅ Öğrenme fırsatı\n   - ✅ İş görüşmelerinde artı\n\n**Mutlaka Olması Gerekenler:**\n✅ About/Hakkımda bölümü\n✅ Projeler (en az 3-5 proje)\n✅ Skills/Yetenekler\n✅ İletişim bilgileri\n✅ GitHub/LinkedIn linkleri\n✅ Responsive design (mobile uyumlu)\n\n**İpuçları:**\n- Basit ve temiz tasarım\n- Koyu mod seçeneği\n- Hızlı yükleme\n- SEO optimize\n\nHangi seviyede yapmayı düşünüyorsunuz?",
+    "type": "project_advice",
+    "category": "Web Development",
+    "tone": "motivating"
+  },
+  {
+    "question": "Regex öğrenmek çok zor geliyor, basitleştirebilir misin?",
+    "response": "Regex başta herkese zor gelir, ama parça parça öğrenince çok kolay! 💪\n\n**Regex Temelleri (Adım Adım):**\n\n**1. Basit Karakterler:**\n- `cat` → \"cat\" kelimesini bulur\n- `123` → \"123\" sayısını bulur\n\n**2. Özel Karakterler:**\n- `.` → Herhangi bir karakter\n- `\\d` → Herhangi bir rakam [0-9]\n- `\\w` → Herhangi bir harf/rakam\n- `\\s` → Boşluk\n\n**3. Tekrar Belirleyiciler:**\n- `*` → 0 veya daha fazla\n- `+` → 1 veya daha fazla\n- `?` → 0 veya 1\n- `{3}` → Tam 3 kez\n\n**4. Pratik Örnekler:**\n\n📧 Email:\n`[a-zA-Z0-9]+@[a-z]+\\.[a-z]+`\n- john@example.com ✅\n\n📱 Telefon:\n`\\d{3}-\\d{3}-\\d{4}`\n- 555-123-4567 ✅\n\n🌐 URL:\n`https?://[\\w.-]+`\n- https://example.com ✅\n\n**Öğrenme Araçları:**\n- regex101.com (test etmek için)\n- regexr.com (görsel öğrenme)\n\n**İpucu:** Karmaşık regex'i parçalara bölerek düşünün!\n\nBir örnek üzerinde pratik yapalım mı?",
+    "type": "simplification",
+    "category": "Programming",
+    "tone": "patient"
+  },
+  {
+    "question": "Kodlama öğrenirken çok hata yapıyorum, normal mi?",
+    "response": "Kesinlikle normal ve hatta **çok iyi bir şey!** 🎉\n\n**Neden Hata Yapmak İyi:**\n\n1️⃣ **En İyi Öğrenme Yolu:**\n   - Hatalar unutulmaz dersler verir\n   - \"Learning by doing\" prensibi\n   - Her hata, bir şey öğretir\n\n2️⃣ **Profesyoneller de Hata Yapar:**\n   - Senior developer'lar da debug yapar\n   - Fark: Hataları hızlı bulurlar\n   - Stack Overflow'da milyonlarca soru var\n\n3️⃣ **Gelişim Göstergesi:**\n   - Hata yapmıyorsanız, yeni şeyler denemiyorsunuz demektir\n   - \"Comfort zone\" dışına çıkıyorsunuz\n\n**Hata Yapma İstatistikleri:**\n- Başlangıç: %80 hata %20 doğru\n- 6 ay sonra: %50 hata %50 doğru\n- 1 yıl sonra: %30 hata %70 doğru\n- Senior: %10 hata %90 doğru (hala hata var!)\n\n**Motivasyon İpuçları:**\n✅ Her hatayı öğrenme fırsatı görün\n✅ Debug sürecini sevin\n✅ Hata loglarını okumayı öğrenin\n✅ Küçük adımlarla ilerleyin\n✅ Community'e katılın (Stack Overflow, Reddit)\n\n**Ünlü Bir Söz:**\n> \"If debugging is the process of removing bugs, then programming must be the process of putting them in.\" - Edsger Dijkstra\n\nDevam edin, harikasınız! 💪🚀",
+    "type": "motivation",
+    "category": "Learning",
+    "tone": "encouraging"
+  },
+  {
+    "question": "İş görüşmesinde teknik sorular soruldu ve çözemedim, nasıl hazırlanmalıyım?",
+    "response": "İş görüşmeleri stresli olabilir, ama doğru hazırlıkla başarabilirsiniz! 💼\n\n**Teknik Mülakat Hazırlık Planı:**\n\n**1. Algoritma ve Veri Yapıları (2-3 ay):**\n📚 **Konular:**\n- Arrays, Strings\n- Linked Lists, Stacks, Queues\n- Trees, Graphs\n- Hash Tables\n- Sorting, Searching\n- Dynamic Programming\n- Recursion\n\n🔗 **Kaynaklar:**\n- LeetCode (Easy → Medium → Hard)\n- HackerRank\n- AlgoExpert\n- Cracking the Coding Interview kitabı\n\n**2. Sistem Tasarımı (Orta/Senior için):**\n- Scalability concepts\n- Database design\n- API design\n- Caching strategies\n📖 Kaynak: System Design Primer (GitHub)\n\n**3. Davranışsal Sorular:**\n- STAR yöntemi (Situation, Task, Action, Result)\n- Geçmiş projelerinizi anlatın\n- Takım çalışması örnekleri\n\n**4. Pratik Strateji:**\n\n📅 **Haftalık Plan:**\n- Her gün 2-3 LeetCode problemi\n- Hafta sonu mock interview\n- Kavramları not alın\n\n**Mülakat Sırasında:**\n✅ Problemi yüksek sesle düşünün (communicate)\n✅ Sorular sorun (edge cases, constraints)\n✅ Brute force ile başlayın, sonra optimize edin\n✅ Test case'ler yazın\n✅ Zaman/alan karmaşıklığını açıklayın\n\n**Reddedilme Normal:**\n- Google'da kabul oranı %3\n- Facebook'ta %5\n- Her mülakat bir pratik\n\n**Motivasyon:**\n> \"Success is not final, failure is not fatal: it is the courage to continue that counts.\" - Winston Churchill\n\nHangi pozisyon için hazırlanıyorsunuz?",
+    "type": "career_advice",
+    "category": "Career",
+    "tone": "professional"
+  }
+]
