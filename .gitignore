@@ -40,16 +40,30 @@ ENV/
 # Research outputs
 arastirma_*.json
 ozet_*.txt
+detayli_ozet_*.txt
+makale_*.txt
 training_results/
 research_data/
+exports/
+results/
+generated/
 
 # Model files (büyük dosyalar)
 *.h5
 *.pkl
 *.pth
 *.bin
+*.safetensors
 models/
 checkpoints/
+*-model/
+final-trained-model/
+qwen-model/
+trained-model/
+model-step*/
+math-gpt2-model/
+test-model/
+datasets_cache/
 
 # Logs
 *.log
@@ -64,3 +78,20 @@ desktop.ini
 *.tmp
 temp/
 tmp/
+
+# Test files (gereksiz)
+test_*.py
+quick_test.py
+check_*.py
+compare_*.py
+
+# Documentation (eski)
+CHECKPOINTING_REHBERI.md
+COKLU_EGITIM_PLANI.md
+DURDURMA_SENARYOSU.md
+EGITIM_DURUMU.md
+MODEL_TOKEN_KAPASITESI.md
+RAM_ANALIZI_16GB.md
+RAM_COZUM_16GB.md
+TOKENIZER_DEGISTIRME.md
+YOLO_*.md

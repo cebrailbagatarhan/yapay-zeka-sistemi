@@ -279,6 +279,9 @@ def show_menu():
     if MODEL_TRAINER_AVAILABLE:
         print("21. 🎓 TAM PAKET Model Eğitimi (Matematik + Kod + Instruction)")
     
+    # Eğitimli GPT-2 model
+    print("22. 🤖 EĞİTİMLİ GPT-2 MODELİNİ KULLAN (Senin Eğittiğin Model!)")
+    
     print("0. 🚪 Çıkış")
     print("="*60)
 
@@ -2009,6 +2012,143 @@ def deep_web_research():
     input("\nDevam etmek için Enter'a basın...")
 
 
+def use_trained_model():
+    """Eğitimli GPT-2 Modelini Kullan"""
+    clear_screen()
+    print("\n" + "🤖"*30)
+    print("🎯 EĞİTİMLİ GPT-2 MODELİ")
+    print("🤖"*30)
+    
+    print("\n📚 Bu model şunları öğrendi:")
+    print("✅ 203 ChatGPT rol-playing senaryosu")
+    print("✅ 9,846 doğal konuşma örneği")
+    print("✅ Instruction-following yeteneği")
+    print("✅ ChatGPT-style '### Assistant:' formatı")
+    
+    print("\n💡 Model bilgileri:")
+    print("  • Temel: GPT-2 Small (124M parametreler)")
+    print("  • Eğitim: 1.6 saat, 10,049 örnek")
+    print("  • Yer: ./final-trained-model/")
+    
+    try:
+        from transformers import GPT2LMHeadModel, GPT2Tokenizer
+        import torch
+        
+        print("\n🔄 Model yükleniyor...")
+        model_path = "./final-trained-model"
+        
+        # Model ve tokenizer yükle
+        model = GPT2LMHeadModel.from_pretrained(model_path)
+        tokenizer = GPT2Tokenizer.from_pretrained(model_path)
+        
+        # Pad token ekle (GPT-2'de yok)
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
+            model.config.pad_token_id = tokenizer.eos_token_id
+        
+        # CPU'da çalıştır
+        device = "cpu"
+        model.to(device)
+        model.eval()
+        
+        print("✅ Model başarıyla yüklendi!\n")
+        print("💬 Çıkmak için 'çıkış' yazın.\n")
+        
+        conversation_count = 0
+        
+        while True:
+            user_prompt = input(f"👤 Sen ({conversation_count + 1}): ").strip()
+            
+            if user_prompt.lower() in ['çıkış', 'exit', 'q', 'quit']:
+                print(f"\n🤖 Model: Hoşça kal! {conversation_count} yanıt ürettim. 👋")
+                break
+            
+            if not user_prompt:
+                continue
+            
+            conversation_count += 1
+            
+            # Prompt formatı - Daha iyi talimatlarla
+            formatted_prompt = f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+{user_prompt}
+
+### Response:"""
+            
+            print(f"\n🤖 Model düşünüyor", end="")
+            for _ in range(2):
+                print(".", end="", flush=True)
+                import time
+                time.sleep(0.3)
+            print("\n")
+            
+            # Tokenize et
+            input_ids = tokenizer.encode(formatted_prompt, return_tensors="pt").to(device)
+            attention_mask = torch.ones_like(input_ids)
+            
+            # Yanıt üret
+            with torch.no_grad():
+                output = model.generate(
+                    input_ids,
+                    attention_mask=attention_mask,
+                    max_new_tokens=80,  # Daha kısa yanıt
+                    num_return_sequences=1,
+                    temperature=0.7,  # Daha tutarlı
+                    top_p=0.9,
+                    top_k=40,
+                    do_sample=True,
+                    repetition_penalty=1.3,  # Daha yüksek tekrar önleme
+                    no_repeat_ngram_size=2,  
+                    pad_token_id=tokenizer.eos_token_id,
+                    eos_token_id=tokenizer.eos_token_id
+                )
+            
+            # Decode et
+            full_response = tokenizer.decode(output[0], skip_special_tokens=True)
+            
+            # Response kısmını al
+            if "### Response:" in full_response:
+                response = full_response.split("### Response:")[-1].strip()
+            elif "### Assistant:" in full_response:
+                response = full_response.split("### Assistant:")[-1].strip()
+            else:
+                # Promptu temizle
+                response = full_response.replace(formatted_prompt, "").strip()
+            
+            # İlk paragrafı veya mantıklı uzunluğu al
+            response = response[:400].strip()
+            
+            # Nokta ile bitir
+            if ". " in response:
+                sentences = response.split(". ")
+                # İlk 1-2 cümle
+                response = ". ".join(sentences[:2])
+                if not response.endswith("."):
+                    response += "."
+            
+            # Boş veya garip yanıt kontrolü
+            if not response or len(response) < 10:
+                response = "Özür dilerim, sorunuzu tam anlayamadım. Başka türlü sorar mısınız?"
+            
+            print(f"🤖 Model: {response}\n")
+            print("-" * 60)
+        
+    except FileNotFoundError:
+        print("\n❌ Eğitimli model bulunamadı!")
+        print("💡 Önce modeli eğitmeniz gerekiyor.")
+        print("   Model şurada olmalı: ./final-trained-model/")
+    except ImportError:
+        print("\n❌ Transformers kütüphanesi yüklü değil!")
+        print("💡 Yüklemek için: pip install transformers torch")
+    except Exception as e:
+        print(f"\n❌ Model yükleme hatası: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    input("\nDevam etmek için Enter'a basın...")
+
+
 def full_model_training():
     """TAM PAKET Model Eğitimi - Matematik + Kod + Instruction Following"""
     clear_screen()
@@ -2117,7 +2257,7 @@ def main():
     while True:
         clear_screen()
         show_menu()
-        choice = input("Seçiminiz (0-21): ").strip()
+        choice = input("Seçiminiz (0-22): ").strip()
 
         if choice == '0':
             print("👋 Hoşça kal!")
@@ -2164,6 +2304,8 @@ def main():
             deep_web_research()
         elif choice == '21' and MODEL_TRAINER_AVAILABLE:
             full_model_training()
+        elif choice == '22':
+            use_trained_model()
         else:
             print("❌ Geçersiz seçim veya modül yüklenmemiş! Lütfen tekrar deneyin.")
             time.sleep(2)
