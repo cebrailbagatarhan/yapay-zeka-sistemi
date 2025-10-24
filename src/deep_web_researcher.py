@@ -18,6 +18,13 @@ try:
 except ImportError:
     REQUESTS_AVAILABLE = False
 
+# DuckDuckGo Search
+try:
+    from ddgs import DDGS
+    DDGS_AVAILABLE = True
+except ImportError:
+    DDGS_AVAILABLE = False
+
 # Wikipedia
 try:
     import wikipedia
@@ -76,33 +83,82 @@ class DeepWebResearcher:
         except:
             return False
     
-    def extract_text_from_url(self, url, max_length=2000):
-        """URL'den metin çıkar"""
+    def extract_text_from_url(self, url, max_length=10000):
+        """
+        URL'den detaylı metin çıkar - Tam sayfa okuma
+        
+        Args:
+            url: Web sayfası URL'i
+            max_length: Maksimum karakter sayısı (varsayılan: 10000)
+        
+        Returns:
+            str: Çıkarılan metin içeriği
+        """
         try:
-            response = self.session.get(url, headers=self.headers, timeout=10)
+            response = self.session.get(url, headers=self.headers, timeout=15)
             response.raise_for_status()
             
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            # Script ve style etiketlerini kaldır
-            for script in soup(["script", "style", "nav", "footer", "header"]):
+            # Gereksiz etiketleri kaldır (daha az agresif)
+            for script in soup(["script", "style", "iframe", "noscript"]):
                 script.decompose()
             
-            # Ana içeriği bul
-            main_content = soup.find(['article', 'main', 'div'], class_=re.compile('content|article|post|entry'))
+            # Önce ana içerik alanlarını dene (daha geniş kapsam)
+            main_content = None
             
+            # Çeşitli ana içerik seçicileri
+            content_selectors = [
+                {'name': 'article'},
+                {'name': 'main'},
+                {'class_': re.compile(r'content|article|post|entry|body|main|text', re.I)},
+                {'id': re.compile(r'content|article|post|main|body', re.I)},
+                {'role': 'main'},
+                {'itemprop': 'articleBody'},
+            ]
+            
+            for selector in content_selectors:
+                main_content = soup.find(**selector)
+                if main_content:
+                    break
+            
+            # Ana içerik bulunduysa onu kullan, yoksa tüm body
             if main_content:
+                # Ana içerikten nav, footer, sidebar kaldır
+                for unwanted in main_content(['nav', 'footer', 'aside', 'header']):
+                    unwanted.decompose()
                 text = main_content.get_text(separator=' ', strip=True)
             else:
+                # Tüm sayfayı kullan ama nav/footer/header hariç
+                for unwanted in soup(['nav', 'footer', 'aside', 'header']):
+                    unwanted.decompose()
                 text = soup.get_text(separator=' ', strip=True)
             
-            # Temizle
-            lines = [line.strip() for line in text.split('\n') if line.strip()]
+            # Paragrafları koru, fazla boşlukları temizle
+            lines = []
+            for line in text.split('\n'):
+                line = line.strip()
+                if line and len(line) > 10:  # Çok kısa satırları atla
+                    lines.append(line)
+            
             text = ' '.join(lines)
             
-            # Çok uzunsa kısalt
+            # Fazla boşlukları tek boşluğa indir
+            text = re.sub(r'\s+', ' ', text)
+            
+            # Maksimum uzunluk kontrolü (daha büyük limit)
             if len(text) > max_length:
-                text = text[:max_length] + "..."
+                # Cümle sonunda kes
+                text = text[:max_length]
+                last_period = text.rfind('.')
+                if last_period > max_length - 200:  # Son 200 karakterde nokta varsa
+                    text = text[:last_period + 1]
+                else:
+                    text = text + "..."
+            
+            # En az 100 karakter olmalı
+            if len(text) < 100:
+                return f"[Yetersiz içerik: {len(text)} karakter]"
             
             return text
             
@@ -132,31 +188,36 @@ class DeepWebResearcher:
             return []
     
     def search_duckduckgo(self, query, max_results=10):
-        """DuckDuckGo ile arama yap"""
+        """DuckDuckGo ile arama yap - API kullanarak"""
+        if not DDGS_AVAILABLE:
+            print("⚠️ duckduckgo-search kütüphanesi yüklü değil!")
+            return []
+        
         try:
-            search_url = f"https://html.duckduckgo.com/html/?q={query}"
-            response = self.session.get(search_url, headers=self.headers, timeout=15)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
             results = []
-            for result in soup.find_all('div', class_='result')[:max_results]:
-                try:
-                    title_tag = result.find('a', class_='result__a')
-                    snippet_tag = result.find('a', class_='result__snippet')
+            with DDGS() as ddgs:
+                # Text search - max_results kadar al
+                search_results = ddgs.text(query, max_results=max_results * 2)  # 2x al, filtreleme için
+                
+                for result in search_results:
+                    if len(results) >= max_results:
+                        break
                     
-                    if title_tag and title_tag.get('href'):
-                        title = title_tag.get_text(strip=True)
-                        url = title_tag['href']
-                        snippet = snippet_tag.get_text(strip=True) if snippet_tag else ""
+                    title = result.get('title', '')
+                    url = result.get('href', '')
+                    snippet = result.get('body', '')
+                    
+                    if url and title:
+                        # Wikipedia veya diğer kaynakları işaretle
+                        source_type = 'Wikipedia' if 'wikipedia.org' in url.lower() else 'Web'
                         
                         results.append({
                             'title': title,
                             'url': url,
                             'snippet': snippet,
-                            'source': 'DuckDuckGo'
+                            'source': f'{source_type} (DuckDuckGo)'
                         })
-                except:
-                    continue
+                        print(f"  ✅ {len(results)}/{max_results}: {title[:60]}")
             
             return results
             
@@ -191,32 +252,27 @@ class DeepWebResearcher:
             return []
     
     def deep_research(self, topic, max_sources=15, include_links=True):
-        """Derin araştırma yap"""
+        """Derin araştırma yap - Tüm web kaynakları (Wikipedia + Web)"""
         print("\n" + "🔍"*30)
         print(f"🌐 DERİN WEB ARAŞTIRMASI: {topic}")
+        print(f"📊 Hedef: {max_sources} kaynak (Wikipedia + Web)")
         print("🔍"*30)
         
         all_results = []
         
-        # 1. Wikipedia'da ara
-        print("\n📚 Wikipedia araştırılıyor...")
-        wiki_results = self.search_wikipedia(topic, max_results=3)
-        all_results.extend(wiki_results)
-        print(f"✅ {len(wiki_results)} Wikipedia sonucu bulundu")
-        
-        # 2. DuckDuckGo'da ara
-        print("\n🔍 DuckDuckGo araştırılıyor...")
-        ddg_results = self.search_duckduckgo(topic, max_results=max_sources - len(all_results))
+        # DuckDuckGo'dan TÜM kaynaklarını çek (Wikipedia DAHİL)
+        print("\n🌐 Web kaynakları + Wikipedia araştırılıyor...")
+        ddg_results = self.search_duckduckgo(topic, max_results=max_sources)
         all_results.extend(ddg_results)
-        print(f"✅ {len(ddg_results)} web sonucu bulundu")
+        print(f"✅ {len(ddg_results)} kaynak bulundu (Wikipedia dahil)")
         
-        # 3. Her sonuç için içerik çıkar
-        print("\n📄 İçerikler çıkarılıyor...")
+        # 3. Her sonuç için detaylı içerik çıkar
+        print("\n📄 İçerikler detaylı olarak çıkarılıyor...")
         for i, result in enumerate(all_results[:max_sources], 1):
             print(f"  {i}/{len(all_results[:max_sources])} {result['url'][:50]}...")
             
-            # İçeriği çıkar
-            content = self.extract_text_from_url(result['url'], max_length=500)
+            # İçeriği detaylı çıkar (10000 karakter)
+            content = self.extract_text_from_url(result['url'], max_length=10000)
             result['content'] = content
             
             # Linkleri çıkar (isteğe bağlı)
@@ -420,7 +476,8 @@ class DeepWebResearcher:
                 print(f"  {i}/{len(links_to_process)} {link[:60]}...")
                 
                 try:
-                    content = self.extract_text_from_url(link, max_length=1000)
+                    # Bağlantılı sayfalar için de detaylı içerik (5000 karakter)
+                    content = self.extract_text_from_url(link, max_length=5000)
                     if content and len(content) > 100:
                         content_data = {
                             'url': link,

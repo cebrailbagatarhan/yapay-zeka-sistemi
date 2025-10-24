@@ -282,6 +282,10 @@ def show_menu():
     # Eğitimli GPT-2 model
     print("22. 🤖 EĞİTİMLİ GPT-2 MODELİNİ KULLAN (Senin Eğittiğin Model!)")
     
+    # Qwen model testi
+    print("23. 🚀 QWEN 2.5-1.5B MODELİNİ TEST ET (En Gelişmiş Model!)")
+    print("24. 🔍 QWEN + DERİN WEB ARAŞTIRMA (Kapsamlı Akıllı Asistan!)")
+    
     print("0. 🚪 Çıkış")
     print("="*60)
 
@@ -2149,6 +2153,333 @@ def use_trained_model():
     input("\nDevam etmek için Enter'a basın...")
 
 
+def qwen_deep_web_research():
+    """Qwen + Derin Web Araştırma = Ultra Akıllı Asistan"""
+    clear_screen()
+    print("\n" + "🔍"*30)
+    print("🤖 QWEN + DERİN WEB ARAŞTIRMA ASİSTANI")
+    print("🔍"*30)
+    
+    try:
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from src.deep_web_researcher import DeepWebResearcher
+        
+        model_path = "./qwen-model"
+        
+        if not os.path.exists(model_path):
+            print(f"\n❌ Qwen model bulunamadı: {model_path}")
+            print("💡 Önce download_qwen.py çalıştırın.")
+            input("\nDevam etmek için Enter'a basın...")
+            return
+        
+        print("\n📋 Bu Ultra Akıllı Sistem:")
+        print("  🔍 Derin web taraması yapar (Wikipedia, DuckDuckGo, güvenilir kaynaklar)")
+        print("  🤖 Qwen ile akıllı analiz ve özet")
+        print("  📊 Çoklu kaynak birleştirme")
+        print("  💬 Doğal dil sohbet")
+        print("  🌐 Gerçek zamanlı web erişimi")
+        
+        print("\n🔄 Model yükleniyor...")
+        
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        
+        if device == "cuda":
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                torch_dtype=torch.float32,
+                device_map="auto"
+            )
+        else:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                torch_dtype=torch.float32
+            )
+            model = model.to(device)
+        
+        print(f"✅ Qwen modeli hazır! (Cihaz: {device.upper()})")
+        
+        # Derin web araştırmacı
+        print("🔍 Derin web sistemi başlatılıyor...")
+        researcher = DeepWebResearcher()
+        print("✅ Derin web sistemi hazır!")
+        
+        def ask_qwen(prompt, max_tokens=512):
+            """Qwen'e sor"""
+            messages = [
+                {"role": "system", "content": "Sen kapsamlı web araştırması yapan uzman bir asistansın. Çoklu kaynaklardan bilgi toplayıp özetler sunarsın."},
+                {"role": "user", "content": prompt}
+            ]
+            
+            text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            inputs = tokenizer([text], return_tensors="pt").to(device)
+            
+            with torch.no_grad():
+                outputs = model.generate(
+                    **inputs,
+                    max_new_tokens=max_tokens,
+                    temperature=0.7,
+                    do_sample=True,
+                    top_p=0.9,
+                    repetition_penalty=1.1
+                )
+            
+            response = tokenizer.decode(outputs[0][len(inputs.input_ids[0]):], skip_special_tokens=True)
+            return response
+        
+        def deep_research_with_qwen(topic, max_sources=10):
+            """Derin araştırma + Qwen analizi"""
+            print(f"\n{'='*60}")
+            print(f"🔍 ARAŞTIRMA: {topic}")
+            print(f"{'='*60}\n")
+            
+            # 1. Derin web araştırması yap
+            print("📡 Derin web taraması yapılıyor...")
+            research_results = researcher.deep_research(topic, max_sources=max_sources)
+            
+            if not research_results:
+                print("❌ Hiçbir sonuç bulunamadı.")
+                return
+            
+            print(f"\n✅ {len(research_results)} kaynak bulundu!\n")
+            
+            # Kaynakları göster
+            print("📚 BULUNAN KAYNAKLAR:")
+            print("-"*60)
+            for i, result in enumerate(research_results[:5], 1):
+                print(f"{i}. {result['title']}")
+                print(f"   🔗 {result.get('url', 'URL yok')}")
+                print(f"   📝 {result.get('snippet', 'Özet yok')[:100]}...")
+                print()
+            
+            # 2. Tüm kaynaklardan bilgi topla
+            print("🤖 Qwen tüm kaynakları analiz ediyor...")
+            
+            combined_info = f"'{topic}' konusu hakkında {len(research_results)} farklı kaynaktan toplanan bilgiler:\n\n"
+            
+            for i, result in enumerate(research_results[:10], 1):
+                combined_info += f"KAYNAK {i} ({result['source']}):\n"
+                combined_info += f"Başlık: {result['title']}\n"
+                combined_info += f"Özet: {result.get('snippet', 'Bilgi yok')}\n"
+                if result.get('content'):
+                    combined_info += f"İçerik: {result['content'][:500]}\n"
+                combined_info += "\n"
+            
+            # 3. Qwen'den kapsamlı özet iste
+            prompt = f"""{combined_info}
+
+Yukarıdaki {len(research_results)} kaynağa dayanarak '{topic}' hakkında kapsamlı bir özet hazırla:
+
+1. Ana tanım ve genel bakış
+2. Önemli noktalar ve özellikler
+3. Güncel gelişmeler (varsa)
+4. Pratik uygulamalar veya örnekler
+5. Sonuç ve değerlendirme
+
+Detaylı ve bilgilendirici bir özet yaz:"""
+            
+            print("🤖 Qwen kapsamlı özet hazırlıyor...\n")
+            summary = ask_qwen(prompt, max_tokens=700)
+            
+            print("="*60)
+            print("📊 QWEN ANALİZİ VE ÖZETİ")
+            print("="*60)
+            print(summary)
+            print("\n" + "="*60)
+            
+            return summary
+        
+        # Ana döngü
+        print("\n" + "="*60)
+        print("💬 İNTERAKTİF DERIN ARAŞTIRMA MODU")
+        print("="*60)
+        print("\n📋 Komutlar:")
+        print("  • araştır: [Konu] - Derin web araştırması yap (15 kaynak)")
+        print("  • hızlı: [Konu] - Hızlı araştırma (10 kaynak)")
+        print("  • tam: [Konu] - Tam araştırma (20 kaynak)")
+        print("  • soru: [Soru] - Direkt soru sor (araştırma yok)")
+        print("  • q - Çıkış")
+        print("\n💡 Kaynaklar: Wikipedia + Web Sayfaları (10,000 karakter/sayfa)")
+        print("💡 Örnek: araştır: Machine Learning")
+        print("💡 Örnek: tam: Python programlama\n")
+        
+        while True:
+            user_input = input("👤 Siz: ").strip()
+            
+            if user_input.lower() in ['q', 'quit', 'exit', 'çıkış']:
+                print("👋 Görüşmek üzere!")
+                break
+            
+            if not user_input:
+                continue
+            
+            if user_input.startswith("araştır:"):
+                topic = user_input[8:].strip()
+                if topic:
+                    deep_research_with_qwen(topic, max_sources=15)  # 10 → 15 web kaynağı
+                else:
+                    print("❌ Lütfen bir konu girin!\n")
+            
+            elif user_input.startswith("hızlı:"):
+                topic = user_input[6:].strip()
+                if topic:
+                    deep_research_with_qwen(topic, max_sources=10)  # 5 → 10 web kaynağı
+                else:
+                    print("❌ Lütfen bir konu girin!\n")
+            
+            elif user_input.startswith("tam:"):
+                topic = user_input[4:].strip()
+                if topic:
+                    deep_research_with_qwen(topic, max_sources=20)  # 15 → 20 web kaynağı
+                else:
+                    print("❌ Lütfen bir konu girin!\n")
+            
+            elif user_input.startswith("soru:"):
+                question = user_input[5:].strip()
+                if question:
+                    print("\n🤖 Qwen: ", end="", flush=True)
+                    response = ask_qwen(question)
+                    print(response + "\n")
+                else:
+                    print("❌ Lütfen bir soru girin!\n")
+            
+            else:
+                # Otomatik araştırma yap
+                print(f"\n🔍 '{user_input}' konusunu araştırıyorum...\n")
+                deep_research_with_qwen(user_input, max_sources=8)
+        
+    except ImportError as e:
+        print(f"\n❌ Gerekli modüller yok: {e}")
+        print("💡 Yükleyin: pip install transformers torch requests beautifulsoup4 wikipedia")
+    except Exception as e:
+        print(f"\n❌ Hata: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    input("\n\nDevam etmek için Enter'a basın...")
+
+
+def test_qwen_model():
+    """Qwen 2.5-1.5B Modelini Test Et"""
+    clear_screen()
+    print("\n" + "🚀"*30)
+    print("🤖 QWEN 2.5-1.5B MODEL TESTİ")
+    print("🚀"*30)
+    
+    print("\n📋 Model Özellikleri:")
+    print("  • Model: Qwen2.5-1.5B-Instruct")
+    print("  • Parametre: 1.54 Milyar")
+    print("  • Diller: Türkçe, İngilizce, İspanyolca, vb.")
+    print("  • Yetenekler: Metin, Kod, Matematik, Çeviri...")
+    
+    try:
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        
+        model_path = "./qwen-model"
+        
+        if not os.path.exists(model_path):
+            print(f"\n❌ Model bulunamadı: {model_path}")
+            print("💡 Önce download_qwen.py çalıştırarak modeli indirin.")
+            input("\nDevam etmek için Enter'a basın...")
+            return
+        
+        print(f"\n📂 Model yolu: {model_path}")
+        print("🔄 Model yükleniyor... (30 saniye sürebilir)")
+        
+        # Model ve tokenizer yükle
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        
+        if device == "cuda":
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                torch_dtype=torch.float32,
+                device_map="auto"
+            )
+        else:
+            # CPU için device_map kullanma
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                torch_dtype=torch.float32
+            )
+            model = model.to(device)
+        
+        print(f"✅ Model yüklendi! (Cihaz: {device.upper()})")
+        
+        # İnteraktif test modu
+        print("\n" + "="*60)
+        print("💬 İNTERAKTİF TEST MODU")
+        print("="*60)
+        print("Qwen modeline soru sorun! (çıkmak için 'q' yazın)")
+        print("\n💡 Örnek sorular:")
+        print("  • Python'da liste nasıl oluşturulur?")
+        print("  • 15 x 23 kaç eder?")
+        print("  • Yapay zeka nedir?")
+        print("  • Kısa bir hikaye yaz")
+        
+        while True:
+            print("\n" + "-"*60)
+            user_input = input("👤 Siz: ").strip()
+            
+            if user_input.lower() in ['q', 'quit', 'exit', 'çıkış']:
+                print("👋 Qwen test modu kapatılıyor...")
+                break
+            
+            if not user_input:
+                continue
+            
+            # Mesajları formatla
+            messages = [
+                {"role": "system", "content": "Sen yardımcı bir asistansın. Türkçe ve İngilizce konuşabilirsin."},
+                {"role": "user", "content": user_input}
+            ]
+            
+            # Tokenize
+            text = tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+            
+            model_inputs = tokenizer([text], return_tensors="pt").to(device)
+            
+            # Yanıt üret
+            print("🤖 Qwen düşünüyor...", end="", flush=True)
+            
+            with torch.no_grad():
+                generated_ids = model.generate(
+                    **model_inputs,
+                    max_new_tokens=512,
+                    temperature=0.7,
+                    do_sample=True,
+                    top_p=0.9,
+                    repetition_penalty=1.1
+                )
+            
+            # Decode
+            generated_ids = [
+                output_ids[len(input_ids):] 
+                for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+            ]
+            
+            response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+            
+            print(f"\r🤖 Qwen: {response}")
+        
+    except ImportError as e:
+        print(f"\n❌ Gerekli kütüphaneler yüklü değil: {e}")
+        print("💡 Yüklemek için: pip install transformers torch")
+    except Exception as e:
+        print(f"\n❌ Hata: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    input("\n\nDevam etmek için Enter'a basın...")
+
+
 def full_model_training():
     """TAM PAKET Model Eğitimi - Matematik + Kod + Instruction Following"""
     clear_screen()
@@ -2257,7 +2588,7 @@ def main():
     while True:
         clear_screen()
         show_menu()
-        choice = input("Seçiminiz (0-22): ").strip()
+        choice = input("Seçiminiz (0-24): ").strip()
 
         if choice == '0':
             print("👋 Hoşça kal!")
@@ -2306,6 +2637,10 @@ def main():
             full_model_training()
         elif choice == '22':
             use_trained_model()
+        elif choice == '23':
+            test_qwen_model()
+        elif choice == '24':
+            qwen_deep_web_research()
         else:
             print("❌ Geçersiz seçim veya modül yüklenmemiş! Lütfen tekrar deneyin.")
             time.sleep(2)
