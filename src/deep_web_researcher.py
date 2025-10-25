@@ -649,6 +649,166 @@ class DeepWebResearcher:
         
         return "\n".join(summary)
     
+    def extract_key_information(self, text, max_sentences=5):
+        """
+        Metinden anahtar bilgileri çıkar (Gelişmiş Information Extraction)
+        
+        Args:
+            text: Analiz edilecek metin
+            max_sentences: Maksimum cümle sayısı
+            
+        Returns:
+            dict: Çıkarılan bilgiler
+        """
+        if not text or len(text) < 50:
+            return {
+                'key_sentences': [],
+                'entities': {},
+                'keywords': [],
+                'summary': ''
+            }
+        
+        # Cümlelere ayır
+        sentences = re.split(r'[.!?]+', text)
+        sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
+        
+        # Önemli cümleleri skorla
+        sentence_scores = {}
+        for sent in sentences[:30]:  # İlk 30 cümle
+            score = 0
+            
+            # Uzunluk skoru (çok kısa veya çok uzun değil)
+            word_count = len(sent.split())
+            if 10 <= word_count <= 30:
+                score += 2
+            
+            # Önemli kelimeleri içeriyor mu?
+            important_words = ['önemli', 'ana', 'temel', 'başlıca', 'birinci', 'ilk', 
+                             'important', 'main', 'key', 'primary', 'first', 'essential',
+                             'critical', 'significant', 'major']
+            for word in important_words:
+                if word.lower() in sent.lower():
+                    score += 3
+                    break
+            
+            # Sayılar içeriyor mu? (istatistik)
+            if re.search(r'\d+', sent):
+                score += 1
+            
+            # Tanım yapıyor mu?
+            if any(x in sent.lower() for x in ['nedir', 'what is', 'tanımı', 'definition', 'means']):
+                score += 4
+            
+            sentence_scores[sent] = score
+        
+        # En yüksek skorlu cümleleri al
+        top_sentences = sorted(sentence_scores.items(), key=lambda x: x[1], reverse=True)[:max_sentences]
+        key_sentences = [sent for sent, score in top_sentences]
+        
+        # Named Entity Recognition (basit versiyon)
+        entities = {
+            'numbers': re.findall(r'\d+(?:\.\d+)?(?:%|\s*(?:milyon|milyar|bin|million|billion))?', text[:2000]),
+            'dates': re.findall(r'\d{4}|\d{1,2}/\d{1,2}/\d{2,4}', text[:2000]),
+            'urls': re.findall(r'https?://[^\s]+', text[:2000]),
+        }
+        
+        # Anahtar kelimeler (frekans bazlı)
+        words = re.findall(r'\b[a-zA-ZğüşıöçĞÜŞİÖÇ]{4,}\b', text.lower())
+        word_freq = {}
+        stop_words = {'için', 'ile', 'daha', 'olan', 'olarak', 'oluyor', 'this', 'that', 'with', 'from', 'have'}
+        
+        for word in words[:200]:  # İlk 200 kelime
+            if word not in stop_words:
+                word_freq[word] = word_freq.get(word, 0) + 1
+        
+        # En sık geçen 10 kelime
+        keywords = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:10]
+        keywords = [word for word, freq in keywords if freq > 1]
+        
+        # Otomatik özet (ilk 3 anahtar cümle)
+        summary = ' '.join(key_sentences[:3])
+        
+        return {
+            'key_sentences': key_sentences,
+            'entities': entities,
+            'keywords': keywords,
+            'summary': summary
+        }
+    
+    def smart_summarize(self, results, max_length=500):
+        """
+        Akıllı özetleme - birden fazla kaynağı birleştir ve özetle
+        
+        Args:
+            results: Araştırma sonuçları listesi
+            max_length: Maksimum özet uzunluğu (kelime)
+            
+        Returns:
+            dict: Akıllı özet
+        """
+        if not results:
+            return {
+                'main_summary': 'Sonuç bulunamadı.',
+                'key_points': [],
+                'all_keywords': [],
+                'source_count': 0
+            }
+        
+        all_text = ""
+        all_keywords = []
+        key_points = []
+        
+        # Her kaynaktan bilgi çıkar
+        for i, result in enumerate(results[:10], 1):
+            content = result.get('content', '') or result.get('snippet', '')
+            if not content:
+                continue
+            
+            # Anahtar bilgileri çıkar
+            info = self.extract_key_information(content, max_sentences=2)
+            
+            # Anahtar cümleleri topla
+            if info['key_sentences']:
+                key_points.extend(info['key_sentences'][:2])
+            
+            # Anahtar kelimeleri birleştir
+            all_keywords.extend(info['keywords'])
+            
+            all_text += content[:1000] + " "
+        
+        # Genel özet oluştur
+        general_info = self.extract_key_information(all_text, max_sentences=5)
+        
+        # En önemli 3-5 noktayı seç
+        unique_points = []
+        seen = set()
+        for point in key_points:
+            point_lower = point.lower()[:50]
+            if point_lower not in seen:
+                unique_points.append(point)
+                seen.add(point_lower)
+                if len(unique_points) >= 5:
+                    break
+        
+        # Ana özet
+        main_summary = general_info['summary']
+        
+        # Anahtar kelimeler (en sık geçenler)
+        keyword_freq = {}
+        for kw in all_keywords:
+            keyword_freq[kw] = keyword_freq.get(kw, 0) + 1
+        
+        top_keywords = sorted(keyword_freq.items(), key=lambda x: x[1], reverse=True)[:8]
+        top_keywords = [kw for kw, freq in top_keywords]
+        
+        return {
+            'main_summary': main_summary,
+            'key_points': unique_points,
+            'all_keywords': top_keywords,
+            'source_count': len(results),
+            'entities': general_info['entities']
+        }
+    
     def save_results(self, filename=None):
         """Sonuçları dosyaya kaydet"""
         if not filename:

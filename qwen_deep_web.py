@@ -25,6 +25,8 @@ class QwenDeepWebAssistant:
         self.tokenizer = None
         self.device = None
         self.researcher = None
+        self.conversation_history = []  # Konuşma geçmişi
+        self.context_window = 5  # Son 5 mesajı bağlam olarak kullan
         
         print("\n" + "🔍"*40)
         print("🤖 QWEN + DERİN WEB ASİSTANI BAŞLATILIYOR")
@@ -64,12 +66,29 @@ class QwenDeepWebAssistant:
         self.researcher = DeepWebResearcher()
         print("✅ Derin web sistemi hazır!")
     
-    def ask_qwen(self, prompt, max_tokens=512):
-        """Qwen'e soru sor"""
+    def ask_qwen(self, prompt, max_tokens=512, use_context=True):
+        """
+        Qwen'e soru sor - konuşma bağlamı ile
+        
+        Args:
+            prompt: Kullanıcı sorusu
+            max_tokens: Maksimum token sayısı
+            use_context: Konuşma geçmişini kullan
+        """
+        # Konuşma geçmişini oluştur
         messages = [
-            {"role": "system", "content": "Sen kapsamlı web araştırması yapan uzman bir asistansın."},
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": "Sen kapsamlı web araştırması yapan, bağlamı anlayan uzman bir asistansın. Önceki konuşmaları hatırlayabilir ve referans verebilirsin."}
         ]
+        
+        # Bağlam ekle (son N mesaj)
+        if use_context and self.conversation_history:
+            # Son context_window kadar mesajı ekle
+            recent_history = self.conversation_history[-self.context_window:]
+            for msg in recent_history:
+                messages.append(msg)
+        
+        # Yeni kullanıcı mesajı
+        messages.append({"role": "user", "content": prompt})
         
         text = self.tokenizer.apply_chat_template(
             messages,
@@ -94,16 +113,30 @@ class QwenDeepWebAssistant:
             skip_special_tokens=True
         )
         
+        # Konuşma geçmişine ekle
+        self.conversation_history.append({"role": "user", "content": prompt})
+        self.conversation_history.append({"role": "assistant", "content": response})
+        
+        # Çok uzarsa eski mesajları sil (max 20 mesaj = 10 dönüş)
+        if len(self.conversation_history) > 20:
+            self.conversation_history = self.conversation_history[-20:]
+        
         return response
     
-    def deep_research(self, topic, max_sources=10, verbose=True):
+    def clear_context(self):
+        """Konuşma bağlamını temizle"""
+        self.conversation_history = []
+        print("🧹 Konuşma geçmişi temizlendi!")
+    
+    def deep_research(self, topic, max_sources=10, verbose=True, use_smart_summary=True):
         """
-        Derin web araştırması + Qwen analizi
+        Derin web araştırması + Gelişmiş Qwen analizi
         
         Args:
             topic: Araştırma konusu
             max_sources: Maksimum kaynak sayısı
             verbose: Detaylı çıktı
+            use_smart_summary: Gelişmiş akıllı özetleme kullan
             
         Returns:
             dict: Araştırma sonuçları ve Qwen özeti
@@ -124,12 +157,44 @@ class QwenDeepWebAssistant:
                 'success': False,
                 'error': 'Hiçbir kaynak bulunamadı',
                 'sources': [],
-                'summary': None
+                'summary': None,
+                'smart_summary': None
             }
         
         if verbose:
             print(f"\n✅ {len(results)} kaynak bulundu!\n")
-            print("📚 BULUNAN KAYNAKLAR:")
+        
+        # 2. Gelişmiş akıllı özetleme
+        smart_summary = None
+        if use_smart_summary:
+            if verbose:
+                print("🧠 Gelişmiş bilgi çıkarma ve özetleme yapılıyor...")
+            
+            smart_summary = self.researcher.smart_summarize(results, max_length=500)
+            
+            if verbose:
+                print("\n" + "="*60)
+                print("🎯 AKILLI ÖZET (Information Extraction)")
+                print("="*60)
+                print(f"\n📝 Ana Özet:\n{smart_summary['main_summary']}\n")
+                
+                if smart_summary['key_points']:
+                    print("🔑 Anahtar Noktalar:")
+                    for i, point in enumerate(smart_summary['key_points'], 1):
+                        print(f"  {i}. {point}")
+                    print()
+                
+                if smart_summary['all_keywords']:
+                    print(f"🏷️ Anahtar Kelimeler: {', '.join(smart_summary['all_keywords'])}")
+                    print()
+                
+                if smart_summary['entities'].get('numbers'):
+                    print(f"📊 Sayısal Veriler: {', '.join(smart_summary['entities']['numbers'][:5])}")
+                    print()
+        
+        # 3. Kaynakları göster
+        if verbose:
+            print("\n📚 BULUNAN KAYNAKLAR:")
             print("-"*60)
             for i, result in enumerate(results[:5], 1):
                 print(f"{i}. {result['title']}")
@@ -137,9 +202,18 @@ class QwenDeepWebAssistant:
                 print(f"   📝 {result.get('snippet', '')[:100]}...")
                 print()
         
-        # 2. Bilgileri birleştir
+        # 4. Bilgileri birleştir (Qwen için)
         combined_info = f"'{topic}' konusu hakkında {len(results)} kaynaktan toplanan bilgiler:\n\n"
         
+        # Akıllı özetleme sonuçlarını kullan
+        if smart_summary:
+            combined_info += f"AKILLI ÖZET:\n{smart_summary['main_summary']}\n\n"
+            combined_info += f"ANAHTAR NOKTALAR:\n"
+            for point in smart_summary['key_points']:
+                combined_info += f"- {point}\n"
+            combined_info += f"\nANAHTAR KELİMELER: {', '.join(smart_summary['all_keywords'])}\n\n"
+        
+        # Kaynak detayları
         for i, result in enumerate(results[:10], 1):
             combined_info += f"KAYNAK {i} - {result['source']}:\n"
             combined_info += f"Başlık: {result['title']}\n"
@@ -152,27 +226,27 @@ class QwenDeepWebAssistant:
             
             combined_info += "\n"
         
-        # 3. Qwen ile analiz
+        # 5. Qwen ile derin analiz
         if verbose:
-            print("🤖 Qwen tüm kaynakları analiz ediyor...\n")
+            print("🤖 Qwen derin analiz yapıyor...\n")
         
         prompt = f"""{combined_info}
 
-Yukarıdaki {len(results)} kaynağa dayanarak '{topic}' hakkında kapsamlı bir özet hazırla:
+Yukarıdaki {len(results)} kaynağa ve akıllı özet analizine dayanarak '{topic}' hakkında kapsamlı bir değerlendirme yaz:
 
 1. Ana tanım ve genel bakış
-2. Önemli özellikler ve noktalar
+2. Önemli özellikler ve noktalar (akıllı özetleme sonuçlarını dikkate al)
 3. Güncel gelişmeler (varsa)
 4. Pratik uygulamalar
 5. Sonuç ve değerlendirme
 
 Detaylı, bilgilendirici ve yapılandırılmış bir özet yaz:"""
         
-        summary = self.ask_qwen(prompt, max_tokens=700)
+        summary = self.ask_qwen(prompt, max_tokens=700, use_context=False)
         
         if verbose:
             print("="*60)
-            print("📊 QWEN ANALİZİ VE ÖZETİ")
+            print("📊 QWEN DERİN ANALİZİ")
             print("="*60)
             print(summary)
             print("\n" + "="*60)
@@ -182,38 +256,64 @@ Detaylı, bilgilendirici ve yapılandırılmış bir özet yaz:"""
             'sources': results,
             'source_count': len(results),
             'summary': summary,
+            'smart_summary': smart_summary,
             'topic': topic
         }
     
     def interactive_mode(self):
-        """İnteraktif sohbet modu"""
+        """İnteraktif sohbet modu - Konuşma bağlamlı"""
         print("\n" + "="*60)
-        print("💬 İNTERAKTİF DERIN ARAŞTIRMA MODU")
+        print("💬 İNTERAKTİF DERIN ARAŞTIRMA MODU (Bağlam Destekli)")
         print("="*60)
         print("\n📋 Komutlar:")
         print("  • araştır: [Konu] - Orta araştırma (10 kaynak)")
         print("  • hızlı: [Konu] - Hızlı araştırma (5 kaynak)")
         print("  • tam: [Konu] - Tam araştırma (15+ kaynak)")
-        print("  • soru: [Soru] - Direkt soru (araştırma yok)")
+        print("  • soru: [Soru] - Direkt soru (bağlam ile)")
+        print("  • temizle - Konuşma geçmişini temizle")
+        print("  • geçmiş - Konuşma geçmişini göster")
         print("  • q - Çıkış")
-        print("\n💡 Veya direkt konu yazın!")
+        print("\n💡 Doğal konuşma:")
+        print("  → 'Bu konuyu daha detaylı açıkla'")
+        print("  → 'Az önce bahsettiğin konuyla ilgili örnek ver'")
+        print("  → 'Bunun ne avantajları var?'")
         print("\n📝 Örnekler:")
         print("  → Machine Learning")
         print("  → araştır: Quantum Computing")
-        print("  → tam: Deep Learning gelişmeleri\n")
+        print("  → tam: Deep Learning gelişmeleri")
+        print(f"\n🧠 Bağlam penceresi: Son {self.context_window} mesaj\n")
         
         while True:
             user_input = input("👤 Siz: ").strip()
             
             if user_input.lower() in ['q', 'quit', 'exit', 'çıkış']:
-                print("\n👋 Görüşmek üzere!")
+                print(f"\n👋 Görüşmek üzere! (Toplam {len(self.conversation_history)//2} soru-cevap)")
                 break
             
             if not user_input:
                 continue
             
             try:
-                if user_input.startswith("araştır:"):
+                if user_input.lower() == 'temizle':
+                    self.clear_context()
+                    continue
+                
+                elif user_input.lower() == 'geçmiş':
+                    print("\n📜 KONUŞMA GEÇMİŞİ:")
+                    print("="*60)
+                    if not self.conversation_history:
+                        print("(Henüz konuşma yok)")
+                    else:
+                        for i, msg in enumerate(self.conversation_history):
+                            role = "👤 Siz" if msg['role'] == 'user' else "🤖 Qwen"
+                            content = msg['content'][:100] + "..." if len(msg['content']) > 100 else msg['content']
+                            print(f"{role}: {content}")
+                            if i < len(self.conversation_history) - 1:
+                                print()
+                    print("="*60 + "\n")
+                    continue
+                
+                elif user_input.startswith("araştır:"):
                     topic = user_input[8:].strip()
                     self.deep_research(topic, max_sources=10)
                 
@@ -227,13 +327,25 @@ Detaylı, bilgilendirici ve yapılandırılmış bir özet yaz:"""
                 
                 elif user_input.startswith("soru:"):
                     question = user_input[5:].strip()
-                    print("\n🤖 Qwen: ", end="", flush=True)
-                    response = self.ask_qwen(question)
+                    print("\n🤖 Qwen (bağlam ile): ", end="", flush=True)
+                    response = self.ask_qwen(question, use_context=True)
                     print(response + "\n")
                 
                 else:
-                    # Otomatik araştırma
-                    self.deep_research(user_input, max_sources=8)
+                    # Bağlam referansları kontrol et
+                    context_keywords = ['bu', 'bunun', 'bunlar', 'o', 'onun', 'az önce', 
+                                       'önceki', 'daha detaylı', 'detaylandır', 'örnek']
+                    
+                    has_context_ref = any(kw in user_input.lower() for kw in context_keywords)
+                    
+                    if has_context_ref and self.conversation_history:
+                        # Bağlam ile cevap ver
+                        print("\n🤖 Qwen (önceki konuşmayı hatırlıyor): ", end="", flush=True)
+                        response = self.ask_qwen(user_input, use_context=True)
+                        print(response + "\n")
+                    else:
+                        # Yeni araştırma
+                        self.deep_research(user_input, max_sources=8)
             
             except KeyboardInterrupt:
                 print("\n\n⚠️ İşlem iptal edildi.\n")
