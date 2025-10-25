@@ -61,7 +61,6 @@ final-trained-model/
 qwen-model/
 trained-model/
 model-step*/
-math-gpt2-model/
 test-model/
 datasets_cache/
 
