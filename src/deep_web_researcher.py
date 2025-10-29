@@ -29,7 +29,7 @@ except ImportError:
 
 # DuckDuckGo Search
 try:
-    from ddgs import DDGS
+    from ddgs import DDGS  # type: ignore
     DDGS_AVAILABLE = True
 except ImportError:
     DDGS_AVAILABLE = False

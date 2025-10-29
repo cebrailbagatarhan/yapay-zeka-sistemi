@@ -16,7 +16,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 try:
     from transformers import AutoModelForCausalLM, AutoTokenizer
     import torch
-    from deep_web_researcher import DeepWebResearcher
+    from src.deep_web_researcher import DeepWebResearcher
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
