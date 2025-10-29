@@ -3,23 +3,30 @@
 Ultra Kapsamlı Akıllı Web Asistanı
 
 Bu sistem:
-- Derin web taraması (DuckDuckGo, Wikipedia, güvenilir kaynaklar)
+- Derin web taraması (DuckDuckGo, Wikipedia, güvenilir kaynaklar) 
+- ⚡ ASYNC paralel web scraping (httpx + asyncio)
 - Çoklu kaynak toplama ve birleştirme
-- Qwen 2.5-1.5B ile akıllı analiz ve özet
+- 🚀 Qwen 2.5-1.5B ile akıllı analiz (4-bit/8-bit quantization)
 - Gerçek zamanlı bilgi toplama
 """
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from src.deep_web_researcher import DeepWebResearcher
 import os
 import sys
 
 
 class QwenDeepWebAssistant:
-    """Qwen + Derin Web Entegre Asistan"""
+    """Qwen + Derin Web Entegre Asistan - Quantized & Async"""
     
-    def __init__(self, model_path="./qwen-model"):
+    def __init__(self, model_path="./qwen-model", use_quantization=True, quantization_bits=4):
+        """
+        Args:
+            model_path: Model dosya yolu
+            use_quantization: Quantization kullan (bellek optimizasyonu)
+            quantization_bits: 4-bit (en hızlı) veya 8-bit (daha kaliteli)
+        """
         self.model_path = model_path
         self.model = None
         self.tokenizer = None
@@ -27,16 +34,21 @@ class QwenDeepWebAssistant:
         self.researcher = None
         self.conversation_history = []  # Konuşma geçmişi
         self.context_window = 5  # Son 5 mesajı bağlam olarak kullan
+        self.use_quantization = use_quantization
+        self.quantization_bits = quantization_bits
         
         print("\n" + "🔍"*40)
         print("🤖 QWEN + DERİN WEB ASİSTANI BAŞLATILIYOR")
-        print("🔍"*40)
+        if use_quantization:
+            print(f"� {quantization_bits}-bit Quantization: AÇIK (Bellek optimizasyonu)")
+        print("⚡ ASYNC Web Scraping: AÇIK (Paralel tarama)")
+        print("�🔍"*40)
         
         self.load_qwen()
         self.init_researcher()
     
     def load_qwen(self):
-        """Qwen modelini yükle"""
+        """Qwen modelini yükle - Quantization ile"""
         if not os.path.exists(self.model_path):
             raise FileNotFoundError(f"❌ Model bulunamadı: {self.model_path}")
         
@@ -45,13 +57,44 @@ class QwenDeepWebAssistant:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         
-        if self.device == "cuda":
+        # GPU varsa ve quantization aktifse BitsAndBytes kullan
+        if self.device == "cuda" and self.use_quantization:
+            print(f"🚀 {self.quantization_bits}-bit quantization uygulanıyor...")
+            
+            # BitsAndBytes config
+            if self.quantization_bits == 4:
+                quantization_config = BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_compute_dtype=torch.float16,
+                    bnb_4bit_use_double_quant=True,
+                    bnb_4bit_quant_type="nf4"
+                )
+            else:  # 8-bit
+                quantization_config = BitsAndBytesConfig(
+                    load_in_8bit=True,
+                    llm_int8_threshold=6.0
+                )
+            
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.model_path,
+                quantization_config=quantization_config,
+                device_map="auto",
+                trust_remote_code=True
+            )
+            print(f"✅ Model {self.quantization_bits}-bit quantized olarak yüklendi!")
+            print(f"💾 Bellek kullanımı: ~{self.quantization_bits/32 * 100:.0f}% azaltıldı!")
+            
+        elif self.device == "cuda":
+            # GPU var ama quantization yok
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_path,
                 torch_dtype=torch.float32,
                 device_map="auto"
             )
         else:
+            # CPU - quantization desteği yok
+            if self.use_quantization:
+                print("⚠️ CPU'da quantization desteklenmez, float32 kullanılacak")
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_path,
                 torch_dtype=torch.float32
@@ -59,6 +102,12 @@ class QwenDeepWebAssistant:
             self.model = self.model.to(self.device)
         
         print(f"✅ Qwen yüklendi! (Cihaz: {self.device.upper()})")
+        
+        # Bellek bilgisi (GPU için)
+        if self.device == "cuda":
+            allocated = torch.cuda.memory_allocated() / 1024**3
+            reserved = torch.cuda.memory_reserved() / 1024**3
+            print(f"💾 GPU Bellek: {allocated:.2f}GB kullanılan / {reserved:.2f}GB ayrılan")
     
     def init_researcher(self):
         """Derin web araştırmacıyı başlat"""

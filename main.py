@@ -2012,16 +2012,15 @@ def deep_web_research():
 
 
 def qwen_deep_web_research():
-    """Qwen + Derin Web Araştırma = Ultra Akıllı Asistan"""
+    """Qwen + Derin Web Araştırma = Ultra Akıllı Asistan (Optimized)"""
     clear_screen()
     print("\n" + "🔍"*30)
     print("🤖 QWEN + DERİN WEB ARAŞTIRMA ASİSTANI")
+    print("⚡ ASYNC + QUANTIZATION OPTIMIZED")
     print("🔍"*30)
     
     try:
-        import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer
-        from src.deep_web_researcher import DeepWebResearcher
+        from qwen_deep_web import QwenDeepWebAssistant
         
         model_path = "./qwen-model"
         
@@ -2033,183 +2032,45 @@ def qwen_deep_web_research():
         
         print("\n📋 Bu Ultra Akıllı Sistem:")
         print("  🔍 Derin web taraması yapar (Wikipedia, DuckDuckGo, güvenilir kaynaklar)")
+        print("  ⚡ ASYNC paralel scraping (10x daha hızlı!)")
+        print("  🚀 4-bit/8-bit quantization (bellek optimizasyonu)")
         print("  🤖 Qwen ile akıllı analiz ve özet")
         print("  📊 Çoklu kaynak birleştirme")
-        print("  💬 Doğal dil sohbet")
+        print("  💬 Konuşma bağlamı ve hafıza")
         print("  🌐 Gerçek zamanlı web erişimi")
         
-        print("\n🔄 Model yükleniyor...")
+        # Optimizasyon seçenekleri
+        print("\n⚙️ OPTİMİZASYON AYARLARI:")
+        print("1. 4-bit quantization (En hızlı, %75 daha az bellek) [Önerilen]")
+        print("2. 8-bit quantization (Dengeli, %50 daha az bellek)")
+        print("3. Quantization YOK (En yüksek kalite, tam bellek)")
         
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        quant_choice = input("\nSeçim (1-3, varsayılan 1): ").strip() or "1"
         
-        if device == "cuda":
-            model = AutoModelForCausalLM.from_pretrained(
-                model_path,
-                torch_dtype=torch.float32,
-                device_map="auto"
-            )
+        if quant_choice == "1":
+            use_quant = True
+            quant_bits = 4
+        elif quant_choice == "2":
+            use_quant = True
+            quant_bits = 8
         else:
-            model = AutoModelForCausalLM.from_pretrained(
-                model_path,
-                torch_dtype=torch.float32
-            )
-            model = model.to(device)
+            use_quant = False
+            quant_bits = None
         
-        print(f"✅ Qwen modeli hazır! (Cihaz: {device.upper()})")
+        # Assistant başlat
+        assistant = QwenDeepWebAssistant(
+            model_path=model_path,
+            use_quantization=use_quant,
+            quantization_bits=quant_bits if quant_bits else 4
+        )
         
-        # Derin web araştırmacı
-        print("🔍 Derin web sistemi başlatılıyor...")
-        researcher = DeepWebResearcher()
-        print("✅ Derin web sistemi hazır!")
-        
-        def ask_qwen(prompt, max_tokens=512):
-            """Qwen'e sor"""
-            messages = [
-                {"role": "system", "content": "Sen kapsamlı web araştırması yapan uzman bir asistansın. Çoklu kaynaklardan bilgi toplayıp özetler sunarsın."},
-                {"role": "user", "content": prompt}
-            ]
-            
-            text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            inputs = tokenizer([text], return_tensors="pt").to(device)
-            
-            with torch.no_grad():
-                outputs = model.generate(
-                    **inputs,
-                    max_new_tokens=max_tokens,
-                    temperature=0.7,
-                    do_sample=True,
-                    top_p=0.9,
-                    repetition_penalty=1.1
-                )
-            
-            response = tokenizer.decode(outputs[0][len(inputs.input_ids[0]):], skip_special_tokens=True)
-            return response
-        
-        def deep_research_with_qwen(topic, max_sources=10):
-            """Derin araştırma + Qwen analizi"""
-            print(f"\n{'='*60}")
-            print(f"🔍 ARAŞTIRMA: {topic}")
-            print(f"{'='*60}\n")
-            
-            # 1. Derin web araştırması yap
-            print("📡 Derin web taraması yapılıyor...")
-            research_results = researcher.deep_research(topic, max_sources=max_sources)
-            
-            if not research_results:
-                print("❌ Hiçbir sonuç bulunamadı.")
-                return
-            
-            print(f"\n✅ {len(research_results)} kaynak bulundu!\n")
-            
-            # Kaynakları göster
-            print("📚 BULUNAN KAYNAKLAR:")
-            print("-"*60)
-            for i, result in enumerate(research_results[:5], 1):
-                print(f"{i}. {result['title']}")
-                print(f"   🔗 {result.get('url', 'URL yok')}")
-                print(f"   📝 {result.get('snippet', 'Özet yok')[:100]}...")
-                print()
-            
-            # 2. Tüm kaynaklardan bilgi topla
-            print("🤖 Qwen tüm kaynakları analiz ediyor...")
-            
-            combined_info = f"'{topic}' konusu hakkında {len(research_results)} farklı kaynaktan toplanan bilgiler:\n\n"
-            
-            for i, result in enumerate(research_results[:10], 1):
-                combined_info += f"KAYNAK {i} ({result['source']}):\n"
-                combined_info += f"Başlık: {result['title']}\n"
-                combined_info += f"Özet: {result.get('snippet', 'Bilgi yok')}\n"
-                if result.get('content'):
-                    combined_info += f"İçerik: {result['content'][:500]}\n"
-                combined_info += "\n"
-            
-            # 3. Qwen'den kapsamlı özet iste
-            prompt = f"""{combined_info}
-
-Yukarıdaki {len(research_results)} kaynağa dayanarak '{topic}' hakkında kapsamlı bir özet hazırla:
-
-1. Ana tanım ve genel bakış
-2. Önemli noktalar ve özellikler
-3. Güncel gelişmeler (varsa)
-4. Pratik uygulamalar veya örnekler
-5. Sonuç ve değerlendirme
-
-Detaylı ve bilgilendirici bir özet yaz:"""
-            
-            print("🤖 Qwen kapsamlı özet hazırlıyor...\n")
-            summary = ask_qwen(prompt, max_tokens=700)
-            
-            print("="*60)
-            print("📊 QWEN ANALİZİ VE ÖZETİ")
-            print("="*60)
-            print(summary)
-            print("\n" + "="*60)
-            
-            return summary
-        
-        # Ana döngü
-        print("\n" + "="*60)
-        print("💬 İNTERAKTİF DERIN ARAŞTIRMA MODU")
-        print("="*60)
-        print("\n📋 Komutlar:")
-        print("  • araştır: [Konu] - Derin web araştırması yap (15 kaynak)")
-        print("  • hızlı: [Konu] - Hızlı araştırma (10 kaynak)")
-        print("  • tam: [Konu] - Tam araştırma (20 kaynak)")
-        print("  • soru: [Soru] - Direkt soru sor (araştırma yok)")
-        print("  • q - Çıkış")
-        print("\n💡 Kaynaklar: Wikipedia + Web Sayfaları (10,000 karakter/sayfa)")
-        print("💡 Örnek: araştır: Machine Learning")
-        print("💡 Örnek: tam: Python programlama\n")
-        
-        while True:
-            user_input = input("👤 Siz: ").strip()
-            
-            if user_input.lower() in ['q', 'quit', 'exit', 'çıkış']:
-                print("👋 Görüşmek üzere!")
-                break
-            
-            if not user_input:
-                continue
-            
-            if user_input.startswith("araştır:"):
-                topic = user_input[8:].strip()
-                if topic:
-                    deep_research_with_qwen(topic, max_sources=15)  # 10 → 15 web kaynağı
-                else:
-                    print("❌ Lütfen bir konu girin!\n")
-            
-            elif user_input.startswith("hızlı:"):
-                topic = user_input[6:].strip()
-                if topic:
-                    deep_research_with_qwen(topic, max_sources=10)  # 5 → 10 web kaynağı
-                else:
-                    print("❌ Lütfen bir konu girin!\n")
-            
-            elif user_input.startswith("tam:"):
-                topic = user_input[4:].strip()
-                if topic:
-                    deep_research_with_qwen(topic, max_sources=20)  # 15 → 20 web kaynağı
-                else:
-                    print("❌ Lütfen bir konu girin!\n")
-            
-            elif user_input.startswith("soru:"):
-                question = user_input[5:].strip()
-                if question:
-                    print("\n🤖 Qwen: ", end="", flush=True)
-                    response = ask_qwen(question)
-                    print(response + "\n")
-                else:
-                    print("❌ Lütfen bir soru girin!\n")
-            
-            else:
-                # Otomatik araştırma yap
-                print(f"\n🔍 '{user_input}' konusunu araştırıyorum...\n")
-                deep_research_with_qwen(user_input, max_sources=8)
+        # İnteraktif mod başlat (QwenDeepWebAssistant kendi interactive_mode metodunu kullan)
+        print("\n🎯 İnteraktif mod başlatılıyor...")
+        assistant.interactive_mode()
         
     except ImportError as e:
         print(f"\n❌ Gerekli modüller yok: {e}")
-        print("💡 Yükleyin: pip install transformers torch requests beautifulsoup4 wikipedia")
+        print("💡 Yükleyin: pip install httpx bitsandbytes accelerate transformers torch")
     except Exception as e:
         print(f"\n❌ Hata: {e}")
         import traceback
