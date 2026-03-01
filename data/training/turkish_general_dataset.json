@@ -1,0 +1,98 @@
+[
+  {
+    "instruction": "Atatürk'ün hayatı hakkında bilgi ver.",
+    "input": "",
+    "output": "Mustafa Kemal Atatürk (1881-1938), Türkiye Cumhuriyeti'nin kurucusu ve ilk Cumhurbaşkanı'dır.\n\n**Erken Hayatı:**\n- 1881'de Selanik'te doğdu\n- Askeri okullarda eğitim aldı\n- Harp Akademisi'ni bitirdi\n\n**Askeri Kariyeri:**\n- Çanakkale Savaşı'nda kritik rol oynadı (1915)\n- Kurtuluş Savaşı'nı yönetti (1919-1922)\n- Büyük Taarruz ile zafere ulaştı (1922)\n\n**Cumhuriyet Dönemi:**\n- 29 Ekim 1923'te Cumhuriyeti ilan etti\n- Harf inkılabı, medeni kanun, eğitim reformları gerçekleştirdi\n- Kadın hakları konusunda devrim niteliğinde adımlar attı\n- 10 Kasım 1938'de İstanbul'da vefat etti\n\nAtatürk, modern Türkiye'nin temellerini atan büyük bir lider ve reformcudur.",
+    "category": "Tarih"
+  },
+  {
+    "instruction": "Python'da sınıf (class) nasıl oluşturulur? Detaylı örnek ver.",
+    "input": "",
+    "output": "Python'da sınıf oluşturmak için `class` anahtar kelimesi kullanılır:\n\n```python\nclass Ogrenci:\n    # Constructor (Yapıcı metot)\n    def __init__(self, isim, yas, numara):\n        self.isim = isim\n        self.yas = yas\n        self.numara = numara\n        self.notlar = []\n    \n    # Metot: Not ekle\n    def not_ekle(self, not_degeri):\n        if 0 <= not_degeri <= 100:\n            self.notlar.append(not_degeri)\n            print(f\"{self.isim} için {not_degeri} notu eklendi.\")\n        else:\n            print(\"Geçersiz not! (0-100 arası olmalı)\")\n    \n    # Metot: Ortalama hesapla\n    def ortalama(self):\n        if self.notlar:\n            return sum(self.notlar) / len(self.notlar)\n        return 0\n    \n    # String gösterimi\n    def __str__(self):\n        return f\"Öğrenci: {self.isim} (No: {self.numara})\"\n\n# Kullanım\nogrenci = Ogrenci(\"Ahmet\", 20, \"2024001\")\nogrenci.not_ekle(85)\nogrenci.not_ekle(92)\nprint(f\"Ortalama: {ogrenci.ortalama():.1f}\")\n```\n\n**Temel Kavramlar:**\n- `__init__`: Constructor metodu, nesne oluşturulduğunda çalışır\n- `self`: Nesnenin kendisini temsil eder\n- Metotlar: Sınıfa ait fonksiyonlar\n- `__str__`: print() ile yazdırıldığında gösterilecek metin",
+    "category": "Programlama"
+  },
+  {
+    "instruction": "Osmanlı İmparatorluğu'nun kuruluşu ve yükselişi hakkında bilgi ver.",
+    "input": "",
+    "output": "**Osmanlı İmparatorluğu (1299-1922)**\n\n**Kuruluş Dönemi (1299-1453):**\n- 1299'da Osman Bey tarafından Söğüt'te kuruldu\n- Orhan Bey döneminde Bursa başkent oldu\n- I. Murad döneminde Rumeli'ye geçildi\n- Yıldırım Bayezid döneminde büyük genişleme yaşandı\n\n**Yükseliş Dönemi (1453-1566):**\n- 1453: Fatih Sultan Mehmet İstanbul'u fethetti\n- Yavuz Sultan Selim, Mısır'ı fethederek halifeliği aldı\n- Kanuni Sultan Süleyman döneminde en geniş sınırlara ulaştı\n- Avrupa'da Viyana kapılarına kadar ilerledi\n\n**Önemli Özellikler:**\n- Üç kıtada hüküm sürdü (Avrupa, Asya, Afrika)\n- Timar sistemi ile düzenli ordu kurdu\n- Devşirme sistemi ile yönetici sınıf yetiştirdi\n- 623 yıl hüküm sürdü\n\nOsmanlı İmparatorluğu, dünya tarihinin en uzun ömürlü devletlerinden biridir.",
+    "category": "Tarih"
+  },
+  {
+    "instruction": "Yapay sinir ağları (neural networks) nasıl çalışır?",
+    "input": "",
+    "output": "**Yapay Sinir Ağları (Neural Networks)**\n\nYapay sinir ağları, insan beynindeki nöronlardan esinlenerek tasarlanmış hesaplama modelleridir.\n\n**Temel Yapı:**\n1. **Giriş Katmanı (Input Layer):** Verileri alır\n2. **Gizli Katmanlar (Hidden Layers):** Hesaplamaları yapar\n3. **Çıkış Katmanı (Output Layer):** Sonucu üretir\n\n**Nasıl Çalışır?**\n1. **İleri Yayılım (Forward Pass):**\n   - Giriş verisi ağırlıklarla çarpılır\n   - Bias eklenir: `z = w₁x₁ + w₂x₂ + ... + b`\n   - Aktivasyon fonksiyonu uygulanır (ReLU, Sigmoid, vb.)\n\n2. **Loss Hesaplama:**\n   - Tahmin ile gerçek değer arasındaki fark ölçülür\n   - MSE, Cross-Entropy gibi loss fonksiyonları kullanılır\n\n3. **Geri Yayılım (Backpropagation):**\n   - Loss'un her ağırlığa göre gradyanı hesaplanır\n   - Zincir kuralı (chain rule) kullanılır\n\n4. **Ağırlık Güncelleme:**\n   - Gradient Descent ile ağırlıklar güncellenir\n   - `w_new = w_old - learning_rate × gradient`\n\n**Popüler Mimariler:**\n- CNN: Görüntü işleme\n- RNN/LSTM: Zaman serisi, metin\n- Transformer: NLP, modern AI",
+    "category": "Yapay Zeka"
+  },
+  {
+    "instruction": "İstanbul'un tarihi ve kültürel önemi nedir?",
+    "input": "",
+    "output": "**İstanbul: İki Kıtanın Başkenti**\n\nİstanbul, dünya tarihinin en önemli şehirlerinden biridir.\n\n**Tarihçe:**\n- MÖ 660: Byzantion olarak kuruldu\n- MS 330: Roma İmparatoru Konstantinus tarafından Konstantinopolis adıyla başkent yapıldı\n- 1453: Fatih Sultan Mehmet tarafından fethedildi, İstanbul adını aldı\n- 1923'e kadar Osmanlı başkenti olarak kaldı\n\n**Kültürel Zenginlikler:**\n- **Ayasofya:** 537'de inşa edilen dünya harikası\n- **Topkapı Sarayı:** 400 yıl Osmanlı yönetim merkezi\n- **Sultanahmet Camii:** Mavi Camii olarak bilinen şaheser\n- **Kapalıçarşı:** Dünyanın en eski alışveriş merkezlerinden\n- **Galata Kulesi:** 1348'den beri İstanbul'un sembolü\n\n**Coğrafi Önemi:**\n- Avrupa ve Asya'yı birleştiren tek şehir\n- İstanbul Boğazı, stratejik su yolu\n- Marmara Denizi'ne açılan doğal liman\n\n**Günümüzde:**\n- 16 milyonu aşan nüfusuyla Türkiye'nin en büyük şehri\n- Ekonomi, kültür ve turizm merkezi\n- UNESCO Dünya Mirası listesinde tarihi alanları var",
+    "category": "Kültür"
+  },
+  {
+    "instruction": "Fibonacci dizisini Python'da nasıl yazarım?",
+    "input": "",
+    "output": "Fibonacci dizisini Python'da birkaç farklı yöntemle yazabilirsiniz:\n\n**1. Döngü ile:**\n```python\ndef fibonacci_dongu(n):\n    \"\"\"İlk n Fibonacci sayısını döndürür\"\"\"\n    fib = [0, 1]\n    for i in range(2, n):\n        fib.append(fib[i-1] + fib[i-2])\n    return fib[:n]\n\nprint(fibonacci_dongu(10))\n# [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]\n```\n\n**2. Recursive (Özyinelemeli):**\n```python\ndef fibonacci_recursive(n):\n    if n <= 1:\n        return n\n    return fibonacci_recursive(n-1) + fibonacci_recursive(n-2)\n\nfor i in range(10):\n    print(fibonacci_recursive(i), end=' ')\n```\n\n**3. Generator ile (Bellek verimli):**\n```python\ndef fibonacci_generator():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\ngen = fibonacci_generator()\nfor _ in range(10):\n    print(next(gen), end=' ')\n```\n\n**4. Memoization ile (Hızlı recursive):**\n```python\nfrom functools import lru_cache\n\n@lru_cache(maxsize=None)\ndef fib_memo(n):\n    if n <= 1:\n        return n\n    return fib_memo(n-1) + fib_memo(n-2)\n```\n\n**Performans Karşılaştırması:**\n- Döngü: O(n) - En verimli\n- Generator: O(n) - Bellek tasarrufu\n- Memoization: O(n) - Hızlı recursive\n- Saf Recursive: O(2^n) - Yavaş!",
+    "category": "Programlama"
+  },
+  {
+    "instruction": "Türk mutfağının en önemli yemekleri nelerdir?",
+    "input": "",
+    "output": "**Türk Mutfağı: Dünyanın En Zengin Mutfaklarından**\n\nTürk mutfağı, Orta Asya'dan Osmanlı saray mutfağına uzanan zengin bir mirasa sahiptir.\n\n**Ana Yemekler:**\n🥩 Kebaplar:\n- Adana Kebap: Acılı kıyma, şiş üzerinde\n- İskender Kebap: Döner + tereyağı + yoğurt\n- Urfa Kebap: Acısız kıyma kebabı\n\n🍖 Et Yemekleri:\n- Kuzu Tandır: Fırında uzun pişen kuzu\n- Hünkar Beğendi: Patlıcan püresi üzerinde et\n- Karnıyarık: Patlıcan dolması\n\n**Çorbalar:**\n- Mercimek Çorbası\n- İşkembe Çorbası\n- Tarhana Çorbası\n\n**Hamur İşleri:**\n- Börek (Su böreği, sigara böreği)\n- Lahmacun\n- Pide\n- Mantı\n\n**Tatlılar:**\n- Baklava: Antep fıstıklı, cevizli\n- Künefe: Hatay'ın meşhur tatlısı\n- Sütlaç\n- Aşure\n\n**İçecekler:**\n- Türk Çayı\n- Türk Kahvesi (UNESCO listesinde)\n- Ayran\n- Şalgam\n\nTürk mutfağı, UNESCO Somut Olmayan Kültürel Miras listesinde yer almaktadır.",
+    "category": "Kültür"
+  },
+  {
+    "instruction": "Makine öğrenmesinde overfitting nedir ve nasıl önlenir?",
+    "input": "",
+    "output": "**Overfitting (Aşırı Öğrenme)**\n\nOverfitting, bir modelin eğitim verisini ezberlemesi ancak yeni verilere genelleme yapamamasıdır.\n\n**Belirtiler:**\n- Eğitim doğruluğu çok yüksek (%99+)\n- Test/doğrulama doğruluğu düşük\n- Eğitim loss'u azalırken, validation loss artıyor\n\n**Nedenleri:**\n1. Yetersiz veri\n2. Çok karmaşık model\n3. Çok uzun eğitim\n4. Gürültülü veri\n\n**Önleme Yöntemleri:**\n\n1️⃣ **Regularization:**\n```python\n# L2 Regularization\nmodel.add(Dense(64, kernel_regularizer=l2(0.01)))\n```\n\n2️⃣ **Dropout:**\n```python\nmodel.add(Dropout(0.5))  # %50 nöron devre dışı\n```\n\n3️⃣ **Early Stopping:**\n```python\ncallback = EarlyStopping(monitor='val_loss', patience=5)\n```\n\n4️⃣ **Data Augmentation:**\n- Veri çoğaltma (döndürme, kırpma, vb.)\n\n5️⃣ **Cross-Validation:**\n```python\nfrom sklearn.model_selection import KFold\nkf = KFold(n_splits=5, shuffle=True)\n```\n\n6️⃣ **Model Basitleştirme:**\n- Daha az katman/nöron\n- Daha düşük LoRA rank\n\n**İpucu:** Eğitim ve doğrulama loss grafiklerini takip ederek overfitting'i erken tespit edebilirsiniz.",
+    "category": "Yapay Zeka"
+  },
+  {
+    "instruction": "Türkiye'deki coğrafi bölgeleri ve özelliklerini açıkla.",
+    "input": "",
+    "output": "**Türkiye'nin 7 Coğrafi Bölgesi:**\n\n1️⃣ **Marmara Bölgesi:**\n- Türkiye'nin en kalabalık bölgesi\n- İstanbul, Bursa, Kocaeli gibi sanayi şehirleri\n- Trakya'da tarım, güneyde zeytin ve zeytinyağı\n\n2️⃣ **Ege Bölgesi:**\n- Akdeniz iklimi, ılıman hava\n- İzmir, Aydın, Muğla\n- Zeytin, incir, üzüm üretimi\n- Efes, Pamukkale gibi antik kentler\n\n3️⃣ **Akdeniz Bölgesi:**\n- Sıcak yazlar, ılık kışlar\n- Antalya, Mersin, Adana\n- Turunçgiller ve sera tarımı\n- Turizm merkezi (Antalya Rivierası)\n\n4️⃣ **İç Anadolu Bölgesi:**\n- Step iklimi, karasal\n- Ankara (başkent), Konya, Kayseri\n- Tahıl üretimi (buğday)\n- Kapadokya'nın peri bacaları\n\n5️⃣ **Karadeniz Bölgesi:**\n- Bol yağışlı, yeşil doğa\n- Trabzon, Rize, Samsun\n- Çay ve fındık üretiminde dünya lideri\n- Yaylalar ve horon kültürü\n\n6️⃣ **Doğu Anadolu Bölgesi:**\n- En yüksek ve soğuk bölge\n- Erzurum, Van, Ağrı\n- Ağrı Dağı (5137m - Türkiye'nin en yüksek noktası)\n- Hayvancılık ağırlıklı ekonomi\n\n7️⃣ **Güneydoğu Anadolu Bölgesi:**\n- Sıcak ve kurak iklim\n- Şanlıurfa, Diyarbakır, Gaziantep\n- GAP Projesi ile tarımda devrim\n- Gaziantep mutfağı (UNESCO)",
+    "category": "Coğrafya"
+  },
+  {
+    "instruction": "REST API ile GraphQL arasındaki farklar nelerdir?",
+    "input": "",
+    "output": "**REST API vs GraphQL Karşılaştırması:**\n\n**REST API:**\n- Her kaynak için ayrı endpoint (URL)\n- Sabit veri yapısı döndürür\n- HTTP metodları: GET, POST, PUT, DELETE\n- Overf-fetching / Under-fetching problemi\n\n```\nGET /api/users/1\nGET /api/users/1/posts\nGET /api/users/1/comments\n```\n\n**GraphQL:**\n- Tek endpoint (/graphql)\n- İstemci istediği veriyi seçer\n- Query language kullanır\n- Tam ihtiyacınız kadar veri\n\n```graphql\nquery {\n  user(id: 1) {\n    name\n    email\n    posts {\n      title\n      comments {\n        text\n      }\n    }\n  }\n}\n```\n\n**Karşılaştırma Tablosu:**\n\n| Özellik | REST | GraphQL |\n|---------|------|----------|\n| Endpoint | Çoklu | Tek |\n| Veri Kontrolü | Sunucu belirler | İstemci belirler |\n| Over-fetching | Var | Yok |\n| Öğrenme Eğrisi | Kolay | Orta |\n| Caching | HTTP cache | Karmaşık |\n| Dosya Upload | Kolay | Ek kütüphane |\n| Real-time | WebSocket | Subscription |\n\n**Ne Zaman Hangisi?**\n- **REST:** Basit CRUD, public API, cache önemli\n- **GraphQL:** Karmaşık ilişkiler, mobil app, esnek sorgular",
+    "category": "Programlama"
+  },
+  {
+    "instruction": "Küresel ısınma nedir ve Türkiye'ye etkileri nelerdir?",
+    "input": "",
+    "output": "**Küresel Isınma ve Türkiye'ye Etkileri**\n\n**Küresel Isınma Nedir?**\nSera gazlarının (CO₂, metan, vb.) atmosferde birikerek Dünya'nın ortalama sıcaklığını artırmasıdır.\n\n**Başlıca Nedenler:**\n- Fosil yakıt kullanımı (kömür, petrol, doğalgaz)\n- Orman tahribatı\n- Sanayi emisyonları\n- Tarımsal faaliyetler\n\n**Türkiye'ye Etkileri:**\n\n🌡️ **Sıcaklık Artışı:**\n- Son 50 yılda ortalama 1.5°C artış\n- Yaz sıcaklıkları rekor seviyelere ulaşıyor\n- Güneydoğu'da çölleşme riski\n\n💧 **Su Kaynakları:**\n- Baraj doluluk oranları düşüyor\n- Tuz Gölü, Burdur Gölü küçülüyor\n- Tarımsal sulama sorunları artıyor\n\n🌊 **Denizler:**\n- Akdeniz'de su sıcaklığı yükseliyor\n- Müsilaj (deniz salyası) sorunu\n- Balık türlerinde değişim\n\n🔥 **Orman Yangınları:**\n- 2021 Manavgat-Marmaris yangınları\n- Yangın sezonu uzuyor\n\n🌾 **Tarım:**\n- Verim düşüşü (buğday, fındık)\n- Yeni zararlı türler\n- Su kıtlığı\n\n**Çözüm Önerileri:**\n1. Yenilenebilir enerji yatırımları (güneş, rüzgar)\n2. Enerji verimliliği\n3. Ağaçlandırma\n4. Sürdürülebilir tarım\n5. Toplu ulaşım",
+    "category": "Çevre"
+  },
+  {
+    "instruction": "Docker nedir ve nasıl kullanılır?",
+    "input": "",
+    "output": "**Docker: Konteyner Teknolojisi**\n\nDocker, uygulamaları konteyner adı verilen izole ortamlarda çalıştırmayı sağlayan bir platformdur.\n\n**Neden Docker?**\n- \"Benim bilgisayarımda çalışıyordu\" sorununu çözer\n- Tutarlı geliştirme ortamı sağlar\n- Hızlı dağıtım ve ölçekleme\n\n**Temel Kavramlar:**\n\n📦 **Image:** Uygulamanın blueprint'i\n```dockerfile\n# Dockerfile\nFROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .\nCMD [\"python\", \"app.py\"]\n```\n\n🚢 **Container:** Image'dan oluşturulan çalışan örnek\n```bash\n# Image oluştur\ndocker build -t my-app .\n\n# Container çalıştır\ndocker run -p 8080:8080 my-app\n```\n\n📋 **Docker Compose:** Çoklu servis yönetimi\n```yaml\nversion: '3'\nservices:\n  web:\n    build: .\n    ports:\n      - \"8080:8080\"\n  db:\n    image: postgres:15\n    environment:\n      POSTGRES_PASSWORD: secret\n```\n\n**Sık Kullanılan Komutlar:**\n```bash\ndocker ps          # Çalışan containerlar\ndocker images      # Mevcut image'lar\ndocker logs <id>   # Container logları\ndocker stop <id>   # Container durdur\ndocker-compose up  # Tüm servisleri başlat\n```\n\n**Docker vs VM:**\n- Docker: Hafif, hızlı, OS paylaşır\n- VM: Ağır, yavaş, kendi OS'i var",
+    "category": "DevOps"
+  },
+  {
+    "instruction": "Türkçe dilbilgisinde fiil çekimleri nasıl yapılır?",
+    "input": "",
+    "output": "**Türkçe Fiil Çekimleri**\n\nTürkçe, sondan eklemeli (aglütinatif) bir dildir. Fiiller kök + zaman eki + şahıs eki yapısındadır.\n\n**Basit Zamanlar:**\n\n1️⃣ **Geniş Zaman (-r, -ar, -er):**\n- Ben gel-ir-im\n- Sen gel-ir-sin\n- O gel-ir\n- Biz gel-ir-iz\n- Siz gel-ir-siniz\n- Onlar gel-ir-ler\n\n2️⃣ **Şimdiki Zaman (-yor):**\n- Ben gel-iyor-um\n- Sen gel-iyor-sun\n- O gel-iyor\n- Biz gel-iyor-uz\n- Siz gel-iyor-sunuz\n- Onlar gel-iyor-lar\n\n3️⃣ **Geçmiş Zaman (-di):**\n- Ben gel-di-m\n- Sen gel-di-n\n- O gel-di\n- Biz gel-di-k\n- Siz gel-di-niz\n- Onlar gel-di-ler\n\n4️⃣ **Gelecek Zaman (-ecek, -acak):**\n- Ben gel-eceğ-im\n- Sen gel-ecek-sin\n- O gel-ecek\n- Biz gel-eceğ-iz\n- Siz gel-ecek-siniz\n- Onlar gel-ecek-ler\n\n**Olumsuz Çekim (-ma, -me):**\n- gel-me-m, gel-me-z-sin, gel-mez...\n- gel-mi-yor-um (şimdiki zaman olumsuz)\n\n**Soru Çekimi (mi, mı, mu, mü):**\n- Gelir misin?\n- Geliyor musun?\n- Geldi mi?\n\n**Büyük Ünlü Uyumu:**\nKalın sesli (a, ı, o, u) → -ar, -dı, -acak\nİnce sesli (e, i, ö, ü) → -er, -di, -ecek",
+    "category": "Türkçe Dilbilgisi"
+  },
+  {
+    "instruction": "Veri tabanı normalizasyonu nedir? 1NF, 2NF, 3NF'yi açıkla.",
+    "input": "",
+    "output": "**Veritabanı Normalizasyonu**\n\nNormalizasyon, veri tekrarını azaltmak ve veri bütünlüğünü sağlamak için tabloları düzenleme sürecidir.\n\n**1NF (Birinci Normal Form):**\n\nKurallar:\n- Her hücrede tek bir değer olmalı (atomik)\n- Her satır benzersiz olmalı (primary key)\n\n❌ Normalizasyonsuz:\n| Ogrenci | Dersler |\n|---------|--------|\n| Ali | Matematik, Fizik |\n\n✅ 1NF:\n| Ogrenci_ID | Ogrenci | Ders |\n|-----------|---------|------|\n| 1 | Ali | Matematik |\n| 1 | Ali | Fizik |\n\n**2NF (İkinci Normal Form):**\n- 1NF sağlanmış olmalı\n- Kısmi bağımlılık olmamalı (her non-key sütun, tüm primary key'e bağlı)\n\n❌ 2NF ihlali:\n| Ogrenci_ID | Ders_ID | Ogrenci_Adi | Not |\nOgrenci_Adi sadece Ogrenci_ID'ye bağlı\n\n✅ 2NF:\nTablo 1: Ogrenci(ID, Adi)\nTablo 2: Kayit(Ogrenci_ID, Ders_ID, Not)\n\n**3NF (Üçüncü Normal Form):**\n- 2NF sağlanmış olmalı\n- Geçişli bağımlılık olmamalı\n\n❌ 3NF ihlali:\n| Ogrenci_ID | Bolum_ID | Bolum_Adi |\nBolum_Adi, Bolum_ID üzerinden geçişli bağımlı\n\n✅ 3NF:\nTablo 1: Ogrenci(ID, Bolum_ID)\nTablo 2: Bolum(ID, Adi)\n\n**Özet:**\n- 1NF: Atomik değerler\n- 2NF: Kısmi bağımlılık yok\n- 3NF: Geçişli bağımlılık yok",
+    "category": "Veritabanı"
+  },
+  {
+    "instruction": "Transformer mimarisi nasıl çalışır?",
+    "input": "",
+    "output": "**Transformer Mimarisi**\n\n2017'de Google'ın \"Attention is All You Need\" makalesinde tanıtılan Transformer, modern NLP'nin temelini oluşturur.\n\n**Temel Yapı:**\n\n```\nGiriş → Embedding + Positional Encoding\n  ↓\nEncoder (N katman):\n  → Multi-Head Self-Attention\n  → Add & Norm\n  → Feed Forward\n  → Add & Norm\n  ↓\nDecoder (N katman):\n  → Masked Self-Attention\n  → Cross-Attention (Encoder çıktısıyla)\n  → Feed Forward\n  ↓\nLinear + Softmax → Çıkış\n```\n\n**Self-Attention Mekanizması:**\n\n1. Her token için Q (Query), K (Key), V (Value) vektörleri oluşturulur\n2. Attention skoru: `Attention(Q,K,V) = softmax(QK^T / √dk) × V`\n3. Her token, diğer tüm tokenlara \"bakabilir\"\n\n**Multi-Head Attention:**\n- Birden fazla attention head paralel çalışır\n- Her head farklı ilişkileri öğrenir\n- Çıktılar birleştirilir\n\n**Positional Encoding:**\n- Token sırasını kodlamak için sinüs/kosinüs fonksiyonları\n- `PE(pos, 2i) = sin(pos / 10000^(2i/d))`\n\n**Neden Devrimsel?**\n- RNN'den farklı olarak paralel işlem yapabilir\n- Uzun mesafe bağımlılıklarını yakalayabilir\n- GPT, BERT, T5, Qwen hep Transformer tabanlı\n\n**Modern Varyantlar:**\n- GPT: Sadece Decoder (autoregressive)\n- BERT: Sadece Encoder (bidirectional)\n- T5: Encoder-Decoder (seq2seq)",
+    "category": "Yapay Zeka"
+  },
+  {
+    "instruction": "Bir sayının asal olup olmadığını kontrol eden Python fonksiyonu yaz ve açıkla.",
+    "input": "",
+    "output": "İşte asal sayı kontrolü için optimize edilmiş bir Python fonksiyonu:\n\n```python\nimport math\n\ndef asal_mi(n):\n    \"\"\"\n    Bir sayının asal olup olmadığını kontrol eder.\n    \n    Parametreler:\n        n (int): Kontrol edilecek sayı\n    \n    Döndürür:\n        bool: Asal ise True, değilse False\n    \"\"\"\n    # Temel kontroller\n    if n < 2:\n        return False\n    if n == 2:\n        return True\n    if n % 2 == 0:\n        return False\n    \n    # Sadece tek sayıları √n'e kadar kontrol et\n    for i in range(3, int(math.sqrt(n)) + 1, 2):\n        if n % i == 0:\n            return False\n    \n    return True\n\n# Test\ntest_sayilari = [1, 2, 3, 4, 17, 25, 97, 100]\nfor sayi in test_sayilari:\n    sonuc = \"Asal ✅\" if asal_mi(sayi) else \"Asal değil ❌\"\n    print(f\"{sayi:4d} → {sonuc}\")\n\n# Belirli aralıktaki asalları bul\nasal_sayilar = [n for n in range(2, 100) if asal_mi(n)]\nprint(f\"\\n2-100 arası asallar: {asal_sayilar}\")\nprint(f\"Toplam: {len(asal_sayilar)} asal sayı\")\n```\n\n**Algoritma Açıklaması:**\n1. n < 2 → Asal değil (tanım gereği)\n2. n = 2 → Tek çift asal sayı\n3. Çift sayılar → Asal değil\n4. 3'ten √n'e kadar tek sayılarla bölünürlük kontrolü\n\n**Neden √n'e kadar?**\nEğer n = a × b ise, a veya b'den biri mutlaka √n'den küçüktür. Bu yüzden √n'e kadar kontrol yeterlidir.\n\n**Zaman Karmaşıklığı:** O(√n)",
+    "category": "Programlama"
+  }
+]

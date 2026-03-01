@@ -1,290 +1,193 @@
-# 🤖 Gelişmiş Yapay Zeka Sistemi# 🤖 Gelişmiş Yapay Zeka Sistemi
-
-
-
-[![GitHub](https://img.shields.io/badge/GitHub-cebrailbagatarhan-blue?style=flat&logo=github)](https://github.com/cebrailbagatarhan/yapay-zeka-sistemi)[![GitHub](https://img.shields.io/badge/GitHub-cebrailbagatarhan-blue?style=flat&logo=github)](https://github.com/cebrailbagatarhan/yapay-zeka-sistemi)
-
-[![Python](https://img.shields.io/badge/Python-3.11+-green?style=flat&logo=python)](https://www.python.org/)[![Python](https://img.shields.io/badge/Python-3.11+-green?style=flat&logo=python)](https://www.python.org/)
-
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-
-
-Türkçe destekli, çok yetenekli yapay zeka asistanı ve model eğitim platformu. GPT-4 tarzı derin akıl yürütme (reasoning), AI destekli web araştırması, akıllı kod üretimi ve çoklu dataset ile model eğitimi özellikleri sunar.Türkçe destekli, çok yetenekli yapay zeka asistanı ve model eğitim platformu. GPT-4 tarzı derin akıl yürütme (reasoning), AI destekli web araştırması, akıllı kod üretimi ve çoklu dataset ile model eğitimi özellikleri sunar.
-
-
-
-## ✨ Özellikler## ✨ Özellikler
-
-
-
-### 🧠 AI Yetenekleri### 🧠 AI Yetenekleri
-
-- **Gelişmiş Reasoning**: Derin analiz, çoklu perspektif, sentez ve context memory- **Gelişmiş Reasoning**: Derin analiz, çoklu perspektif, sentez ve context memory
-
-- **Akıllı Kod Üretimi**: İsteğe göre kod yazma, iyileştirme önerileri, dosyaya kaydetme- **Akıllı Kod Üretimi**: İsteğe göre kod yazma, iyileştirme önerileri, dosyaya kaydetme
-
-- **Derin Web Araştırma**: AI destekli web analizi, otomatik link gezinme ve akıllı özet oluşturma- **Derin Web Araştırma**: AI destekli web analizi, otomatik link gezinme ve akıllı özet oluşturma
-
-- **Chatbot**: Matematik, Python, ML ve genel konularda açıklamalı yanıtlar- **Chatbot**: Matematik, Python, ML ve genel konularda açıklamalı yanıtlar
-
-- **Demo Modülleri**: LoRA, CoT dataset, RL tutor, Knowledge Distillation- **Demo Modülleri**: LoRA, CoT dataset, RL tutor, Knowledge Distillation
-
-
-
-### 📚 Model Eğitimi### 📚 Model Eğitimi
-
-- **Çoklu Dataset Desteği**: - **Çoklu Dataset Desteği**: 
-
-  - 🧮 CAMEL AI Math (5K matematik problemi)  - 🧮 CAMEL AI Math (5K matematik problemi)
-
-  - 📝 Alpaca Cleaned (5K instruction-following)  - 📝 Alpaca Cleaned (5K instruction-following)
-
-  - 🎯 Tatsu-Lab Alpaca (3K genel görev)  - 🎯 Tatsu-Lab Alpaca (3K genel görev)
-
-  - 💻 Open Platypus (2K kod + STEM)  - 💻 Open Platypus (2K kod + STEM)
-
-- **Otomatik Dataset İndirme**: Hugging Face entegrasyonu- **Otomatik Dataset İndirme**: Hugging Face entegrasyonu
-
-- **Esnek Eğitim Modları**: Test, küçük, orta, tam paket seçenekleri- **Esnek Eğitim Modları**: Test, küçük, orta, tam paket seçenekleri
-
-
-
-### 🔍 Derin Web Araştırma### 🔍 Derin Web Araştırma
-
-- Wikipedia + DuckDuckGo otomatik tarama- Wikipedia + DuckDuckGo otomatik tarama
-
-- 20+ güvenilir kaynak desteği- 20+ güvenilir kaynak desteği
-
-- İlgili linklere otomatik gezinme (3 seviye derinlik)- İlgili linklere otomatik gezinme (3 seviye derinlik)
-
-- AI destekli akıllı özet oluşturma- AI destekli akıllı özet oluşturma
-
-- Anahtar kelime analizi ve kaynak güvenilirlik kontrolü- Anahtar kelime analizi ve kaynak güvenilirlik kontrolü
-
-- JSON + TXT formatında sonuç kaydetme- JSON + TXT formatında sonuç kaydetme
-
-
-
-## 🚀 Kurulum## 📁 Proje Yapısı
-
-
-
-### Gereksinimler```
-
-- Python 3.11+yapay-zeka-sistemi/
-
-- pip veya conda├── main.py                         # Ana menü (21 özellik)
-
-- Git├── README.md                       # Proje dokümantasyonu
-
-├── GITHUB_YUKLEME.md              # GitHub yükleme rehberi
-
-### Kurulum Adımları├── requirements.txt                # Python bağımlılıkları
-
-├── requirements_web.txt            # Web araştırma bağımlılıkları
-
-```bash├── src/
-
-# Repository'yi klonlayın│   ├── advanced_reasoning.py       # Reasoning, Web ve Kod üretim motorları
-
-git clone https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git│   ├── web_research.py             # Web araştırma, bilgi tabanı
-
-cd yapay-zeka-sistemi│   ├── deep_web_researcher.py      # AI destekli derin web araştırma
-
-│   ├── model_trainer.py            # Çoklu dataset model eğitimi
-
-# Sanal ortam oluşturun (önerilen)│   ├── advanced_ai.py              # İleri seviye AI demoları
-
-python -m venv .conda│   └── __init__.py                 # Model ve yardımcı sınıflar
-
-.conda\Scripts\activate  # Windows├── notebooks/                      # Jupyter notebook'lar
-
-# source .conda/bin/activate  # Linux/Mac│   ├── 01_data_exploration.ipynb
-
-│   ├── 02_model_training.ipynb
-
-# Bağımlılıkları yükleyin│   ├── 03_model_evaluation.ipynb
-
-pip install -r requirements.txt│   └── 04_advanced_ai_techniques.ipynb
-
-pip install -r requirements_web.txt├── data/                           # Bilgi tabanı ve örnek veriler
-
-```│   ├── knowledge_base.json
-
-│   └── examples/
-
-## 📖 Kullanım└── tests/                          # Test dosyaları
+# 🤖 Gelişmiş Yapay Zeka Sistemi
+
+[![GitHub](https://img.shields.io/badge/GitHub-cebrailbagatarhan-blue?style=flat&logo=github)](https://github.com/cebrailbagatarhan/yapay-zeka-sistemi)
+[![Python](https://img.shields.io/badge/Python-3.11+-green?style=flat&logo=python)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+Türkçe destekli, çok yetenekli yapay zeka asistanı ve model eğitim platformu. GPT-4 tarzı derin akıl yürütme (reasoning), AI destekli web araştırması, akıllı kod üretimi ve çoklu dataset ile model eğitimi özellikleri sunar.
+
+## ✨ Özellikler
+
+### 🧠 AI Yetenekleri
+- **Gelişmiş Reasoning**: Derin analiz, çoklu perspektif, sentez ve context memory
+- **Akıllı Kod Üretimi**: İsteğe göre kod yazma, iyileştirme önerileri, dosyaya kaydetme
+- **Derin Web Araştırma**: AI destekli web analizi, otomatik link gezinme ve akıllı özet oluşturma
+- **Chatbot**: Matematik, Python, ML ve genel konularda açıklamalı yanıtlar
+- **Demo Modülleri**: LoRA, CoT dataset, RL tutor, Knowledge Distillation
+
+### 📚 Model Eğitimi
+- **Çoklu Dataset Desteği**: 
+  - 🧮 CAMEL AI Math (5K matematik problemi)
+  - 📝 Alpaca Cleaned (5K instruction-following)
+  - 🎯 Tatsu-Lab Alpaca (3K genel görev)
+  - 💻 Open Platypus (2K kod + STEM)
+- **Otomatik Dataset İndirme**: Hugging Face entegrasyonu
+- **Esnek Eğitim Modları**: Test, küçük, orta, tam paket seçenekleri
+
+### 🇹🇷 Türkçe Model Eğitimi (YENİ)
+- **H100/A100/T4 GPU Desteği**: Otomatik GPU algılama ve optimizasyon
+- **300K+ Türkçe Dataset**: HuggingFace'den otomatik indirme
+  - 📖 alibayram/turkish_instructions_150k (150K talimat)
+  - 📝 malhajar/alpaca-turkish (52K Alpaca)
+  - 🎯 merve/turkish_instructions (53K talimat)
+  - 🌍 MBZUAI/Bactrian-X - Türkçe (67K çokdilli)
+  - 📚 wikimedia/wikipedia - Türkçe (100K makale)
+  - 📰 uonlp/CulturaX - Türkçe (50K streaming)
+- **İki Aşamalı Eğitim**: Continued Pre-training + SFT (Supervised Fine-Tuning)
+- **Qwen 2.5 Tabanlı**: 7B (H100/A100), 3B (L4), 1.5B (T4) otomatik seçim
+- **Google Colab Notebook**: `turkish_h100_training.ipynb`
+
+### 🔍 Derin Web Araştırma
+- Wikipedia + DuckDuckGo otomatik tarama
+- 20+ güvenilir kaynak desteği
+- İlgili linklere otomatik gezinme (3 seviye derinlik)
+- AI destekli akıllı özet oluşturma
+- Anahtar kelime analizi ve kaynak güvenilirlik kontrolü
+- JSON + TXT formatında sonuç kaydetme
+
+## 📁 Proje Yapısı
 
 ```
-
-### Hızlı Başlangıç
+yapay-zeka-sistemi/
+├── main.py                         # Ana menü (21 özellik)
+├── turkish_h100_training.ipynb     # 🇹🇷 Türkçe H100 eğitim notebook'u
+├── colab_runner.ipynb              # Google Colab eğitim notebook'u
+├── README.md                       # Proje dokümantasyonu
+├── requirements.txt                # Python bağımlılıkları
+├── requirements_web.txt            # Web araştırma bağımlılıkları
+├── src/
+│   ├── advanced_reasoning.py       # Reasoning, Web ve Kod üretim motorları
+│   ├── web_research.py             # Web araştırma, bilgi tabanı
+│   ├── deep_web_researcher.py      # AI destekli derin web araştırma
+│   ├── model_trainer.py            # Çoklu dataset model eğitimi
+│   ├── advanced_ai.py              # İleri seviye AI demoları
+│   └── __init__.py                 # Model ve yardımcı sınıflar
+├── notebooks/                      # Jupyter notebook'lar
+│   ├── 01_data_exploration.ipynb
+│   ├── 02_model_training.ipynb
+│   ├── 03_model_evaluation.ipynb
+│   └── 04_advanced_ai_techniques.ipynb
+├── data/
+│   ├── knowledge_base.json         # Bilgi tabanı
+│   ├── turkish_datasets/           # 🇹🇷 Türkçe dataset kaynakları
+│   │   └── dataset_sources.json
+│   ├── training/                   # Eğitim verileri
+│   │   ├── turkish_general_dataset.json
+│   │   ├── conversational_dataset.json
+│   │   ├── reasoning_chat_dataset.json
+│   │   └── code_examples_dataset.json
+│   └── examples/
+├── qwen-model/                     # Qwen 2.5 model dosyaları
+├── generated/                      # Kod üretici çıktıları
+└── tests/                          # Test dosyaları
+```
 
 ## 🚀 Kurulum
 
-```bash
-
-python main.py### Gereksinimler
-
-```- Python 3.11+ (önerilir)
-
+### Gereksinimler
+- Python 3.11+
 - pip veya conda
+- Git
 
-Ana menüden istediğiniz özelliği seçin (21 seçenek):- Git
+### Kurulum Adımları
 
+```bash
+# Repository'yi klonlayın
+git clone https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git
+cd yapay-zeka-sistemi
 
+# Sanal ortam oluşturun (önerilen)
+python -m venv .conda
+.conda\Scripts\activate  # Windows
+# source .conda/bin/activate  # Linux/Mac
 
-### 🎯 Ana Özellikler### Kurulum Adımları
-
-
-
-#### 1. 🤖 Gelişmiş Sohbet```bash
-
-- Doğal dil işleme ve bağlam anlama# Repository'yi klonlayın
-
-- Matematik ve programlama desteğigit clone https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git
-
-- Context memory ile akıllı yanıtlarcd yapay-zeka-sistemi
-
-
-
-#### 2. 🔍 Derin Web Araştırma (Seçenek 20)# Sanal ortam oluşturun (önerilen)
-
-```pythonpython -m venv .conda
-
-# Örnek kullanım:.conda\Scripts\activate  # Windows
-
-# Menüden 20'yi seçin# source .conda/bin/activate  # Linux/Mac
-
-# Konu: "machine learning"
-
-# Sonuç: AI destekli özet + kaynaklar + anahtar kelimeler# Bağımlılıkları yükleyin
-
-```pip install -r requirements.txt
-
-**Özellikler:**pip install -r requirements_web.txt
-
-- ✅ Wikipedia + DuckDuckGo otomatik tarama```
-
-- ✅ İlgili linklere otomatik gezinme (3 seviye)conda create -y -n yapay python=3.11
-
-- ✅ AI destekli akıllı özet oluşturmaconda activate yapay
-
-- ✅ Anahtar kelime analizi
-
-- ✅ JSON + TXT formatında kaydetme# Gerekli paketler
-
+# Bağımlılıkları yükleyin
 pip install -r requirements.txt
-
-#### 3. 📚 Model Eğitimi (Seçenek 21)pip install -r requirements_web.txt
-
-```python
-
-# Örnek kullanım:# (Opsiyonel) İleri seviye demolar
-
-# Menüden 21'i seçinpip install gymnasium
-
-# Seçenek: C (Tam paket - 4 dataset)```
-
-# Mod: Test (hızlı) / Küçük / Orta / Tam
-
-```Not:
-
-**Özellikler:**- `advanced_ai.py` içeren demolar bazı ek kütüphaneler ister; yüklü değilse program çalışır fakat ilgili demolar atlanır.
-
-- ✅ Otomatik dataset indirme- `wikipedia`, `requests`, `beautifulsoup4`, `feedparser` paketleri web araştırma için gereklidir (requirements_web.txt içinde vardır).
-
-- ✅ Çoklu dataset birleştirme
-
-- ✅ Hata toleranslı yükleme## Çalıştırma
-
-- ✅ İlerleme takibi```powershell
-
-python .\main.py
-
-#### 4. 💻 Akıllı Kod Üretici```
-
-- Otomatik kod yazmaUygulama açıldığında menüden aşağıdaki gibi özelliklere erişebilirsiniz:
-
-- Kod açıklama ve iyileştirme
-
-- `generated/` klasörüne kaydetme- 🤖 Advanced AI Chatbot
-
-- 🌐 Web Research Demo / Akıllı Web Chatbot / Bilgi Tabanı Yönetimi
-
-### 🌐 Diğer Özellikler- 🧠 “Senin Gibi Düşünen AI” (Thinking Clone)
-
-- Bilgi tabanı yönetimi- 💻 Gelişmiş Kod Üretici
-
-- Web chatbot- 🧪 LoRA, CoT, RL, Distillation demoları (opsiyonel)
-
-- Specialized kaynak araştırma
-
-- LoRA, CoT, RL demoları## Hızlı Kullanım Örnekleri
-
-- Chatbot (matematik): `sin(pi/2) hesapla`, `√16 + 2^3`, `27 × 15`
-
-## 📁 Proje Yapısı- Chatbot (Python): `Python'da for döngüsü`, `Liste dilimleme nedir?`
-
-- Kod Üretici: `Flask ile basit API`, `ikili arama fonksiyonu`, `Pandas ile CSV analiz`
-
-```- Web Araştırması: `LLM evaluation yöntemleri nedir?`, `RAG mimarisi hakkında`
-
-yapay-zeka-sistemi/
-
-├── main.py                         # Ana menü (21 özellik)## Gelişmiş Kod Üretici
-
-├── README.md                       # Proje dokümantasyonu- İstediğiniz kodu tarif edin.
-
-├── GITHUB_YUKLEME.md              # GitHub yükleme rehberi- Önizleme konsolda gösterilir; kaydetmeyi seçerseniz `generated/` klasörüne `codegen_{n}_{konu}.py` olarak yazılır.
-
-├── requirements.txt                # Python bağımlılıkları
-
-├── requirements_web.txt            # Web araştırma bağımlılıkları## Sorun Giderme
-
-├── src/- `No module named 'wikipedia'` veya benzeri: `pip install -r requirements_web.txt`
-
-│   ├── advanced_reasoning.py       # Reasoning motoru- `No module named 'gymnasium'`: İleri düzey AI demoları için `pip install gymnasium`
-
-│   ├── web_research.py             # Web araştırma- Türkçe/Emoji bozuk çıkıyor: PowerShell’de UTF-8 etkin olduğundan emin olun (Windows Terminal önerilir).
-
-│   ├── deep_web_researcher.py      # AI derin web araştırma
-
-│   ├── model_trainer.py            # Çoklu dataset eğitim## Notlar
-
-│   ├── advanced_ai.py              # İleri AI demoları- Web araştırma çıktıları `data/` altında bilgi tabanına kaydedilebilir.
-
-│   └── __init__.py                 # Model ve yardımcılar- Kod üretimi sonucu dosyalar `generated/` klasörüne kaydedilir (otomatik oluşturulur).
-
-├── notebooks/                      # Jupyter notebook'lar- Jupyter notebooklar `notebooks/` klasöründe olabilir; bazı demoları oradan tetikleyebilirsiniz.
-
-│   ├── 01_data_exploration.ipynb
-
-│   ├── 02_model_training.ipynb## Katkı ve Lisans
-
-│   ├── 03_model_evaluation.ipynb- PR ve önerilere açıktır. Lisans bilgisi eklenmediyse, lütfen kullanmadan önce proje sahibine danışın.
-
-│   └── 04_advanced_ai_techniques.ipynb#   a i 
-
-├── data/                           # Bilgi tabanı 
-
-│   ├── knowledge_base.json #   y a p a y - z e k a - s i s t e m i 
-
-│   └── examples/ 
-
-├── generated/                      # Kod üretici çıktıları 
-└── tests/                          # Test dosyaları
+pip install -r requirements_web.txt
 ```
+
+## 📖 Kullanım
+
+### Hızlı Başlangıç
+
+```bash
+python main.py
+```
+
+Ana menüden istediğiniz özelliği seçin (21 seçenek).
+
+### 🇹🇷 Türkçe Model Eğitimi (Google Colab)
+
+H100/A100/T4 GPU üzerinde Türkçe LLM eğitimi için:
+
+1. `turkish_h100_training.ipynb` dosyasını Google Colab'da açın
+2. **Runtime > Change runtime type > GPU** (H100 önerilir)
+3. Tüm hücreleri sırasıyla çalıştırın
+
+#### GPU Performans Tablosu
+
+| GPU | Model | Batch Size | Sequence | LoRA Rank | Precision | Tahmini Süre |
+|-----|-------|-----------|----------|-----------|-----------|-------------|
+| **H100 80GB** | Qwen 2.5-7B | 8 | 2048 | 64 | BF16 | ~2 saat |
+| **A100 40GB** | Qwen 2.5-7B | 4 | 2048 | 32 | BF16 | ~4 saat |
+| **L4 24GB** | Qwen 2.5-3B | 4 | 1024 | 32 | BF16 | ~6 saat |
+| **T4 16GB** | Qwen 2.5-1.5B | 2 | 512 | 16 | FP16 4-bit | ~8 saat |
+
+#### Eğitim Pipeline
+
+```
+1. HuggingFace'den 300K+ Türkçe dataset indirme
+2. Veri birleştirme ve chat formatına dönüştürme
+3. Continued Pre-training (Wikipedia + Web corpus)
+4. SFT (Supervised Fine-Tuning) Türkçe talimatlarla
+5. Otomatik Türkçe kalite değerlendirmesi
+6. Model kaydetme (lokal + Google Drive + HuggingFace Hub)
+```
+
+#### H100 Optimizasyonları
+- Flash Attention 2 (otomatik)
+- BF16 precision (quantization yok)
+- AdamW Fused optimizer
+- LoRA r=64, alpha=128
+- Gradient accumulation steps: 2
+- Max sequence length: 2048
+
+### 🎯 Diğer Ana Özellikler
+
+#### 🤖 Gelişmiş Sohbet
+- Doğal dil işleme ve bağlam anlama
+- Matematik ve programlama desteği
+- Context memory ile akıllı yanıtlar
+
+#### 🔍 Derin Web Araştırma (Seçenek 20)
+- Wikipedia + DuckDuckGo otomatik tarama
+- İlgili linklere otomatik gezinme (3 seviye)
+- AI destekli akıllı özet oluşturma
+- JSON + TXT formatında kaydetme
+
+#### 📚 Çoklu Dataset Model Eğitimi (Seçenek 21)
+- Otomatik dataset indirme (HuggingFace)
+- Çoklu dataset birleştirme
+- Hata toleranslı yükleme
+- İlerleme takibi
+
+#### 💻 Akıllı Kod Üretici
+- Otomatik kod yazma
+- Kod açıklama ve iyileştirme
+- `generated/` klasörüne kaydetme
 
 ## 🛠️ Teknolojiler
 
 - **AI/ML**: TensorFlow, PyTorch, scikit-learn
-- **NLP**: Hugging Face Transformers, Datasets
+- **NLP**: Hugging Face Transformers, Datasets, PEFT, TRL
 - **Web Scraping**: BeautifulSoup4, Requests, Wikipedia API
 - **Data Science**: NumPy, Pandas, Matplotlib, Seaborn
+- **Training**: Flash Attention 2, bitsandbytes, LoRA/QLoRA
 - **Development**: Python 3.11+
 
 ## 📊 Dataset Bilgileri
+
+### İngilizce Datasetler
 
 | Dataset | Boyut | Ağırlık | Amaç |
 |---------|-------|---------|------|
@@ -293,7 +196,18 @@ yapay-zeka-sistemi/
 | Tatsu-Lab Alpaca | 3,000 | 20% | Genel görevler |
 | Open Platypus | 2,000 | 20% | Kod + STEM |
 
-**Toplam: ~15,000 eğitim örneği**
+### 🇹🇷 Türkçe Datasetler
+
+| Dataset | Boyut | Kaynak | Amaç |
+|---------|-------|--------|------|
+| turkish_instructions_150k | 150,000 | alibayram | Türkçe talimatlar |
+| alpaca-turkish | 52,000 | malhajar | Türkçe Alpaca |
+| turkish_instructions | 53,000 | merve | Türkçe talimatlar |
+| Bactrian-X (tr) | 67,000 | MBZUAI | Çokdilli talimatlar |
+| Wikipedia (tr) | 100,000 | wikimedia | Ön-eğitim corpus |
+| CulturaX (tr) | 50,000 | uonlp | Web corpus |
+
+**Toplam Türkçe: ~472,000 eğitim örneği**
 
 ## 💡 Kullanım Örnekleri
 
@@ -333,10 +247,10 @@ yapay-zeka-sistemi/
 6. **Kaydetme**: JSON (ham veri) + TXT (özet)
 
 ### Model Eğitimi Akışı
-1. **Dataset Seçimi**: 4 farklı dataset
+1. **Dataset Seçimi**: 4 İngilizce + 6 Türkçe dataset
 2. **Otomatik İndirme**: Hugging Face'den
 3. **Birleştirme**: Ağırlıklı örnekleme
-4. **Eğitim**: Seçilen moda göre
+4. **Eğitim**: GPU'ya göre optimize edilmiş parametreler
 5. **Kaydetme**: Checkpoint + metrikler
 
 ## 🔧 Sorun Giderme
@@ -362,6 +276,11 @@ pip install gymnasium
 - Hugging Face hesabınızla giriş yapın (bazı datasetler için)
 - VPN kullanıyorsanız kapatın
 
+### Colab / GPU Hataları
+- H100 kullanıyorsanız: Flash Attention 2 otomatik yüklenir
+- T4 kullanıyorsanız: 4-bit quantization otomatik aktif olur
+- CUDA out of memory: Batch size veya sequence length azaltın
+
 ## 🤝 Katkıda Bulunma
 
 Katkılarınızı bekliyoruz! Lütfen:
@@ -374,6 +293,9 @@ Katkılarınızı bekliyoruz! Lütfen:
 
 ## 📝 Geliştirme Yol Haritası
 
+- [x] Türkçe model eğitim notebook'u (H100 optimizeli)
+- [x] 300K+ Türkçe dataset entegrasyonu
+- [x] Çoklu GPU desteği (H100/A100/L4/T4)
 - [ ] GPT-4 API entegrasyonu
 - [ ] Vektör veritabanı desteği (Pinecone, Weaviate)
 - [ ] RAG (Retrieval Augmented Generation)
@@ -396,6 +318,7 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosy
 - [Hugging Face](https://huggingface.co/) - Dataset ve model desteği
 - [OpenAI](https://openai.com/) - İlham kaynağı
 - [Wikipedia API](https://www.mediawiki.org/wiki/API:Main_page) - Web araştırma
+- [Qwen Team](https://huggingface.co/Qwen) - Temel model
 - Tüm açık kaynak topluluğuna
 
 ## 📞 İletişim
