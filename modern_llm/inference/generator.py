@@ -70,6 +70,12 @@ class TextGenerator:
         prompt: str,
         config: Optional[GenerationConfig] = None,
         system_prompt: Optional[str] = None,
+        max_new_tokens: Optional[int] = None,
+        temperature: Optional[float] = None,
+        top_k: Optional[int] = None,
+        top_p: Optional[float] = None,
+        repetition_penalty: Optional[float] = None,
+        do_sample: Optional[bool] = None,
     ) -> str:
         """
         Metin üret.
@@ -78,11 +84,25 @@ class TextGenerator:
             prompt: Kullanıcı girdisi
             config: Üretim ayarları
             system_prompt: Sistem mesajı
+            max_new_tokens: Üretilecek max token (kısayol)
+            temperature: Sampling sıcaklığı (kısayol)
+            top_k: Top-k filtre (kısayol)
+            top_p: Top-p nucleus filtre (kısayol)
+            repetition_penalty: Tekrar cezası (kısayol)
+            do_sample: Sampling aç/kapa (kısayol)
             
         Returns:
             Üretilen metin
         """
         config = config or GenerationConfig()
+        
+        # Kısayol parametreleri config'e uygula
+        if max_new_tokens is not None: config.max_new_tokens = max_new_tokens
+        if temperature is not None: config.temperature = temperature
+        if top_k is not None: config.top_k = top_k
+        if top_p is not None: config.top_p = top_p
+        if repetition_penalty is not None: config.repetition_penalty = repetition_penalty
+        if do_sample is not None: config.do_sample = do_sample
         
         # Chat template uygula
         if system_prompt:
@@ -117,9 +137,16 @@ class TextGenerator:
         prompt: str,
         config: Optional[GenerationConfig] = None,
         system_prompt: Optional[str] = None,
+        max_new_tokens: Optional[int] = None,
+        temperature: Optional[float] = None,
     ) -> Dict[str, str]:
         """
         CoT destekli metin üret.
+        
+        Args:
+            prompt: Kullanıcı girdisi
+            max_new_tokens: Üretilecek max token (kısayol)
+            temperature: Sampling sıcaklığı (kısayol)
         
         Returns:
             {
@@ -129,6 +156,8 @@ class TextGenerator:
             }
         """
         config = config or GenerationConfig(enable_thinking=True)
+        if max_new_tokens is not None: config.max_new_tokens = max_new_tokens
+        if temperature is not None: config.temperature = temperature
         
         # Thinking prompt ekle
         think_system = system_prompt or (
