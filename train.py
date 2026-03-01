@@ -325,6 +325,37 @@ def prepare_sample_data():
             except Exception as e:
                 print(f"  ⚠️ {cot_file} yüklenemedi: {e}")
     
+    # ===== data/datasets/ klasöründen otomatik yükle =====
+    datasets_dir = "data/datasets"
+    if os.path.exists(datasets_dir):
+        for fname in sorted(os.listdir(datasets_dir)):
+            if not fname.endswith(".json"):
+                continue
+            fpath = os.path.join(datasets_dir, fname)
+            try:
+                with open(fpath, 'r', encoding='utf-8') as f:
+                    raw = json.load(f)
+                if not isinstance(raw, list) or len(raw) == 0:
+                    continue
+                sample = raw[0]
+                count_loaded = 0
+                if "messages" in sample:
+                    sft_data.extend(raw)
+                    count_loaded = len(raw)
+                    print(f"  ✅ [SFT] datasets/{fname}: {count_loaded} örnek")
+                elif "instruction" in sample and ("thinking" in sample or "response" in sample):
+                    cot_data.extend(raw)
+                    count_loaded = len(raw)
+                    print(f"  ✅ [CoT] datasets/{fname}: {count_loaded} örnek")
+                elif "text" in sample:
+                    for item in raw:
+                        if item.get("text"):
+                            pretrain_texts.append(item["text"])
+                    count_loaded = len(raw)
+                    print(f"  ✅ [PRE] datasets/{fname}: {count_loaded} metin")
+            except Exception as e:
+                print(f"  ⚠️ datasets/{fname} yüklenemedi: {e}")
+    
     # Varsayılan CoT örnekleri
     if not cot_data:
         cot_data = [
