@@ -1,312 +1,288 @@
-# 🤖 Gelişmiş Yapay Zeka Sistemi
+# � Modern LLM - Sıfırdan Yapay Zeka Sistemi
 
 [![GitHub](https://img.shields.io/badge/GitHub-cebrailbagatarhan-blue?style=flat&logo=github)](https://github.com/cebrailbagatarhan/yapay-zeka-sistemi)
 [![Python](https://img.shields.io/badge/Python-3.11+-green?style=flat&logo=python)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red?style=flat&logo=pytorch)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cebrailbagatarhan/yapay-zeka-sistemi/blob/main/modern_llm_training.ipynb)
 
-Türkçe destekli, çok yetenekli yapay zeka asistanı ve model eğitim platformu. GPT-4 tarzı derin akıl yürütme (reasoning), AI destekli web araştırması, akıllı kod üretimi ve çoklu dataset ile model eğitimi özellikleri sunar.
+**Sıfırdan yazılmış, günümüz modern LLM mimarilerini (GPT-4, Claude, Gemini, LLaMA 3) temel alan bir dil modeli.**
+Chain-of-Thought (CoT) reasoning, Türkçe dil desteği ve Google Colab üzerinde eğitim imkanı sunar.
 
-## ✨ Özellikler
+## ✨ Temel Özellikler
 
-### 🧠 AI Yetenekleri
-- **Gelişmiş Reasoning**: Derin analiz, çoklu perspektif, sentez ve context memory
-- **Akıllı Kod Üretimi**: İsteğe göre kod yazma, iyileştirme önerileri, dosyaya kaydetme
-- **Derin Web Araştırma**: AI destekli web analizi, otomatik link gezinme ve akıllı özet oluşturma
-- **Chatbot**: Matematik, Python, ML ve genel konularda açıklamalı yanıtlar
-- **Demo Modülleri**: LoRA, CoT dataset, RL tutor, Knowledge Distillation
+### 🏗️ Modern LLM Mimarisi (Sıfırdan)
+- **RMSNorm** — Pre-normalization (LayerNorm yerine)
+- **Rotary Position Embeddings (RoPE)** — θ=500,000, linear/dynamic/NTK scaling
+- **Grouped Query Attention (GQA)** — 4:1 ratio ile verimli attention
+- **SwiGLU Activation** — Gate + Up + Down projections (GELU yerine)
+- **Flash Attention** — PyTorch 2.0+ SDPA, manual fallback
+- **KV-Cache** — Verimli autoregressive inference
+- **Weight Tying** — Embedding ve LM Head ağırlık paylaşımı
 
-### 📚 Model Eğitimi
-- **Çoklu Dataset Desteği**: 
-  - 🧮 CAMEL AI Math (5K matematik problemi)
-  - 📝 Alpaca Cleaned (5K instruction-following)
-  - 🎯 Tatsu-Lab Alpaca (3K genel görev)
-  - 💻 Open Platypus (2K kod + STEM)
-- **Otomatik Dataset İndirme**: Hugging Face entegrasyonu
-- **Esnek Eğitim Modları**: Test, küçük, orta, tam paket seçenekleri
+### 🧠 Chain-of-Thought (CoT) Reasoning
+- **`<think>...</think>`** blokları ile dahili akıl yürütme
+- Otomatik görev tipi tespiti (math, code, logic, analysis)
+- Güven skoru hesaplama
+- 35+ CoT eğitim örneği (Türkçe + İngilizce)
+- Claude / DeepSeek-R1 tarzı reasoning
 
-### 🇹🇷 Türkçe Model Eğitimi (YENİ)
-- **H100/A100/T4 GPU Desteği**: Otomatik GPU algılama ve optimizasyon
-- **300K+ Türkçe Dataset**: HuggingFace'den otomatik indirme
-  - 📖 alibayram/turkish_instructions_150k (150K talimat)
-  - 📝 malhajar/alpaca-turkish (52K Alpaca)
-  - 🎯 merve/turkish_instructions (53K talimat)
-  - 🌍 MBZUAI/Bactrian-X - Türkçe (67K çokdilli)
-  - 📚 wikimedia/wikipedia - Türkçe (100K makale)
-  - 📰 uonlp/CulturaX - Türkçe (50K streaming)
-- **İki Aşamalı Eğitim**: Continued Pre-training + SFT (Supervised Fine-Tuning)
-- **Qwen 2.5 Tabanlı**: 7B (H100/A100), 3B (L4), 1.5B (T4) otomatik seçim
-- **Google Colab Notebook**: `turkish_h100_training.ipynb`
+### 🔤 Custom Tokenizer
+- **SentencePiece BPE** tokenizer (sıfırdan eğitim)
+- **Byte-level fallback** (SentencePiece olmadan da çalışır)
+- 14 özel token: `<pad>`, `<bos>`, `<eos>`, `<think>`, `</think>`, chat tokenları
+- Türkçe karakter desteği (çÇğĞıİöÖşŞüÜ)
+- Chat template sistemi
 
-### 🔍 Derin Web Araştırma
-- Wikipedia + DuckDuckGo otomatik tarama
-- 20+ güvenilir kaynak desteği
-- İlgili linklere otomatik gezinme (3 seviye derinlik)
-- AI destekli akıllı özet oluşturma
-- Anahtar kelime analizi ve kaynak güvenilirlik kontrolü
-- JSON + TXT formatında sonuç kaydetme
+### 📊 Model Boyutları
+
+| Model | Params | GPU | Hidden | Layers | Heads | KV Heads |
+|-------|--------|-----|--------|--------|-------|----------|
+| **Nano** | ~30M | T4 (16GB) | 512 | 8 | 8 | 2 |
+| **Small** | ~100M | L4 (24GB) | 768 | 12 | 12 | 4 |
+| **Medium** | ~350M | A100 (40GB) | 1024 | 24 | 16 | 4 |
+| **Large** | ~1.3B | H100 (80GB) | 2048 | 24 | 32 | 8 |
+| **XL** | ~3B | H100 (80GB) | 3072 | 32 | 32 | 8 |
+
+### 🎯 3 Aşamalı Eğitim Pipeline
+1. **Pre-training** — Causal LM (next-token prediction)
+2. **SFT** — Supervised Fine-Tuning (instruction-following)
+3. **CoT Fine-tuning** — Chain-of-Thought reasoning eğitimi
+
+### 🇹🇷 Türkçe Dil Desteği
+- Türkçe CoT eğitim verileri (Atatürk, coğrafya, dilbilgisi, tarih vb.)
+- HuggingFace Türkçe dataset entegrasyonu
+- Türkçe karakter setine özel tokenizer desteği
+
+### 🔧 Ek Özellikler
+- Qwen 2.5 fine-tuning (mevcut, ayrı notebook)
+- AI destekli web araştırma
+- Akıllı kod üretimi
+- İnteraktif sohbet arayüzü
 
 ## 📁 Proje Yapısı
 
 ```
 yapay-zeka-sistemi/
-├── main.py                         # Ana menü (21 özellik)
-├── turkish_h100_training.ipynb     # 🇹🇷 Türkçe H100 eğitim notebook'u
-├── colab_runner.ipynb              # Google Colab eğitim notebook'u
-├── README.md                       # Proje dokümantasyonu
-├── requirements.txt                # Python bağımlılıkları
-├── requirements_web.txt            # Web araştırma bağımlılıkları
-├── src/
-│   ├── advanced_reasoning.py       # Reasoning, Web ve Kod üretim motorları
-│   ├── web_research.py             # Web araştırma, bilgi tabanı
-│   ├── deep_web_researcher.py      # AI destekli derin web araştırma
-│   ├── model_trainer.py            # Çoklu dataset model eğitimi
-│   ├── advanced_ai.py              # İleri seviye AI demoları
-│   └── __init__.py                 # Model ve yardımcı sınıflar
-├── notebooks/                      # Jupyter notebook'lar
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_model_training.ipynb
-│   ├── 03_model_evaluation.ipynb
-│   └── 04_advanced_ai_techniques.ipynb
+├── modern_llm/                      # 🧠 Sıfırdan Modern LLM
+│   ├── __init__.py                  # Paket tanımları
+│   ├── config.py                    # Model + Training konfigürasyonları
+│   ├── tokenizer.py                 # SentencePiece BPE tokenizer
+│   ├── utils.py                     # GPU, bellek, seed, timer utilities
+│   ├── model/                       # Transformer mimarisi
+│   │   ├── attention.py             # RoPE + GQA + Flash Attention
+│   │   ├── layers.py                # RMSNorm + SwiGLU + TransformerBlock
+│   │   └── transformer.py           # ModernLLMForCausalLM (tam model)
+│   ├── training/                    # Eğitim pipeline
+│   │   ├── dataset.py               # TextDataset, ChatDataset, CoTDataset
+│   │   └── trainer.py               # Sıfırdan Trainer (mixed precision, grad accum)
+│   ├── inference/                   # Inference pipeline
+│   │   └── generator.py             # TextGenerator + ChatInterface
+│   └── cot/                         # Chain-of-Thought modülü
+│       └── engine.py                # CoT Engine (task detection, confidence)
+├── modern_llm_training.ipynb        # 🚀 Colab Eğitim Notebook'u
+├── colab_runner.ipynb               # Qwen fine-tuning notebook'u
+├── turkish_h100_training.ipynb      # Türkçe H100 eğitim notebook'u
 ├── data/
-│   ├── knowledge_base.json         # Bilgi tabanı
-│   ├── turkish_datasets/           # 🇹🇷 Türkçe dataset kaynakları
-│   │   └── dataset_sources.json
-│   ├── training/                   # Eğitim verileri
-│   │   ├── turkish_general_dataset.json
-│   │   ├── conversational_dataset.json
-│   │   ├── reasoning_chat_dataset.json
-│   │   └── code_examples_dataset.json
-│   └── examples/
-├── qwen-model/                     # Qwen 2.5 model dosyaları
-├── generated/                      # Kod üretici çıktıları
-└── tests/                          # Test dosyaları
+│   ├── cot/                         # CoT eğitim verileri
+│   │   ├── cot_training_data.json   # 25 CoT örneği (EN+TR)
+│   │   └── turkish_cot_data.json    # 10 Türkçe CoT örneği
+│   ├── training/                    # SFT eğitim verileri
+│   ├── examples/                    # Ek dataset örnekleri
+│   └── knowledge_base.json
+├── src/                             # Orijinal AI sistemi
+├── qwen-model/                      # Qwen 2.5 model dosyaları
+├── main.py                          # Ana menü
+└── tests/                           # Test dosyaları
 ```
 
-## 🚀 Kurulum
+## 🚀 Hızlı Başlangıç
 
 ### Gereksinimler
 - Python 3.11+
-- pip veya conda
-- Git
+- PyTorch 2.0+
+- GPU (önerilen): T4/L4/A100/H100
 
-### Kurulum Adımları
+### Kurulum
 
 ```bash
 # Repository'yi klonlayın
 git clone https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git
 cd yapay-zeka-sistemi
 
-# Sanal ortam oluşturun (önerilen)
-python -m venv .conda
-.conda\Scripts\activate  # Windows
-# source .conda/bin/activate  # Linux/Mac
+# Sanal ortam oluşturun
+python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # Linux/Mac
 
 # Bağımlılıkları yükleyin
+pip install torch sentencepiece datasets wandb
 pip install -r requirements.txt
-pip install -r requirements_web.txt
 ```
+
+### Google Colab'da Eğitim (Önerilen)
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cebrailbagatarhan/yapay-zeka-sistemi/blob/main/modern_llm_training.ipynb)
+
+1. Yukarıdaki butona tıklayın
+2. **Runtime > Change runtime type > GPU** seçin (H100/A100 önerilir)
+3. Hücreleri sırasıyla çalıştırın
+
+Notebook otomatik olarak:
+- GPU tipini algılar ve uygun model boyutunu seçer
+- Eğitim verisini hazırlar (Türkçe + İngilizce)
+- Tokenizer'ı eğitir
+- 3 aşamalı eğitimi çalıştırır (Pre-train → SFT → CoT)
+- Modeli kaydeder ve test eder
 
 ## 📖 Kullanım
 
-### Hızlı Başlangıç
+### Python'da Kullanım
 
-```bash
-python main.py
+```python
+from modern_llm.config import PRESET_CONFIGS
+from modern_llm.model.transformer import ModernLLMForCausalLM
+from modern_llm.tokenizer import ModernTokenizer
+from modern_llm.inference.generator import TextGenerator
+
+# Model oluştur (veya eğitilmiş modeli yükle)
+config = PRESET_CONFIGS["nano"]
+model = ModernLLMForCausalLM(config)
+
+# Tokenizer
+tokenizer = ModernTokenizer(vocab_size=config.vocab_size)
+
+# Metin üret
+generator = TextGenerator(model, tokenizer)
+output = generator.generate("Yapay zeka nedir?", max_new_tokens=200)
+print(output)
 ```
 
-Ana menüden istediğiniz özelliği seçin (21 seçenek).
+### CoT (Düşünme) Modu
 
-### 🇹🇷 Türkçe Model Eğitimi (Google Colab)
-
-H100/A100/T4 GPU üzerinde Türkçe LLM eğitimi için:
-
-1. `turkish_h100_training.ipynb` dosyasını Google Colab'da açın
-2. **Runtime > Change runtime type > GPU** (H100 önerilir)
-3. Tüm hücreleri sırasıyla çalıştırın
-
-#### GPU Performans Tablosu
-
-| GPU | Model | Batch Size | Sequence | LoRA Rank | Precision | Tahmini Süre |
-|-----|-------|-----------|----------|-----------|-----------|-------------|
-| **H100 80GB** | Qwen 2.5-7B | 8 | 2048 | 64 | BF16 | ~2 saat |
-| **A100 40GB** | Qwen 2.5-7B | 4 | 2048 | 32 | BF16 | ~4 saat |
-| **L4 24GB** | Qwen 2.5-3B | 4 | 1024 | 32 | BF16 | ~6 saat |
-| **T4 16GB** | Qwen 2.5-1.5B | 2 | 512 | 16 | FP16 4-bit | ~8 saat |
-
-#### Eğitim Pipeline
-
-```
-1. HuggingFace'den 300K+ Türkçe dataset indirme
-2. Veri birleştirme ve chat formatına dönüştürme
-3. Continued Pre-training (Wikipedia + Web corpus)
-4. SFT (Supervised Fine-Tuning) Türkçe talimatlarla
-5. Otomatik Türkçe kalite değerlendirmesi
-6. Model kaydetme (lokal + Google Drive + HuggingFace Hub)
+```python
+# Chain-of-Thought ile akıl yürütme
+result = generator.generate_with_thinking(
+    prompt="15 * 23 kaçtır? Adım adım hesapla.",
+    max_new_tokens=300,
+    temperature=0.3,
+)
+print(f"Düşünme: {result['thinking']}")
+print(f"Cevap: {result['response']}")
 ```
 
-#### H100 Optimizasyonları
-- Flash Attention 2 (otomatik)
-- BF16 precision (quantization yok)
-- AdamW Fused optimizer
-- LoRA r=64, alpha=128
-- Gradient accumulation steps: 2
-- Max sequence length: 2048
+### İnteraktif Sohbet
 
-### 🎯 Diğer Ana Özellikler
+```python
+from modern_llm.inference.generator import ChatInterface
 
-#### 🤖 Gelişmiş Sohbet
-- Doğal dil işleme ve bağlam anlama
-- Matematik ve programlama desteği
-- Context memory ile akıllı yanıtlar
+chat = ChatInterface(model, tokenizer)
+chat.start()  # Terminal'de interaktif sohbet başlatır
 
-#### 🔍 Derin Web Araştırma (Seçenek 20)
-- Wikipedia + DuckDuckGo otomatik tarama
-- İlgili linklere otomatik gezinme (3 seviye)
-- AI destekli akıllı özet oluşturma
-- JSON + TXT formatında kaydetme
+# Komutlar: /think (CoT aç/kapa), /reset, /temp 0.5, /quit
+```
 
-#### 📚 Çoklu Dataset Model Eğitimi (Seçenek 21)
-- Otomatik dataset indirme (HuggingFace)
-- Çoklu dataset birleştirme
-- Hata toleranslı yükleme
-- İlerleme takibi
+### Eğitilmiş Modeli Yükleme
 
-#### 💻 Akıllı Kod Üretici
-- Otomatik kod yazma
-- Kod açıklama ve iyileştirme
-- `generated/` klasörüne kaydetme
+```python
+# Kayıtlı modeli yükle
+model = ModernLLMForCausalLM.from_pretrained("trained_model/")
+tokenizer = ModernTokenizer(model_path="trained_model/tokenizer")
+generator = TextGenerator(model, tokenizer)
+
+output = generator.generate("Merhaba!")
+```
+
+## 🏗️ Mimari Detayları
+
+### Transformer Blok Akışı
+
+```
+Input → Embed → [TransformerBlock × N] → RMSNorm → LM Head → Logits
+
+TransformerBlock:
+  x → RMSNorm → GQA(RoPE) → + residual
+    → RMSNorm → SwiGLU FFN → + residual
+```
+
+### Grouped Query Attention (GQA)
+
+```
+Query Heads:  [H1] [H2] [H3] [H4] [H5] [H6] [H7] [H8] [H9] [H10] [H11] [H12]
+               ↓    ↓    ↓    ↓    ↓    ↓    ↓    ↓    ↓    ↓     ↓     ↓
+KV Heads:     [KV1      ][KV2      ][KV3      ][KV4      ]  (4:1 ratio)
+```
+
+### SwiGLU FFN
+
+```
+SwiGLU(x) = SiLU(W_gate · x) ⊙ (W_up · x)
+Output    = W_down · SwiGLU(x)
+```
+
+### CoT Format
+
+```
+<|im_start|><|assistant|>
+<think>
+Adım 1: Problemi anlıyorum...
+Adım 2: Çözüm yolunu belirliyorum...
+Adım 3: Hesaplama yapıyorum...
+</think>
+Nihai cevabım şudur: ...
+<|im_end|>
+```
+
+## 📊 GPU Performans Tablosu
+
+### Modern LLM (Sıfırdan)
+
+| GPU | Model | Params | Batch | Seq Len | Precision | Grad Accum |
+|-----|-------|--------|-------|---------|-----------|------------|
+| **T4 16GB** | Nano | ~30M | 4 | 512 | FP16 | 8 |
+| **L4 24GB** | Small | ~100M | 4 | 1024 | BF16 | 4 |
+| **A100 40GB** | Medium | ~350M | 8 | 2048 | BF16 | 2 |
+| **H100 80GB** | Large | ~1.3B | 16 | 4096 | BF16 | 1 |
+
+### Qwen Fine-tuning (Mevcut)
+
+| GPU | Model | Batch | LoRA Rank | Precision |
+|-----|-------|-------|-----------|-----------|
+| **T4** | Qwen 2.5-1.5B | 2 | 16 | FP16 4-bit |
+| **A100** | Qwen 2.5-7B | 4 | 32 | BF16 |
+| **H100** | Qwen 2.5-7B | 8 | 64 | BF16 |
 
 ## 🛠️ Teknolojiler
 
-- **AI/ML**: TensorFlow, PyTorch, scikit-learn
-- **NLP**: Hugging Face Transformers, Datasets, PEFT, TRL
-- **Web Scraping**: BeautifulSoup4, Requests, Wikipedia API
-- **Data Science**: NumPy, Pandas, Matplotlib, Seaborn
-- **Training**: Flash Attention 2, bitsandbytes, LoRA/QLoRA
-- **Development**: Python 3.11+
-
-## 📊 Dataset Bilgileri
-
-### İngilizce Datasetler
-
-| Dataset | Boyut | Ağırlık | Amaç |
-|---------|-------|---------|------|
-| CAMEL AI Math | 5,000 | 30% | Matematik problemleri |
-| Alpaca Cleaned | 5,000 | 30% | Instruction-following |
-| Tatsu-Lab Alpaca | 3,000 | 20% | Genel görevler |
-| Open Platypus | 2,000 | 20% | Kod + STEM |
-
-### 🇹🇷 Türkçe Datasetler
-
-| Dataset | Boyut | Kaynak | Amaç |
-|---------|-------|--------|------|
-| turkish_instructions_150k | 150,000 | alibayram | Türkçe talimatlar |
-| alpaca-turkish | 52,000 | malhajar | Türkçe Alpaca |
-| turkish_instructions | 53,000 | merve | Türkçe talimatlar |
-| Bactrian-X (tr) | 67,000 | MBZUAI | Çokdilli talimatlar |
-| Wikipedia (tr) | 100,000 | wikimedia | Ön-eğitim corpus |
-| CulturaX (tr) | 50,000 | uonlp | Web corpus |
-
-**Toplam Türkçe: ~472,000 eğitim örneği**
-
-## 💡 Kullanım Örnekleri
-
-### Chatbot Örnekleri
-```python
-# Matematik
-"sin(pi/2) hesapla"
-"√16 + 2^3"
-
-# Python
-"Python'da for döngüsü nasıl kullanılır?"
-"Liste dilimleme nedir?"
-```
-
-### Kod Üretici Örnekleri
-```python
-"Flask ile REST API yaz"
-"Binary search algoritması"
-"Pandas ile CSV dosyası analiz et"
-```
-
-### Web Araştırma Örnekleri
-```python
-"LLM evaluation yöntemleri"
-"RAG mimarisi nedir?"
-"Transformer architecture"
-```
-
-## 🎯 Özellik Detayları
-
-### Derin Web Araştırma Akışı
-1. **Kaynak Tarama**: Wikipedia + DuckDuckGo + 20 güvenilir site
-2. **Link Toplama**: Her kaynaktan ilgili linkler
-3. **Derin Gezinme**: Linklere girerek içerik çıkarma (3 seviye)
-4. **AI Analizi**: Anahtar kelime + kaynak analizi
-5. **Özet Oluşturma**: AI destekli akıllı özet
-6. **Kaydetme**: JSON (ham veri) + TXT (özet)
-
-### Model Eğitimi Akışı
-1. **Dataset Seçimi**: 4 İngilizce + 6 Türkçe dataset
-2. **Otomatik İndirme**: Hugging Face'den
-3. **Birleştirme**: Ağırlıklı örnekleme
-4. **Eğitim**: GPU'ya göre optimize edilmiş parametreler
-5. **Kaydetme**: Checkpoint + metrikler
-
-## 🔧 Sorun Giderme
-
-### Paket Hataları
-```bash
-# Web araştırma hatası
-pip install -r requirements_web.txt
-
-# Dataset hatası
-pip install datasets transformers
-
-# AI demo hatası
-pip install gymnasium
-```
-
-### Karakter Kodlama Sorunları
-- Windows Terminal kullanın (UTF-8 desteği için)
-- PowerShell'de: `chcp 65001`
-
-### Dataset İndirme Hataları
-- İnternet bağlantınızı kontrol edin
-- Hugging Face hesabınızla giriş yapın (bazı datasetler için)
-- VPN kullanıyorsanız kapatın
-
-### Colab / GPU Hataları
-- H100 kullanıyorsanız: Flash Attention 2 otomatik yüklenir
-- T4 kullanıyorsanız: 4-bit quantization otomatik aktif olur
-- CUDA out of memory: Batch size veya sequence length azaltın
-
-## 🤝 Katkıda Bulunma
-
-Katkılarınızı bekliyoruz! Lütfen:
-
-1. Fork yapın
-2. Feature branch oluşturun (`git checkout -b feature/YeniOzellik`)
-3. Commit yapın (`git commit -m 'Yeni özellik: XYZ'`)
-4. Push yapın (`git push origin feature/YeniOzellik`)
-5. Pull Request açın
+- **AI/ML**: PyTorch 2.0+, SentencePiece, Wandb
+- **Mimari**: RMSNorm, RoPE, GQA, SwiGLU, Flash Attention, KV-Cache
+- **Eğitim**: Mixed Precision (BF16/FP16), Gradient Accumulation, Cosine LR
+- **NLP**: Hugging Face Datasets, Transformers, PEFT, TRL
+- **Web**: BeautifulSoup4, Requests, Wikipedia API
+- **Platform**: Google Colab, CUDA 12+
 
 ## 📝 Geliştirme Yol Haritası
 
-- [x] Türkçe model eğitim notebook'u (H100 optimizeli)
-- [x] 300K+ Türkçe dataset entegrasyonu
-- [x] Çoklu GPU desteği (H100/A100/L4/T4)
-- [ ] GPT-4 API entegrasyonu
-- [ ] Vektör veritabanı desteği (Pinecone, Weaviate)
-- [ ] RAG (Retrieval Augmented Generation)
-- [ ] Fine-tuning pipeline iyileştirmeleri
+- [x] Sıfırdan modern LLM mimarisi (RoPE, GQA, SwiGLU, RMSNorm)
+- [x] Chain-of-Thought (CoT) reasoning modülü
+- [x] Custom BPE tokenizer (Türkçe destekli)
+- [x] 3 aşamalı eğitim pipeline (Pretrain → SFT → CoT)
+- [x] Google Colab eğitim notebook'u
+- [x] CoT eğitim verileri (35+ örnek, TR+EN)
+- [x] Qwen fine-tuning (ayrı notebook)
+- [x] Türkçe H100 eğitim notebook'u
+- [ ] DPO (Direct Preference Optimization) desteği
+- [ ] RLHF pipeline
+- [ ] Daha büyük CoT dataset (1000+ örnek)
+- [ ] Daha fazla HuggingFace dataset entegrasyonu
 - [ ] Web UI (Gradio/Streamlit)
+- [ ] Model Hub'a yükleme
 - [ ] Docker containerization
-- [ ] CI/CD pipeline
+- [ ] Multi-GPU eğitim (FSDP/DeepSpeed)
 
 ## 📄 Lisans
 
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosyasına bakın.
+MIT Lisansı — Detaylar için `LICENSE` dosyasına bakın.
 
 ## 👤 Geliştirici
 
@@ -315,17 +291,11 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosy
 
 ## 🙏 Teşekkürler
 
-- [Hugging Face](https://huggingface.co/) - Dataset ve model desteği
-- [OpenAI](https://openai.com/) - İlham kaynağı
-- [Wikipedia API](https://www.mediawiki.org/wiki/API:Main_page) - Web araştırma
-- [Qwen Team](https://huggingface.co/Qwen) - Temel model
+- [PyTorch](https://pytorch.org/) — Temel deep learning framework
+- [Hugging Face](https://huggingface.co/) — Dataset ve model ekosistemi
+- [SentencePiece](https://github.com/google/sentencepiece) — Tokenizer
+- [LLaMA](https://ai.meta.com/llama/) / [Mistral](https://mistral.ai/) — Mimari ilham
 - Tüm açık kaynak topluluğuna
-
-## 📞 İletişim
-
-Sorularınız ve önerileriniz için:
-- Issue açın: [GitHub Issues](https://github.com/cebrailbagatarhan/yapay-zeka-sistemi/issues)
-- Pull Request gönderin
 
 ---
 
