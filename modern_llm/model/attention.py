@@ -13,7 +13,7 @@ mekanizmalarının sıfırdan yazılmış versiyonu.
   göreceli pozisyon bilgisi kodlar
 - Grouped Query Attention (GQA) - KV head sayısını azaltarak bellek
   ve hız optimizasyonu sağlar
-- Flash Attention 2 desteği (PyTorch 2.0+ SDPA)
+- PyTorch 2.0+ SDPA desteği (manuel fallback ile)
 - KV-Cache ile verimli autoregressive inference
 - Sliding window attention desteği (opsiyonel)
 """
@@ -278,7 +278,7 @@ class GroupedQueryAttention(nn.Module):
         kv_seq_len = key_states.shape[2]
         
         # === Attention Hesaplama ===
-        # Flash Attention (PyTorch 2.0+ SDPA)
+        # PyTorch scaled dot-product attention (SDPA)
         if self.use_flash_attention and hasattr(F, 'scaled_dot_product_attention') and not output_attentions:
             # SDPA causal mask otomatik uygular
             if attention_mask is not None and attention_mask.shape[-1] != kv_seq_len:
