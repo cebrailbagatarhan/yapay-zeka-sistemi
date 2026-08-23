@@ -73,7 +73,7 @@ class ModelConfig:
     tie_word_embeddings: bool = True
     
     # ===== Attention =====
-    use_flash_attention: bool = True
+    use_flash_attention: bool = True  # Historical name: enables the PyTorch SDPA path
     sliding_window: Optional[int] = None  # None = tam attention
     
     # ===== Initialization =====
