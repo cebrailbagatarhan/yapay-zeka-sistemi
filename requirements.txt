@@ -9,7 +9,8 @@ seaborn>=0.11.0
 # Makine öğrenmesi ve deep learning
 scikit-learn>=1.0.0
 tensorflow>=2.8.0
-torch>=1.11.0
+torch>=2.1.0
+sentencepiece>=0.2.0
 torchvision>=0.12.0
 
 # 🚀 Model Optimizasyonu - Quantization
@@ -18,7 +19,6 @@ accelerate>=0.20.0    # Model yükleme optimizasyonu
 
 # ⚡ Async Web Scraping - Paralel HTTP
 httpx>=0.25.0         # Async HTTP client
-asyncio              # Async/await (built-in Python 3.7+)
 
 # Web Scraping ve Arama
 requests>=2.28.0
