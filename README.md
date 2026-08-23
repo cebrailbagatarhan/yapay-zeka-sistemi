@@ -1,304 +1,150 @@
-# � Modern LLM - Sıfırdan Yapay Zeka Sistemi
+# Yapay Zeka Sistemi — ModernLLM ve Qwen Deneyleri
 
-[![GitHub](https://img.shields.io/badge/GitHub-cebrailbagatarhan-blue?style=flat&logo=github)](https://github.com/cebrailbagatarhan/yapay-zeka-sistemi)
 [![Python](https://img.shields.io/badge/Python-3.11+-green?style=flat&logo=python)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red?style=flat&logo=pytorch)](https://pytorch.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.x-red?style=flat&logo=pytorch)](https://pytorch.org/)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cebrailbagatarhan/yapay-zeka-sistemi/blob/main/modern_llm_training.ipynb)
 
-**Sıfırdan yazılmış, günümüz modern LLM mimarilerini (GPT-4, Claude, Gemini, LLaMA 3) temel alan bir dil modeli.**
-Chain-of-Thought (CoT) reasoning, Türkçe dil desteği ve Google Colab üzerinde eğitim imkanı sunar.
+Bu depo, dil modeli mimarisi ve fine-tuning üzerine deneysel/öğrenme amaçlı çalışmalar içerir. Üretime hazır bir model, GPT-4/Claude/Gemini replikası veya doğrulanmış bir “reasoning modeli” sunmaz.
 
-## ✨ Temel Özellikler
+> **Durum özeti:** ModernLLM kodu mevcut ve H100 üzerinde kısmi eğitim denemeleri kaydedilmiş durumda; ancak depodaki notebook çıktıları tamamlanmış, tekrarlanabilir bir eğitim koşusu göstermiyor. Qwen dosyaları ise ağırlıklı olarak fine-tuning reçetesi/notebook niteliğinde ve tamamlanmış eğitim metriği içermiyor.
 
-### 🏗️ Modern LLM Mimarisi (Sıfırdan)
-- **RMSNorm** — Pre-normalization (LayerNorm yerine)
-- **Rotary Position Embeddings (RoPE)** — θ=500,000, linear/dynamic/NTK scaling
-- **Grouped Query Attention (GQA)** — 4:1 ratio ile verimli attention
-- **SwiGLU Activation** — Gate + Up + Down projections (GELU yerine)
-- **Flash Attention** — PyTorch 2.0+ SDPA, manual fallback
-- **KV-Cache** — Verimli autoregressive inference
-- **Weight Tying** — Embedding ve LM Head ağırlık paylaşımı
+## Birbirinden Ayrı Çalışma Alanları
 
-### 🧠 Chain-of-Thought (CoT) Reasoning
-- **`<think>...</think>`** blokları ile dahili akıl yürütme
-- Otomatik görev tipi tespiti (math, code, logic, analysis)
-- Güven skoru hesaplama
-- 35+ CoT eğitim örneği (Türkçe + İngilizce)
-- Claude / DeepSeek-R1 tarzı reasoning
+| Alan | Başlangıç noktası | Kod / notebook | Kanıtlanan durum |
+| --- | --- | --- | --- |
+| **ModernLLM** | PyTorch ile tanımlanan özel decoder-only Transformer | [`modern_llm/`](modern_llm/), [`modern_llm_training.ipynb`](modern_llm_training.ipynb) | Mimari ve trainer uygulanmış; H100 koşuları kısmi/kesintili |
+| **Qwen fine-tuning** | Önceden eğitilmiş Qwen2.5 modelleri + LoRA/QLoRA | [`colab_runner.ipynb`](colab_runner.ipynb), [`turkish_h100_training.ipynb`](turkish_h100_training.ipynb) | Eğitim reçetesi mevcut; tamamlanmış koşu ve final metrik yok |
+| **Web asistanı** | Önceden eğitilmiş Qwen + web kaynaklarından içerik toplama | [`qwen_deep_web.py`](qwen_deep_web.py), [`qwen_web_assistant.py`](qwen_web_assistant.py), [`web_app.py`](web_app.py) | Uygulama kodu mevcut; kalite/hız benchmarkı yok |
+| **Eski/demonstrasyon deneyleri** | Kural tabanlı ve küçük örnek sistemler | [`src/`](src/), [`results/`](results/) | ModernLLM veya Qwen eğitim sonucu olarak değerlendirilmemeli |
 
-### 🔤 Custom Tokenizer
-- **SentencePiece BPE** tokenizer (sıfırdan eğitim)
-- **Byte-level fallback** (SentencePiece olmadan da çalışır)
-- 14 özel token: `<pad>`, `<bos>`, `<eos>`, `<think>`, `</think>`, chat tokenları
-- Türkçe karakter desteği (çÇğĞıİöÖşŞüÜ)
-- Chat template sistemi
+Bu alanların sonuçları birbirinin yerine kullanılamaz. Özellikle `results/` altındaki küçük teacher/student ve RL JSON dosyaları ModernLLM eğitim metriği değildir.
 
-### 📊 Model Boyutları
+## ModernLLM'de Uygulanan Mimari
 
-| Model | Params | GPU | Hidden | Layers | Heads | KV Heads |
-|-------|--------|-----|--------|--------|-------|----------|
-| **Nano** | ~30M | T4 (16GB) | 512 | 8 | 8 | 2 |
-| **Small** | ~100M | L4 (24GB) | 768 | 12 | 12 | 4 |
-| **Medium** | ~350M | A100 (40GB) | 1024 | 24 | 16 | 4 |
-| **Large** | ~1.3B | H100 (80GB) | 2048 | 24 | 32 | 8 |
-| **XL** | ~3B | H100 (80GB) | 3072 | 32 | 32 | 8 |
+- RMSNorm ve pre-normalization
+- Rotary Position Embeddings (RoPE)
+- Grouped Query Attention (GQA)
+- SwiGLU ileri beslemeli katmanlar
+- KV cache ve tied input/output embeddings
+- Causal language-model loss
+- Mixed precision, gradient accumulation, checkpoint ve değerlendirme döngüsü
 
-### 🎯 3 Aşamalı Eğitim Pipeline
-1. **Pre-training** — Causal LM (next-token prediction)
-2. **SFT** — Supervised Fine-Tuning (instruction-following)
-3. **CoT Fine-tuning** — Chain-of-Thought reasoning eğitimi
+### Attention uygulaması
 
-### 🇹🇷 Türkçe Dil Desteği
-- Türkçe CoT eğitim verileri (Atatürk, coğrafya, dilbilgisi, tarih vb.)
-- HuggingFace Türkçe dataset entegrasyonu
-- Türkçe karakter setine özel tokenizer desteği
+ModernLLM, uygun PyTorch sürümünde [`torch.nn.functional.scaled_dot_product_attention`](https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html) çağrısını kullanır; aksi durumda manuel attention yoluna düşer. Bu, depoda doğrudan FlashAttention/FlashAttention-2 paketinin kullanıldığı anlamına gelmez. `use_flash_attention` yapılandırma alanı tarihsel bir isimdir ve ModernLLM kodunda PyTorch SDPA yolunu seçer.
 
-### 🔧 Ek Özellikler
-- Qwen 2.5 fine-tuning (mevcut, ayrı notebook)
-- AI destekli web araştırma
-- Akıllı kod üretimi
-- İnteraktif sohbet arayüzü
+Qwen notebook'larında isteğe bağlı `flash_attention_2` kurulumu ayrı bir deney yoludur; ModernLLM uygulamasıyla karıştırılmamalıdır.
 
-## 📁 Proje Yapısı
+## CoT Verisinin Anlamı
 
-```
-yapay-zeka-sistemi/
-├── modern_llm/                      # 🧠 Sıfırdan Modern LLM
-│   ├── __init__.py                  # Paket tanımları
-│   ├── config.py                    # Model + Training konfigürasyonları
-│   ├── tokenizer.py                 # SentencePiece BPE tokenizer
-│   ├── utils.py                     # GPU, bellek, seed, timer utilities
-│   ├── model/                       # Transformer mimarisi
-│   │   ├── attention.py             # RoPE + GQA + Flash Attention
-│   │   ├── layers.py                # RMSNorm + SwiGLU + TransformerBlock
-│   │   └── transformer.py           # ModernLLMForCausalLM (tam model)
-│   ├── training/                    # Eğitim pipeline
-│   │   ├── dataset.py               # TextDataset, ChatDataset, CoTDataset
-│   │   └── trainer.py               # Sıfırdan Trainer (mixed precision, grad accum)
-│   ├── inference/                   # Inference pipeline
-│   │   └── generator.py             # TextGenerator + ChatInterface
-│   └── cot/                         # Chain-of-Thought modülü
-│       └── engine.py                # CoT Engine (task detection, confidence)
-├── modern_llm_training.ipynb        # 🚀 Colab Eğitim Notebook'u
-├── colab_runner.ipynb               # Qwen fine-tuning notebook'u
-├── turkish_h100_training.ipynb      # Türkçe H100 eğitim notebook'u
-├── data/
-│   ├── cot/                         # CoT eğitim verileri
-│   │   ├── cot_training_data.json   # 25 CoT örneği (EN+TR)
-│   │   └── turkish_cot_data.json    # 10 Türkçe CoT örneği
-│   ├── training/                    # SFT eğitim verileri
-│   ├── examples/                    # Ek dataset örnekleri
-│   └── knowledge_base.json
-├── src/                             # Orijinal AI sistemi
-├── qwen-model/                      # Qwen 2.5 model dosyaları
-├── main.py                          # Ana menü
-└── tests/                           # Test dosyaları
-```
+Depoda `<think>...</think>` biçiminde toplam **133** örnek bulunuyor:
 
-## 🚀 Hızlı Başlangıç
+| Dosya | Örnek |
+| --- | ---: |
+| [`data/cot/cot_training_data.json`](data/cot/cot_training_data.json) | 33 |
+| [`data/cot/turkish_cot_data.json`](data/cot/turkish_cot_data.json) | 10 |
+| [`data/examples/cot_dataset.json`](data/examples/cot_dataset.json) | 90 |
 
-### Gereksinimler
-- Python 3.11+
-- PyTorch 2.0+
-- GPU (önerilen): T4/L4/A100/H100
+Bu örnekler modele belirli bir çıktı biçimi göstermek için kullanılabilir. Tek başına örnek sayısı; genellenebilir akıl yürütme, matematik doğruluğu veya zincir içi düşünmenin güvenilirliği için kanıt değildir. Depoda şu anda held-out reasoning benchmarkı, karşılaştırmalı baseline veya insan değerlendirmesi yoktur.
 
-### Kurulum
+## Model Presetleri
+
+Aşağıdaki parametre sayıları [`ModelConfig.estimated_params`](modern_llm/config.py) formülüyle hesaplanan yapılandırma değerleridir. “Eğitildi” anlamına gelmez.
+
+| Preset | Hesaplanan parametre | Hidden | Katman | Attention head | KV head | Maks. context | Durum |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Nano | 39,068,160 | 512 | 8 | 8 | 2 | 2,048 | Yalnızca config |
+| Small | 100,289,280 | 768 | 12 | 12 | 4 | 2,048 | Yalnızca config |
+| Medium | 303,612,928 | 1,024 | 24 | 16 | 4 | 4,096 | Yalnızca config |
+| Large | 1,129,416,704 | 2,048 | 24 | 32 | 8 | 4,096 | Oluşturuldu; kısmi H100 koşuları var |
+| XL | 3,270,183,936 | 3,072 | 32 | 32 | 8 | 8,192 | Yalnızca config |
+
+## Kaydedilmiş Eğitim Kanıtı
+
+Bu tablo yalnızca depoya commit edilmiş notebook çıktısını özetler. Kesintili koşulardaki ara değerler final sonuç değildir.
+
+| Koşu | Model / donanım | Veri ve plan | Gerçekleşen durum | Son gözlem |
+| --- | --- | --- | --- | --- |
+| İlk pre-training | ModernLLM Large / H100 79.2 GB | 7 blok, 2 epoch | `Total steps: 0`; optimizer adımı yok | `loss=0`, `PPL=1` bir eğitim sonucu değildir |
+| SFT | ModernLLM Large / H100 | 31 örnek, 3 planlı adım | Çıktı eğitim başlangıcından sonra tamamlanmıyor | Final metrik yok |
+| CoT fine-tuning | ModernLLM Large / H100 | 133 örnek, 37 planlı adım | CUDA OOM ile durdu | Final metrik yok |
+| Extended run | ModernLLM Large / H100 | 18,370 planlı adım | Bir deneme 200. adımda kesildi | Ara eval loss `1.4176`, PPL `4.13` |
+| Optimized 1K run | ModernLLM Large / H100 | En fazla 32,000 örnek, seq len 1,024, 1,000 planlı adım | 600. adım sonrasında kesildi | Ara train loss `0.0009`; ara eval loss `0.0001`, PPL `1.00` |
+| Qwen fine-tuning | Qwen2.5 1.5B/3B/7B reçeteleri | GPU'ya göre LoRA/QLoRA planı | Tamamlanmış eğitim çıktısı yok | Final metrik yok |
+
+Optimized 1K hücresinde eğitim ve değerlendirme indeksleri aynı corpus üzerinden bağımsız seçildiği için örtüşme mümkündür. Bu nedenle çok düşük ara eval loss değeri genelleme kanıtı olarak kullanılmamalıdır.
+
+### Sonuç tablosu
+
+| Koşu | Params | Eğitim tokenı | GPU-saat | Final loss | Final perplexity | tok/s | Sistem RAM | Peak VRAM |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| ModernLLM Large | 1,129,416,704 | Kaydedilmedi | Kaydedilmedi | Yok — koşu tamamlanmadı | Yok — koşu tamamlanmadı | Ölçülmedi | Ölçülmedi | Ölçülmedi; başarısız denemeler yaklaşık 79 GB'ı doldurdu |
+| Qwen fine-tuning | Seçilen base modele bağlı | Kaydedilmedi | Kaydedilmedi | Yok — tamamlanmış koşu yok | Yok — tamamlanmış koşu yok | Ölçülmedi | Ölçülmedi | Ölçülmedi |
+
+Eksik hücreler sıfır değildir; metriklerin mevcut kod/notebook tarafından güvenilir biçimde kaydedilmediğini gösterir.
+
+## Hızlı Başlangıç
 
 ```bash
-# Repository'yi klonlayın
 git clone https://github.com/cebrailbagatarhan/yapay-zeka-sistemi.git
 cd yapay-zeka-sistemi
 
-# Sanal ortam oluşturun
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
 
-# Bağımlılıkları yükleyin
-pip install torch sentencepiece datasets wandb
 pip install -r requirements.txt
 ```
 
-### Google Colab'da Eğitim (Önerilen)
+ModernLLM notebook'u:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cebrailbagatarhan/yapay-zeka-sistemi/blob/main/modern_llm_training.ipynb)
 
-1. Yukarıdaki butona tıklayın
-2. **Runtime > Change runtime type > GPU** seçin (H100/A100 önerilir)
-3. Hücreleri sırasıyla çalıştırın
+Qwen notebook'ları, ModernLLM'den ayrı çalıştırılmalıdır:
 
-Notebook otomatik olarak:
-- GPU tipini algılar ve uygun model boyutunu seçer
-- Eğitim verisini hazırlar (Türkçe + İngilizce)
-- Tokenizer'ı eğitir
-- 3 aşamalı eğitimi çalıştırır (Pre-train → SFT → CoT)
-- Modeli kaydeder ve test eder
+- [`colab_runner.ipynb`](colab_runner.ipynb): GPU'ya göre Qwen model/LoRA reçetesi
+- [`turkish_h100_training.ipynb`](turkish_h100_training.ipynb): Türkçe veri indirme ve Qwen SFT planı; commit edilmiş çalıştırma çıktısı yok
 
-## 📖 Kullanım
+## Tekrarlanabilir Sonuç İçin Eksikler
 
-### Python'da Kullanım
+Yeni bir “tamamlandı” sonucu eklemeden önce aşağıdakiler kaydedilmelidir:
 
-```python
-from modern_llm.config import PRESET_CONFIGS
-from modern_llm.model.transformer import ModernLLMForCausalLM
-from modern_llm.tokenizer import ModernTokenizer
-from modern_llm.inference.generator import TextGenerator
+1. Sabit seed, commit SHA ve tam model/training config
+2. Veri kaynağı, lisansı, temizleme adımları, split manifesti ve duplicate kontrolü
+3. Gerçek eğitim tokenı ve optimizer adımı
+4. GPU modeli/adedi, duvar saati ve GPU-saat
+5. Final train/eval loss, perplexity ve held-out değerlendirme
+6. tokens/s, sistem RAM ve peak allocated/reserved VRAM
+7. Kesintisiz log ve yüklenebilir checkpoint
+8. CoT için ayrı, veri sızıntısından arındırılmış reasoning benchmarkı
 
-# Model oluştur (veya eğitilmiş modeli yükle)
-config = PRESET_CONFIGS["nano"]
-model = ModernLLMForCausalLM(config)
+## Bilinen Sorunlar
 
-# Tokenizer
-tokenizer = ModernTokenizer(vocab_size=config.vocab_size)
+- Commit edilmiş ana ModernLLM notebook'unda başarısız, yeniden denenmiş ve kesilmiş hücreler birlikte bulunuyor.
+- Kaydedilmiş tokenizer çalıştırmasında SentencePiece eğitimi hata veriyor ve byte-level fallback kullanılıyor.
+- Bazı harici veri setleri notebook çıktısında bulunamıyor, erişim gerektiriyor veya güncel `datasets` sürümüyle yüklenemiyor.
+- Extended koşularda OOM, collator hataları, checkpointing hataları ve manuel kesintiler bulunuyor.
+- Qwen notebook sonuçları, ModernLLM sonuç tablosuna dahil edilmemelidir.
 
-# Metin üret
-generator = TextGenerator(model, tokenizer)
-output = generator.generate("Yapay zeka nedir?", max_new_tokens=200)
-print(output)
+## Proje Yapısı
+
+```text
+modern_llm/                  # Özel PyTorch decoder-only model ve trainer
+modern_llm_training.ipynb    # ModernLLM deney notebook'u
+colab_runner.ipynb           # Qwen fine-tuning reçetesi
+turkish_h100_training.ipynb  # Türkçe Qwen SFT reçetesi
+data/                        # Küçük yerel eğitim/demonstrasyon verileri
+qwen_deep_web.py             # Qwen + web araştırma uygulaması
+qwen_web_assistant.py        # Qwen web yardımcı kodu
+src/                         # Eski/ayrı deneyler
+results/                     # Eski/demonstrasyon JSON çıktıları
+tests/                       # Mevcut temel testler
 ```
 
-### CoT (Düşünme) Modu
+## Lisans
 
-```python
-# Chain-of-Thought ile akıl yürütme
-result = generator.generate_with_thinking(
-    prompt="15 * 23 kaçtır? Adım adım hesapla.",
-    max_new_tokens=300,
-    temperature=0.3,
-)
-print(f"Düşünme: {result['thinking']}")
-print(f"Cevap: {result['response']}")
-```
+Bu depoda şu anda bir `LICENSE` dosyası bulunmuyor. Bu nedenle MIT veya başka bir lisans varsayılmamalıdır. Yeniden kullanım/dağıtım koşullarını netleştirmek için açık bir lisans dosyası eklenmelidir.
 
-### İnteraktif Sohbet
+## Maintainer
 
-```python
-from modern_llm.inference.generator import ChatInterface
-
-chat = ChatInterface(model, tokenizer)
-chat.start()  # Terminal'de interaktif sohbet başlatır
-
-# Komutlar: /think (CoT aç/kapa), /reset, /temp 0.5, /quit
-```
-
-### Eğitilmiş Modeli Yükleme
-
-```python
-# Kayıtlı modeli yükle
-model = ModernLLMForCausalLM.from_pretrained("trained_model/")
-tokenizer = ModernTokenizer(model_path="trained_model/tokenizer")
-generator = TextGenerator(model, tokenizer)
-
-output = generator.generate("Merhaba!")
-```
-
-## 🏗️ Mimari Detayları
-
-### Transformer Blok Akışı
-
-```
-Input → Embed → [TransformerBlock × N] → RMSNorm → LM Head → Logits
-
-TransformerBlock:
-  x → RMSNorm → GQA(RoPE) → + residual
-    → RMSNorm → SwiGLU FFN → + residual
-```
-
-### Grouped Query Attention (GQA)
-
-```
-Query Heads:  [H1] [H2] [H3] [H4] [H5] [H6] [H7] [H8] [H9] [H10] [H11] [H12]
-               ↓    ↓    ↓    ↓    ↓    ↓    ↓    ↓    ↓    ↓     ↓     ↓
-KV Heads:     [KV1      ][KV2      ][KV3      ][KV4      ]  (4:1 ratio)
-```
-
-### SwiGLU FFN
-
-```
-SwiGLU(x) = SiLU(W_gate · x) ⊙ (W_up · x)
-Output    = W_down · SwiGLU(x)
-```
-
-### CoT Format
-
-```
-<|im_start|><|assistant|>
-<think>
-Adım 1: Problemi anlıyorum...
-Adım 2: Çözüm yolunu belirliyorum...
-Adım 3: Hesaplama yapıyorum...
-</think>
-Nihai cevabım şudur: ...
-<|im_end|>
-```
-
-## 📊 GPU Performans Tablosu
-
-### Modern LLM (Sıfırdan)
-
-| GPU | Model | Params | Batch | Seq Len | Precision | Grad Accum |
-|-----|-------|--------|-------|---------|-----------|------------|
-| **T4 16GB** | Nano | ~30M | 4 | 512 | FP16 | 8 |
-| **L4 24GB** | Small | ~100M | 4 | 1024 | BF16 | 4 |
-| **A100 40GB** | Medium | ~350M | 8 | 2048 | BF16 | 2 |
-| **H100 80GB** | Large | ~1.3B | 16 | 4096 | BF16 | 1 |
-
-### Qwen Fine-tuning (Mevcut)
-
-| GPU | Model | Batch | LoRA Rank | Precision |
-|-----|-------|-------|-----------|-----------|
-| **T4** | Qwen 2.5-1.5B | 2 | 16 | FP16 4-bit |
-| **A100** | Qwen 2.5-7B | 4 | 32 | BF16 |
-| **H100** | Qwen 2.5-7B | 8 | 64 | BF16 |
-
-## 🛠️ Teknolojiler
-
-- **AI/ML**: PyTorch 2.0+, SentencePiece, Wandb
-- **Mimari**: RMSNorm, RoPE, GQA, SwiGLU, Flash Attention, KV-Cache
-- **Eğitim**: Mixed Precision (BF16/FP16), Gradient Accumulation, Cosine LR
-- **NLP**: Hugging Face Datasets, Transformers, PEFT, TRL
-- **Web**: BeautifulSoup4, Requests, Wikipedia API
-- **Platform**: Google Colab, CUDA 12+
-
-## 📝 Geliştirme Yol Haritası
-
-- [x] Sıfırdan modern LLM mimarisi (RoPE, GQA, SwiGLU, RMSNorm)
-- [x] Chain-of-Thought (CoT) reasoning modülü
-- [x] Custom BPE tokenizer (Türkçe destekli)
-- [x] 3 aşamalı eğitim pipeline (Pretrain → SFT → CoT)
-- [x] Google Colab eğitim notebook'u
-- [x] CoT eğitim verileri (35+ örnek, TR+EN)
-- [x] Qwen fine-tuning (ayrı notebook)
-- [x] Türkçe H100 eğitim notebook'u
-- [ ] DPO (Direct Preference Optimization) desteği
-- [ ] RLHF pipeline
-- [ ] Daha büyük CoT dataset (1000+ örnek)
-- [ ] Daha fazla HuggingFace dataset entegrasyonu
-- [ ] Web UI (Gradio/Streamlit)
-- [ ] Model Hub'a yükleme
-- [ ] Docker containerization
-- [ ] Multi-GPU eğitim (FSDP/DeepSpeed)
-
-## 📄 Lisans
-
-MIT Lisansı — Detaylar için `LICENSE` dosyasına bakın.
-
-## 👤 Geliştirici
-
-**Cebrail Bağatar Han**
-- GitHub: [@cebrailbagatarhan](https://github.com/cebrailbagatarhan)
-
-## 🙏 Teşekkürler
-
-- [PyTorch](https://pytorch.org/) — Temel deep learning framework
-- [Hugging Face](https://huggingface.co/) — Dataset ve model ekosistemi
-- [SentencePiece](https://github.com/google/sentencepiece) — Tokenizer
-- [LLaMA](https://ai.meta.com/llama/) / [Mistral](https://mistral.ai/) — Mimari ilham
-- Tüm açık kaynak topluluğuna
-
----
-
-⭐ **Projeyi beğendiyseniz yıldız vermeyi unutmayın!**
-
-🚀 **Happy Coding!**
+[@cebrailbagatarhan](https://github.com/cebrailbagatarhan)

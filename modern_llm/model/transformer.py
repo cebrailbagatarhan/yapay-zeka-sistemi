@@ -531,7 +531,7 @@ class ModernLLMForCausalLM(nn.Module):
                     "RoPE",
                     "GQA",
                     "SwiGLU",
-                    "Flash Attention",
+                    "PyTorch SDPA",
                     "KV-Cache",
                     "CoT",
                 ],
