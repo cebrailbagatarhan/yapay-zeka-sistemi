@@ -890,6 +890,9 @@ def main():
         _, train_config = get_config_for_gpu(gpu_type)
         print(f"  Model: {model_config.model_name}")
     
+    # Global preset nesnesini değiştirmemek için bağımsız kopya.
+    model_config = ModelConfig.from_dict(model_config.to_dict())
+    
     # Kullanıcı override'ları
     if args.batch_size:
         train_config.batch_size = args.batch_size
@@ -953,6 +956,15 @@ def main():
     decoded = tokenizer.decode(tokens)
     print(f"  Test: '{test_text}'")
     print(f"  Tokens: {len(tokens)} token → '{decoded}'")
+    
+    # Tokenizer eğitimi başarısız olduğunda byte fallback'in gerçek
+    # vocabulary boyutunu kullan; eşlenmemiş output ID üretme.
+    if len(tokenizer) != model_config.vocab_size:
+        print(
+            f"  ⚠️ Model vocab_size {model_config.vocab_size:,} → "
+            f"{len(tokenizer):,} olarak tokenizer ile eşitlendi"
+        )
+        model_config.vocab_size = len(tokenizer)
     
     # ===== 5. Model Oluşturma =====
     print("\n" + "="*60)

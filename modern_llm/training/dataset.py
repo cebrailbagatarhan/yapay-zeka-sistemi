@@ -59,10 +59,11 @@ class TextDataset(Dataset):
             ids = tokenizer.encode(text, add_bos=True, add_eos=True)
             all_ids.extend(ids)
         
-        # Sabit uzunlukta bloklar oluştur
-        for i in range(0, len(all_ids) - max_length, self.stride):
-            block = all_ids[i:i + max_length + 1]  # +1 for labels shift
-            if len(block) == max_length + 1:
+        # Model loss'u causal shift'i kendi içinde uygular. Bu nedenle
+        # input_ids ve labels aynı sequence olmalıdır.
+        for i in range(0, len(all_ids) - max_length + 1, self.stride):
+            block = all_ids[i:i + max_length]
+            if len(block) == max_length:
                 self.examples.append(block)
     
     def __len__(self):
@@ -70,8 +71,8 @@ class TextDataset(Dataset):
     
     def __getitem__(self, idx):
         block = self.examples[idx]
-        input_ids = torch.tensor(block[:-1], dtype=torch.long)
-        labels = torch.tensor(block[1:], dtype=torch.long)
+        input_ids = torch.tensor(block, dtype=torch.long)
+        labels = input_ids.clone()
         
         return {
             "input_ids": input_ids,
@@ -130,22 +131,34 @@ class ChatDataset(Dataset):
         if not messages:
             return None
         
-        # Chat template uygula
-        formatted = self.tokenizer.apply_chat_template(messages)
+        # Mesajları ayrı tokenize ederek token sınırlarını kesin olarak koru.
+        # Böylece sonraki user/system turları yanlışlıkla loss'a dahil olmaz.
+        from modern_llm.tokenizer import CHAT_TEMPLATE
         
-        # Tokenize
-        input_ids = self.tokenizer.encode(formatted, add_bos=True, add_eos=True)
+        input_ids = [self.tokenizer.bos_token_id]
+        labels = [-100] if self.mask_user_tokens else [self.tokenizer.bos_token_id]
+        
+        for msg in messages:
+            role = msg.get("role")
+            if role not in CHAT_TEMPLATE or role == "assistant_with_thinking":
+                raise ValueError(f"Desteklenmeyen mesaj rolü: {role}")
+            
+            formatted = CHAT_TEMPLATE[role].format(content=msg.get("content", ""))
+            msg_ids = self.tokenizer.encode(formatted)
+            input_ids.extend(msg_ids)
+            
+            if self.mask_user_tokens and role != "assistant":
+                labels.extend([-100] * len(msg_ids))
+            else:
+                labels.extend(msg_ids)
+        
+        input_ids.append(self.tokenizer.eos_token_id)
+        supervise_eos = not self.mask_user_tokens or messages[-1].get("role") == "assistant"
+        labels.append(self.tokenizer.eos_token_id if supervise_eos else -100)
         
         # Max length'e kırp
-        if len(input_ids) > self.max_length:
-            input_ids = input_ids[:self.max_length]
-        
-        # Labels oluştur
-        labels = input_ids.copy()
-        
-        # User/system tokenlarını maskele (sadece assistant'ın cevabını eğit)
-        if self.mask_user_tokens:
-            labels = self._mask_non_assistant_tokens(messages, labels)
+        input_ids = input_ids[:self.max_length]
+        labels = labels[:self.max_length]
         
         # Padding
         pad_length = self.max_length - len(input_ids)
@@ -164,43 +177,32 @@ class ChatDataset(Dataset):
         messages: List[Dict[str, str]],
         labels: List[int],
     ) -> List[int]:
-        """Assistant olmayan tokenları -100 ile maskele."""
-        # Basit yaklaşım: <|assistant|> tokenından sonraki kısımları eğit
-        # Daha sofistike yaklaşım her mesajın sınırlarını bulur
+        """Assistant olmayan tokenları -100 ile maskele.
+
+        Geriye dönük uyumluluk için korunur. Yeni örnekler _process_item
+        içinde mesaj bazında tokenleştirilerek maskelenir.
+        """
+        from modern_llm.tokenizer import CHAT_TEMPLATE
         
-        # Her mesajı ayrı tokenize edip sınırları bul
-        current_pos = 0
         masked_labels = [-100] * len(labels)
+        current_pos = 1  # BOS
         
-        is_assistant = False
         for msg in messages:
-            role = msg["role"]
-            content = msg["content"]
+            role = msg.get("role")
+            if role not in CHAT_TEMPLATE or role == "assistant_with_thinking":
+                raise ValueError(f"Desteklenmeyen mesaj rolü: {role}")
+            
+            formatted = CHAT_TEMPLATE[role].format(content=msg.get("content", ""))
+            msg_ids = self.tokenizer.encode(formatted)
+            end_pos = min(current_pos + len(msg_ids), len(labels))
             
             if role == "assistant":
-                # Assistant mesajının tam formatını tokenize et
-                from modern_llm.tokenizer import CHAT_TEMPLATE
-                formatted = CHAT_TEMPLATE["assistant"].format(content=content)
-                msg_ids = self.tokenizer.encode(formatted)
-                
-                # Bu mesajın başlangıç pozisyonunu bul
-                # (basitleştirilmiş - gerçek implementasyonda daha robust olmalı)
-                for i in range(current_pos, len(labels)):
-                    if i < len(labels):
-                        masked_labels[i] = labels[i]
-                
-                current_pos += len(msg_ids)
-            else:
-                # System/user mesajlarını tokenize et
-                if role == "system":
-                    from modern_llm.tokenizer import CHAT_TEMPLATE
-                    formatted = CHAT_TEMPLATE["system"].format(content=content)
-                else:
-                    from modern_llm.tokenizer import CHAT_TEMPLATE
-                    formatted = CHAT_TEMPLATE["user"].format(content=content)
-                
-                msg_ids = self.tokenizer.encode(formatted)
-                current_pos += len(msg_ids)
+                masked_labels[current_pos:end_pos] = labels[current_pos:end_pos]
+            
+            current_pos = end_pos
+        
+        if messages and messages[-1].get("role") == "assistant" and current_pos < len(labels):
+            masked_labels[current_pos] = labels[current_pos]  # EOS
         
         return masked_labels
     

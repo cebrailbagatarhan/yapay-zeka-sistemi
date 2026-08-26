@@ -42,7 +42,6 @@ from typing import Optional, List, Dict, Any
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, ConcatDataset, random_split
-from torch.cuda.amp import autocast, GradScaler
 
 # Modern LLM imports
 from modern_llm.config import (
@@ -541,7 +540,7 @@ class H100OptimizedTrainer:
         optimizer = self._create_optimizer()
         
         # Total steps estimation
-        steps_per_epoch = len(train_loader) // gradient_accumulation
+        steps_per_epoch = math.ceil(len(train_loader) / gradient_accumulation)
         total_steps = steps_per_epoch * max_epochs
         warmup_steps = max(1, int(total_steps * 0.05))
         
@@ -564,6 +563,8 @@ class H100OptimizedTrainer:
         for epoch in range(max_epochs):
             epoch_loss = 0.0
             epoch_steps = 0
+            num_batches = len(train_loader)
+            remainder = num_batches % gradient_accumulation
             
             for batch_idx, batch in enumerate(train_loader):
                 # ⏱️ Zaman kontrolü
@@ -574,26 +575,41 @@ class H100OptimizedTrainer:
                 
                 # Move to device
                 batch = {k: v.to(self.device, non_blocking=True) for k, v in batch.items()}
+                in_partial_group = (
+                    remainder > 0 and batch_idx >= num_batches - remainder
+                )
+                accumulation_divisor = (
+                    remainder if in_partial_group else gradient_accumulation
+                )
                 
                 # Forward pass (BF16)
-                with autocast(device_type="cuda", dtype=self.amp_dtype, enabled=self.use_amp):
+                with torch.autocast(
+                    device_type=self.device.type,
+                    dtype=self.amp_dtype,
+                    enabled=self.use_amp,
+                ):
                     outputs = self.model(
                         input_ids=batch["input_ids"],
                         attention_mask=batch.get("attention_mask"),
                         labels=batch["labels"],
                     )
-                    loss = outputs.loss / gradient_accumulation
+                    raw_loss = outputs.loss
+                    loss = raw_loss / accumulation_divisor
                 
                 # Backward pass (BF16 doesn't need scaler!)
                 loss.backward()
                 
-                epoch_loss += loss.item() * gradient_accumulation
+                epoch_loss += raw_loss.item()
                 epoch_steps += 1
-                log_loss += loss.item() * gradient_accumulation
+                log_loss += raw_loss.item()
                 log_steps += 1
                 
                 # Gradient accumulation step
-                if (batch_idx + 1) % gradient_accumulation == 0:
+                should_step = (
+                    (batch_idx + 1) % gradient_accumulation == 0
+                    or batch_idx + 1 == num_batches
+                )
+                if should_step:
                     # Gradient clipping
                     torch.nn.utils.clip_grad_norm_(
                         self.model.parameters(),
@@ -680,23 +696,16 @@ class H100OptimizedTrainer:
         
         all_metrics = {}
         
-        # ===== Tokenizer Eğitimi =====
-        tok_start = time.time()
-        if pretrain_texts and len(pretrain_texts) > 5:
-            print("\n🔤 Tokenizer eğitiliyor...")
-            try:
-                self.tokenizer.train(
-                    texts=pretrain_texts[:500],  # İlk 500 metin yeterli
-                    vocab_size=self.model_config.vocab_size,
-                    output_path=os.path.join(self.output_dir, "tokenizer"),
-                )
-                print("  ✅ Tokenizer eğitimi tamamlandı")
-            except Exception as e:
-                print(f"  ⚠️ Tokenizer eğitimi başarısız (byte-fallback devam): {e}")
-        tok_time = time.time() - tok_start
+        # Tokenizer model oluşturulmadan önce hazırlanmış olmalıdır.
+        if len(self.tokenizer) != self.model_config.vocab_size:
+            raise ValueError(
+                "Tokenizer/model vocab_size uyumsuzluğu: "
+                f"{len(self.tokenizer)} != {self.model_config.vocab_size}"
+            )
         
-        # Kalan zamanı yeniden hesapla
-        remaining = self.time_budget - tok_time
+        # Tokenizer hazırlığı main() içinde tamamlandığı için tüm eğitim
+        # bütçesi model aşamalarına ayrılır.
+        remaining = self.time_budget
         pretrain_time = remaining * TIME_BUDGET_RATIOS["pretrain"] / (1 - TIME_BUDGET_RATIOS["tokenizer"])
         sft_time = remaining * TIME_BUDGET_RATIOS["sft"] / (1 - TIME_BUDGET_RATIOS["tokenizer"])
         cot_time = remaining * TIME_BUDGET_RATIOS["cot"] / (1 - TIME_BUDGET_RATIOS["tokenizer"])
@@ -958,7 +967,7 @@ def main():
         print("⚠️ CUDA bulunamadı! CPU mode (çok yavaş)")
     
     # ===== Config =====
-    model_config = PRESET_CONFIGS[args.model]
+    model_config = ModelConfig.from_dict(PRESET_CONFIGS[args.model].to_dict())
     
     # H100 preset training config
     train_config = TrainingConfig(
@@ -979,15 +988,36 @@ def main():
     # ===== Load Datasets =====
     data = load_all_datasets(".")
     
+    # ===== Create Tokenizer =====
+    # Tokenizer modelden önce hazırlanır; böylece embedding/lm_head boyutu
+    # tokenizer'ın gerçek vocabulary boyutuyla aynı olur.
+    tokenizer = ModernTokenizer(vocab_size=model_config.vocab_size)
+    pretrain_texts = data.get("pretrain", [])
+    if pretrain_texts and len(pretrain_texts) > 5:
+        print("\n🔤 Tokenizer eğitiliyor...")
+        try:
+            tokenizer.train(
+                texts=pretrain_texts[:500],
+                vocab_size=model_config.vocab_size,
+                output_path=os.path.join(args.output_dir, "tokenizer"),
+            )
+            print("  ✅ Tokenizer eğitimi tamamlandı")
+        except Exception as exc:
+            print(f"  ⚠️ Tokenizer eğitilemedi; byte fallback kullanılacak: {exc}")
+    
+    if len(tokenizer) != model_config.vocab_size:
+        print(
+            f"  ⚠️ Model vocab_size {model_config.vocab_size:,} → "
+            f"{len(tokenizer):,} olarak tokenizer ile eşitlendi"
+        )
+        model_config.vocab_size = len(tokenizer)
+    
     # ===== Create Model =====
     print("\n🏗️  Model oluşturuluyor...")
     model = ModernLLMForCausalLM(model_config)
     params = count_parameters(model)
     print(f"  Parametreler: {format_params(params['total'])}")
     print(f"  Eğitilebilir: {format_params(params['trainable'])}")
-    
-    # ===== Create Tokenizer =====
-    tokenizer = ModernTokenizer(vocab_size=model_config.vocab_size)
     
     # ===== Train =====
     trainer = H100OptimizedTrainer(
