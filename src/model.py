@@ -3,6 +3,7 @@ Basit Neural Network Modeli
 Bu dosya, sıfırdan yazılmış bir sinir ağı implementasyonu içerir.
 """
 
+import os
 import numpy as np
 import json
 from typing import List, Tuple, Optional
@@ -41,6 +42,14 @@ class Activation:
         """Tanh fonksiyonunun türevi"""
         return 1 - x**2
 
+    @staticmethod
+    def binary_cross_entropy(y_true, y_pred, eps=1e-12):
+        """Sigmoid çıkışla uyumlu, sayısal olarak kararlı BCE kaybı."""
+        p = np.clip(y_pred, eps, 1.0 - eps)
+        return -np.mean(
+            y_true * np.log(p) + (1.0 - y_true) * np.log(1.0 - p)
+        )
+
 
 class NeuralNetwork:
     """
@@ -50,7 +59,8 @@ class NeuralNetwork:
     Backpropagation algoritması ile eğitim yapar.
     """
     
-    def __init__(self, layers: List[int], activation='sigmoid', learning_rate=0.1):
+    def __init__(self, layers: List[int], activation='sigmoid', learning_rate=0.1,
+                 momentum=0.9):
         """
         Neural Network'ü başlatır
         
@@ -58,23 +68,13 @@ class NeuralNetwork:
             layers: Her katmandaki nöron sayısı [input, hidden1, hidden2, ..., output]
             activation: Aktivasyon fonksiyonu ('sigmoid', 'relu', 'tanh')
             learning_rate: Öğrenme oranı
+            momentum: SGD momentum katsayısı (0 = kapalı)
         """
         self.layers = layers
         self.learning_rate = learning_rate
+        self.momentum = momentum
         self.num_layers = len(layers)
-        
-        # Aktivasyon fonksiyonunu seç
-        if activation == 'sigmoid':
-            self.activation = Activation.sigmoid
-            self.activation_derivative = Activation.sigmoid_derivative
-        elif activation == 'relu':
-            self.activation = Activation.relu
-            self.activation_derivative = Activation.relu_derivative
-        elif activation == 'tanh':
-            self.activation = Activation.tanh
-            self.activation_derivative = Activation.tanh_derivative
-        else:
-            raise ValueError("Desteklenen aktivasyon fonksiyonları: 'sigmoid', 'relu', 'tanh'")
+        self._set_activation(activation)
         
         # Ağırlıkları ve bias'ları başlat
         self.weights = []
@@ -89,7 +89,25 @@ class NeuralNetwork:
             # Bias'ları sıfır olarak başlat
             b = np.zeros((1, layers[i+1]))
             self.biases.append(b)
-    
+
+        # Momentum terimleri
+        self.velocity_weights = [np.zeros_like(w) for w in self.weights]
+        self.velocity_biases = [np.zeros_like(b) for b in self.biases]
+
+    def _set_activation(self, activation: str):
+        """Aktivasyon fonksiyonunu ve türevini birlikte ayarla."""
+        activations = {
+            'sigmoid': (Activation.sigmoid, Activation.sigmoid_derivative),
+            'relu': (Activation.relu, Activation.relu_derivative),
+            'tanh': (Activation.tanh, Activation.tanh_derivative),
+        }
+        if activation not in activations:
+            raise ValueError(
+                "Desteklenen aktivasyon fonksiyonları: 'sigmoid', 'relu', 'tanh'"
+            )
+        self.activation_name = activation
+        self.activation, self.activation_derivative = activations[activation]
+
     def forward(self, X):
         """
         İleri beslenme (Forward propagation)
@@ -133,7 +151,8 @@ class NeuralNetwork:
         """
         m = X.shape[0]  # Örnek sayısı
         
-        # Çıkış katmanından başlayarak hata hesapla
+        # Sigmoid + binary cross-entropy için çıkış deltası output - y'dir.
+        # Kayıp da BCE olarak hesaplandığı için gradyan ve metrik tutarlıdır.
         delta = output - y
         
         # Gradyanları sakla
@@ -151,16 +170,22 @@ class NeuralNetwork:
             db.insert(0, d_b)
             
             if i > 0:  # İlk katman değilse
-                # Bir önceki katmana hata propogasyonu
-                if i == self.num_layers - 2:  # Son katmandan geliyorsa
-                    delta = np.dot(delta, self.weights[i].T) * Activation.sigmoid_derivative(self.a[i])
-                else:
-                    delta = np.dot(delta, self.weights[i].T) * self.activation_derivative(self.a[i])
+                # Önceki katman gizli katmandır; çıkış katmanının sabit
+                # sigmoid türevi yerine seçilen aktivasyonun türevini kullan.
+                delta = np.dot(delta, self.weights[i].T) * self.activation_derivative(self.a[i])
         
-        # Ağırlıkları güncelle
+        # Ağırlıkları momentumlu SGD ile güncelle
         for i in range(self.num_layers - 1):
-            self.weights[i] -= self.learning_rate * dW[i]
-            self.biases[i] -= self.learning_rate * db[i]
+            self.velocity_weights[i] = (
+                self.momentum * self.velocity_weights[i]
+                - self.learning_rate * dW[i]
+            )
+            self.velocity_biases[i] = (
+                self.momentum * self.velocity_biases[i]
+                - self.learning_rate * db[i]
+            )
+            self.weights[i] += self.velocity_weights[i]
+            self.biases[i] += self.velocity_biases[i]
     
     def train(self, X, y, epochs=1000, verbose=True):
         """
@@ -181,8 +206,8 @@ class NeuralNetwork:
             # İleri beslenme
             output = self.forward(X)
             
-            # Kayıp hesapla (Mean Squared Error)
-            loss = np.mean((output - y) ** 2)
+            # Kayıp, backpropagation'daki sigmoid gradyanıyla tutarlı BCE.
+            loss = Activation.binary_cross_entropy(y, output)
             losses.append(loss)
             
             # Geri beslenme
@@ -215,25 +240,31 @@ class NeuralNetwork:
         model_data = {
             'layers': self.layers,
             'learning_rate': self.learning_rate,
+            'activation': self.activation_name,
             'weights': [w.tolist() for w in self.weights],
             'biases': [b.tolist() for b in self.biases]
         }
         
-        with open(filepath, 'w') as f:
+        os.makedirs(os.path.dirname(filepath) or '.', exist_ok=True)
+        with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(model_data, f)
         
         print(f"Model kaydedildi: {filepath}")
     
     def load_model(self, filepath):
         """Modeli yükle"""
-        with open(filepath, 'r') as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             model_data = json.load(f)
         
         self.layers = model_data['layers']
         self.learning_rate = model_data['learning_rate']
+        # Eski dosyalarda activation yoksa sigmoid varsayılır.
+        self._set_activation(model_data.get('activation', 'sigmoid'))
         self.weights = [np.array(w) for w in model_data['weights']]
         self.biases = [np.array(b) for b in model_data['biases']]
         self.num_layers = len(self.layers)
+        self.velocity_weights = [np.zeros_like(w) for w in self.weights]
+        self.velocity_biases = [np.zeros_like(b) for b in self.biases]
         
         print(f"Model yüklendi: {filepath}")
 

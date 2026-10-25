@@ -273,6 +273,11 @@ def chunk_text(text: str, max_length: int, overlap: int = 0) -> List[str]:
         max_length: Maksimum parça uzunluğu (karakter)
         overlap: Parçalar arası örtüşme
     """
+    if max_length <= 0:
+        raise ValueError("max_length sıfırdan büyük olmalı.")
+    if overlap < 0 or overlap >= max_length:
+        raise ValueError("overlap 0 ile max_length arasında olmalı.")
+
     chunks = []
     start = 0
     

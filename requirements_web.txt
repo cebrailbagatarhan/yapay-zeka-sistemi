@@ -1,7 +1,5 @@
-"""
-Web Araştırma ve Öz-Öğrenme için Gerekli Kütüphaneler
-Bu dosyayı: pip install -r requirements_web.txt ile yükleyebilirsiniz.
-"""
+# Web Araştırma ve Öz-Öğrenme için Gerekli Kütüphaneler
+# Bu dosyayı: pip install -r requirements_web.txt ile yükleyebilirsiniz.
 
 # Temel web işlemleri
 requests>=2.31.0

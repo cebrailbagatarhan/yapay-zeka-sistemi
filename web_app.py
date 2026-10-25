@@ -82,6 +82,8 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 if 'research_results' not in st.session_state:
     st.session_state.research_results = None
+if 'qwen_analysis' not in st.session_state:
+    st.session_state.qwen_analysis = None
 
 # Başlık
 st.title("🤖 Yapay Zeka Sistemi")
@@ -122,7 +124,6 @@ with st.sidebar:
     
     # Araştırma ayarları
     st.header("🔍 Araştırma Ayarları")
-    max_sources = st.slider("Maksimum Kaynak Sayısı", 5, 30, 15)
     max_tokens = st.slider("Maksimum Token (Yanıt)", 256, 2048, 700)
     
     st.divider()
@@ -222,6 +223,10 @@ with tab2:
             research_button = st.form_submit_button("🔍 Araştırmayı Başlat")
             
             if research_button and research_topic:
+                # Yeni araştırmada önceki konunun analizi görünmesin.
+                st.session_state.qwen_analysis = None
+                st.session_state.research_results = None
+
                 # Kaynak sayısını belirle
                 sources_map = {
                     "Hızlı (10 kaynak)": 10,
@@ -301,11 +306,11 @@ with tab2:
             st.divider()
             st.subheader(f"📊 Sonuçlar ({len(st.session_state.research_results)} kaynak)")
             
-            # Qwen analizi varsa göster
-            if hasattr(st.session_state, 'qwen_analysis'):
+            # Qwen analizi varsa göster. Model çıktısı güvenilmeyen web
+            # içeriğinden türetildiği için HTML olarak render edilmez.
+            if st.session_state.qwen_analysis:
                 st.markdown("### 🤖 Qwen Analizi")
-                st.markdown(f'<div class="success-box">{st.session_state.qwen_analysis}</div>', 
-                           unsafe_allow_html=True)
+                st.success(st.session_state.qwen_analysis)
                 st.divider()
             
             # Kaynakları göster

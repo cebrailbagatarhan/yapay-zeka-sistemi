@@ -23,7 +23,7 @@ Kullanım (Colab H100):
     - Tüm dataset'leri otomatik yükleme
     - Optimize edilmiş DataLoader (persistent workers, prefetch)
     - Azaltılmış checkpoint/log overhead
-    - Otomatik GitHub push ve model kaydetme
+    - Model kaydetme; GitHub push yalnızca --push ile
 
 Yazar: Cebrail Bağatar Han
 """
@@ -42,7 +42,7 @@ from typing import Optional, List, Dict, Any
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, ConcatDataset, random_split
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast
 
 # Modern LLM imports
 from modern_llm.config import (
@@ -415,8 +415,10 @@ class H100OptimizedTrainer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.model.to(self.device)
         
-        # BF16 setup (H100 native)
-        self.use_amp = True
+        # BF16 setup (H100 native); CPU veya BF16 desteklemeyen GPU'da kapat.
+        self.use_amp = (
+            self.device.type == "cuda" and torch.cuda.is_bf16_supported()
+        )
         self.amp_dtype = torch.bfloat16
         
         # torch.compile for H100 (Triton kernel fusion)
@@ -540,9 +542,10 @@ class H100OptimizedTrainer:
         # Optimizer
         optimizer = self._create_optimizer()
         
-        # Total steps estimation
-        steps_per_epoch = len(train_loader) // gradient_accumulation
-        total_steps = steps_per_epoch * max_epochs
+        # Total steps estimation (son eksik accumulation penceresi dahil)
+        num_batches = len(train_loader)
+        steps_per_epoch = math.ceil(num_batches / gradient_accumulation)
+        total_steps = max(1, steps_per_epoch * max_epochs)
         warmup_steps = max(1, int(total_steps * 0.05))
         
         print(f"  Steps/epoch: {steps_per_epoch}, Max epochs: {max_epochs}")
@@ -554,8 +557,11 @@ class H100OptimizedTrainer:
         
         # Training loop
         self.model.train()
+        optimizer.zero_grad(set_to_none=True)
         stage_start = time.time()
         global_step = 0
+        samples_processed = 0
+        epochs_completed = 0
         total_loss = 0.0
         log_loss = 0.0
         log_steps = 0
@@ -574,26 +580,33 @@ class H100OptimizedTrainer:
                 
                 # Move to device
                 batch = {k: v.to(self.device, non_blocking=True) for k, v in batch.items()}
+                window_start = (batch_idx // gradient_accumulation) * gradient_accumulation
+                window_size = min(gradient_accumulation, num_batches - window_start)
                 
                 # Forward pass (BF16)
-                with autocast(device_type="cuda", dtype=self.amp_dtype, enabled=self.use_amp):
+                with autocast(device_type=self.device.type, dtype=self.amp_dtype, enabled=self.use_amp):
                     outputs = self.model(
                         input_ids=batch["input_ids"],
                         attention_mask=batch.get("attention_mask"),
                         labels=batch["labels"],
                     )
-                    loss = outputs.loss / gradient_accumulation
+                    loss = outputs.loss / window_size
                 
                 # Backward pass (BF16 doesn't need scaler!)
                 loss.backward()
                 
-                epoch_loss += loss.item() * gradient_accumulation
+                epoch_loss += loss.item() * window_size
                 epoch_steps += 1
-                log_loss += loss.item() * gradient_accumulation
+                samples_processed += batch["input_ids"].shape[0]
+                log_loss += loss.item() * window_size
                 log_steps += 1
                 
-                # Gradient accumulation step
-                if (batch_idx + 1) % gradient_accumulation == 0:
+                # Gradient accumulation step (epoch sonundaki artığı da uygula)
+                should_step = (
+                    (batch_idx + 1) % gradient_accumulation == 0
+                    or (batch_idx + 1) == num_batches
+                )
+                if should_step:
                     # Gradient clipping
                     torch.nn.utils.clip_grad_norm_(
                         self.model.parameters(),
@@ -635,24 +648,33 @@ class H100OptimizedTrainer:
             
             avg_epoch_loss = epoch_loss / max(epoch_steps, 1)
             ppl = math.exp(min(avg_epoch_loss, 20))
+            epochs_completed = epoch + 1
             print(f"  📊 Epoch {epoch+1}/{max_epochs}: Loss={avg_epoch_loss:.4f}, PPL={ppl:.1f}")
         
+        # Zaman bütçesi kesintisinden kalan gradyanlar sonraki aşamaya sızmasın.
+        optimizer.zero_grad(set_to_none=True)
+
         # Stage metrics
         stage_time = time.time() - stage_start
         final_loss = epoch_loss / max(epoch_steps, 1) if epoch_steps > 0 else float('inf')
+        final_ppl = math.exp(min(final_loss, 20)) if math.isfinite(final_loss) else None
         
         metrics = {
             "stage": stage_name,
             "steps": global_step,
-            "epochs_completed": epoch + 1,
-            "final_loss": final_loss,
-            "final_ppl": math.exp(min(final_loss, 20)),
+            "epochs_completed": epochs_completed,
+            "final_loss": final_loss if math.isfinite(final_loss) else None,
+            "final_ppl": final_ppl,
             "time_seconds": stage_time,
-            "samples_processed": global_step * self.train_config.batch_size * gradient_accumulation,
+            "samples_processed": samples_processed,
+            "status": "completed" if global_step > 0 else "no_optimizer_step",
         }
         
-        print(f"\n  ✅ {stage_name} tamamlandı!")
-        print(f"     Steps: {global_step} | Loss: {final_loss:.4f} | Süre: {stage_time:.0f}s")
+        if global_step > 0:
+            print(f"\n  ✅ {stage_name} tamamlandı!")
+            print(f"     Steps: {global_step} | Loss: {final_loss:.4f} | Süre: {stage_time:.0f}s")
+        else:
+            print(f"\n  ⚠️ {stage_name}: hiç optimizer adımı atılmadı; sonuç üretilmedi.")
         
         return metrics
     
@@ -685,12 +707,15 @@ class H100OptimizedTrainer:
         if pretrain_texts and len(pretrain_texts) > 5:
             print("\n🔤 Tokenizer eğitiliyor...")
             try:
-                self.tokenizer.train(
+                trained = self.tokenizer.train(
                     texts=pretrain_texts[:500],  # İlk 500 metin yeterli
                     vocab_size=self.model_config.vocab_size,
                     output_path=os.path.join(self.output_dir, "tokenizer"),
                 )
-                print("  ✅ Tokenizer eğitimi tamamlandı")
+                if trained:
+                    print("  ✅ Tokenizer eğitimi tamamlandı")
+                else:
+                    print("  ℹ️ SentencePiece yok; byte-level fallback kullanılıyor")
             except Exception as e:
                 print(f"  ⚠️ Tokenizer eğitimi başarısız (byte-fallback devam): {e}")
         tok_time = time.time() - tok_start
@@ -867,8 +892,9 @@ def push_to_github(output_dir: str):
     try:
         import subprocess
         
-        # Git add
-        subprocess.run(["git", "add", "-A"], check=True, capture_output=True)
+        # Yalnızca bu koşunun çıktı dizinini stage'le; kullanıcının diğer
+        # değişikliklerini veya secret dosyalarını commit'e dahil etme.
+        subprocess.run(["git", "add", "--", output_dir], check=True, capture_output=True)
         print("  ✅ git add tamamlandı")
         
         # Git commit
@@ -892,17 +918,10 @@ def push_to_github(output_dir: str):
         if result.returncode == 0:
             print("  ✅ git push başarılı!")
         else:
-            print(f"  ⚠️ Push hatası: {result.stderr.strip()}")
-            # Force push dene
-            result = subprocess.run(
-                ["git", "push", "-f", "origin", "main"],
-                capture_output=True,
-                text=True,
-            )
-            if result.returncode == 0:
-                print("  ✅ Force push başarılı!")
-            else:
-                print(f"  ❌ Push başarısız: {result.stderr.strip()}")
+            # Reddedilen push geçmişin üzerine yazılarak çözülmemeli.
+            # Önce uzak değişiklikleri inceleyip bilinçli biçimde birleştir.
+            print(f"  ❌ Push başarısız: {result.stderr.strip()}")
+            print("  💡 Önce git fetch/pull ile uzak değişiklikleri inceleyin; force push yapılmadı.")
                 
     except Exception as e:
         print(f"  ❌ GitHub push hatası: {e}")
@@ -930,8 +949,8 @@ def parse_args():
                         help="Random seed")
     parser.add_argument("--no_compile", action="store_true",
                         help="torch.compile kullanma")
-    parser.add_argument("--no_push", action="store_true",
-                        help="GitHub'a push etme")
+    parser.add_argument("--push", action="store_true",
+                        help="Eğitim çıktısını GitHub'a push et (varsayılan: kapalı)")
     parser.add_argument("--skip_eval", action="store_true",
                         help="Değerlendirmeyi atla")
     
@@ -1009,8 +1028,8 @@ def main():
     # ===== Save =====
     save_path = trainer.save_model()
     
-    # ===== GitHub Push =====
-    if not args.no_push:
+    # ===== GitHub Push (yalnızca açıkça istenirse) =====
+    if args.push:
         push_to_github(args.output_dir)
     
     # ===== Summary =====
@@ -1034,7 +1053,12 @@ def main():
     for stage in ["pretrain", "sft", "cot"]:
         if stage in metrics and not metrics[stage].get("skipped"):
             m = metrics[stage]
-            print(f"    {stage}: Loss={m['final_loss']:.4f}, Steps={m['steps']}, Time={m['time_seconds']:.0f}s")
+            loss_text = (
+                f"{m['final_loss']:.4f}"
+                if m.get('final_loss') is not None
+                else "N/A"
+            )
+            print(f"    {stage}: Loss={loss_text}, Steps={m['steps']}, Time={m['time_seconds']:.0f}s")
     
     print(f"""
   📥 Modeli indirmek için:

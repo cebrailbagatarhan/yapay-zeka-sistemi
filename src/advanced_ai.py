@@ -61,7 +61,7 @@ class CoTDatasetGenerator:
 
     def save_dataset(self, examples, filepath):
         """Dataset'i JSON olarak kaydet"""
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        os.makedirs(os.path.dirname(filepath) or '.', exist_ok=True)
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(examples, f, ensure_ascii=False, indent=2)
         print(f"✅ Dataset kaydedildi: {filepath}")

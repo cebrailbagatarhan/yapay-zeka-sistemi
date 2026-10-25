@@ -109,7 +109,7 @@ class DeepWebResearcher:
         try:
             response = self.session.head(url, headers=self.headers, timeout=5, allow_redirects=True)
             return response.status_code == 200
-        except:
+        except Exception:
             return False
     
     async def extract_text_from_url_async(self, url, max_length=10000):
@@ -125,8 +125,11 @@ class DeepWebResearcher:
         """
         try:
             client = await self._get_async_client()
-            response = await client.get(url)
+            response = await client.get(url, timeout=15, follow_redirects=True)
             response.raise_for_status()
+            if len(response.content) > 2_000_000:
+                print(f"  ⚠️ Sayfa boyutu sınırı aşıldı: {url[:50]}")
+                return ""
             
             soup = BeautifulSoup(response.content, 'html.parser')
             
@@ -171,6 +174,8 @@ class DeepWebResearcher:
         try:
             response = self.session.get(url, headers=self.headers, timeout=15)
             response.raise_for_status()
+            if len(response.content) > 2_000_000:
+                return "[İçerik 2 MB boyut sınırını aşıyor]"
             
             soup = BeautifulSoup(response.content, 'html.parser')
             
@@ -243,6 +248,8 @@ class DeepWebResearcher:
         """Sayfadan linkleri çıkar"""
         try:
             response = self.session.get(url, headers=self.headers, timeout=10)
+            if len(response.content) > 2_000_000:
+                return []
             soup = BeautifulSoup(response.content, 'html.parser')
             
             links = []
@@ -317,7 +324,7 @@ class DeepWebResearcher:
                         'snippet': page.summary[:300] + "...",
                         'source': 'Wikipedia'
                     })
-                except:
+                except Exception:
                     continue
             
             return results
@@ -344,11 +351,18 @@ class DeepWebResearcher:
         
         all_results = []
         
-        # DuckDuckGo'dan kaynak bul
+        # DuckDuckGo'dan kaynak bul; başarısız olsa da Wikipedia çalışsın.
         print("\n🌐 Web kaynakları + Wikipedia araştırılıyor...")
         ddg_results = self.search_duckduckgo(topic, max_results=max_sources)
         all_results.extend(ddg_results)
-        print(f"✅ {len(ddg_results)} kaynak bulundu (Wikipedia dahil)")
+        seen_urls = {result['url'] for result in all_results}
+        for wiki_result in self.search_wikipedia(
+            topic, max_results=min(5, max_sources)
+        ):
+            if wiki_result['url'] not in seen_urls:
+                all_results.append(wiki_result)
+                seen_urls.add(wiki_result['url'])
+        print(f"✅ {len(all_results)} kaynak bulundu (Wikipedia dahil)")
         
         # ⚡ PARALEL içerik çıkarma (en büyük hız kazancı burada!)
         print(f"\n⚡ İçerikler PARALEL olarak çıkarılıyor (async)...")
@@ -369,14 +383,23 @@ class DeepWebResearcher:
         # Paralel çalıştır ve bekle
         import time as time_module
         start_time = time_module.time()
-        processed_results = await asyncio.gather(*tasks, return_exceptions=True)
+        try:
+            processed_results = await asyncio.gather(*tasks, return_exceptions=True)
+        finally:
+            # Hata veya iptal durumunda da HTTP client sızmasın.
+            await self._close_async_client()
         elapsed = time_module.time() - start_time
         
         # Hataları filtrele
         self.results = [r for r in processed_results if not isinstance(r, Exception)]
-        
-        # Client'ı kapat
-        await self._close_async_client()
+
+        if include_links:
+            for result in self.results:
+                result['related_links'] = await asyncio.to_thread(
+                    self.extract_links_from_page,
+                    result['url'],
+                    result['url'],
+                )
         
         print("\n" + "="*60)
         print(f"🎉 TOPLAM {len(self.results)} KAYNAK TARANDI!")
@@ -401,7 +424,16 @@ class DeepWebResearcher:
         """
         # Async kullan (daha hızlı!)
         if use_async and HTTPX_AVAILABLE:
-            return asyncio.run(self.deep_research_async(topic, max_sources, include_links))
+            try:
+                asyncio.get_running_loop()
+            except RuntimeError:
+                return asyncio.run(
+                    self.deep_research_async(topic, max_sources, include_links)
+                )
+            raise RuntimeError(
+                "Aktif bir event loop içinde deep_research() çağrılamaz; "
+                "doğrudan 'await deep_research_async(...)' kullanın."
+            )
         
         # Fallback: Klasik sync yöntem
         print("\n" + "🔍"*30)
@@ -415,7 +447,14 @@ class DeepWebResearcher:
         print("\n🌐 Web kaynakları + Wikipedia araştırılıyor...")
         ddg_results = self.search_duckduckgo(topic, max_results=max_sources)
         all_results.extend(ddg_results)
-        print(f"✅ {len(ddg_results)} kaynak bulundu (Wikipedia dahil)")
+        seen_urls = {result['url'] for result in all_results}
+        for wiki_result in self.search_wikipedia(
+            topic, max_results=min(5, max_sources)
+        ):
+            if wiki_result['url'] not in seen_urls:
+                all_results.append(wiki_result)
+                seen_urls.add(wiki_result['url'])
+        print(f"✅ {len(all_results)} kaynak bulundu (Wikipedia dahil)")
         
         # 3. Her sonuç için detaylı içerik çıkar
         print("\n📄 İçerikler detaylı olarak çıkarılıyor...")

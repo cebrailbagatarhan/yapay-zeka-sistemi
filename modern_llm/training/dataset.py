@@ -71,7 +71,9 @@ class TextDataset(Dataset):
     def __getitem__(self, idx):
         block = self.examples[idx]
         input_ids = torch.tensor(block[:-1], dtype=torch.long)
-        labels = torch.tensor(block[1:], dtype=torch.long)
+        # Model, causal LM loss içinde shift işlemini zaten yapar. Etiketleri
+        # burada ayrıca kaydırmak hedefi iki token ileriye taşır.
+        labels = input_ids.clone()
         
         return {
             "input_ids": input_ids,
@@ -164,44 +166,30 @@ class ChatDataset(Dataset):
         messages: List[Dict[str, str]],
         labels: List[int],
     ) -> List[int]:
-        """Assistant olmayan tokenları -100 ile maskele."""
-        # Basit yaklaşım: <|assistant|> tokenından sonraki kısımları eğit
-        # Daha sofistike yaklaşım her mesajın sınırlarını bulur
-        
-        # Her mesajı ayrı tokenize edip sınırları bul
-        current_pos = 0
+        """Yalnızca assistant mesajlarının token aralıklarını loss'a dahil et."""
         masked_labels = [-100] * len(labels)
-        
-        is_assistant = False
+        prefix = ""
+
         for msg in messages:
-            role = msg["role"]
-            content = msg["content"]
-            
-            if role == "assistant":
-                # Assistant mesajının tam formatını tokenize et
-                from modern_llm.tokenizer import CHAT_TEMPLATE
-                formatted = CHAT_TEMPLATE["assistant"].format(content=content)
-                msg_ids = self.tokenizer.encode(formatted)
-                
-                # Bu mesajın başlangıç pozisyonunu bul
-                # (basitleştirilmiş - gerçek implementasyonda daha robust olmalı)
-                for i in range(current_pos, len(labels)):
-                    if i < len(labels):
-                        masked_labels[i] = labels[i]
-                
-                current_pos += len(msg_ids)
-            else:
-                # System/user mesajlarını tokenize et
-                if role == "system":
-                    from modern_llm.tokenizer import CHAT_TEMPLATE
-                    formatted = CHAT_TEMPLATE["system"].format(content=content)
-                else:
-                    from modern_llm.tokenizer import CHAT_TEMPLATE
-                    formatted = CHAT_TEMPLATE["user"].format(content=content)
-                
-                msg_ids = self.tokenizer.encode(formatted)
-                current_pos += len(msg_ids)
-        
+            # Tam metinle aynı şablonu kullanarak her mesajın gerçek token
+            # sınırlarını bul. BOS, encode(add_bos=True) ile hesaba katılır.
+            formatted = self.tokenizer.apply_chat_template([msg])
+            start = len(self.tokenizer.encode(prefix, add_bos=True))
+            prefix += formatted
+            end = len(self.tokenizer.encode(prefix, add_bos=True))
+
+            if msg.get("role") == "assistant":
+                start = min(start, len(labels))
+                end = min(end, len(labels))
+                if start < end:
+                    masked_labels[start:end] = labels[start:end]
+
+        # Sondaki EOS da assistant cevabının parçası olarak öğrenilir.
+        if messages and messages[-1].get("role") == "assistant":
+            eos_pos = len(self.tokenizer.encode(prefix, add_bos=True))
+            if eos_pos < len(labels):
+                masked_labels[eos_pos] = labels[eos_pos]
+
         return masked_labels
     
     def __len__(self):
@@ -473,6 +461,9 @@ def create_data_collator(tokenizer, max_length: int = 2048):
     Dynamic padding ile batch oluşturma.
     """
     def collate_fn(batch):
+        if not batch:
+            raise ValueError("Boş batch collate edilemez.")
+
         # Batch'teki en uzun sequence'ı bul
         max_len = min(
             max(len(item["input_ids"]) for item in batch),
@@ -490,9 +481,9 @@ def create_data_collator(tokenizer, max_length: int = 2048):
             
             # Padding
             pad_len = max_len - len(ids)
-            ids = torch.cat([ids, torch.full((pad_len,), tokenizer.pad_token_id)])
-            lbl = torch.cat([lbl, torch.full((pad_len,), -100)])
-            mask = torch.cat([mask, torch.zeros(pad_len)])
+            ids = torch.cat([ids, ids.new_full((pad_len,), tokenizer.pad_token_id)])
+            lbl = torch.cat([lbl, lbl.new_full((pad_len,), -100)])
+            mask = torch.cat([mask, mask.new_zeros(pad_len)])
             
             input_ids.append(ids)
             labels.append(lbl)

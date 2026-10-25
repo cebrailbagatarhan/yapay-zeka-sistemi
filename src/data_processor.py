@@ -48,8 +48,9 @@ class DataProcessor:
             n_clusters_per_class=1
         )
         
-        # Gürültü ekle
-        X += np.random.normal(0, noise, X.shape)
+        # Gürültü ekle (random_state ile tam tekrarlanabilir)
+        rng = np.random.default_rng(random_state)
+        X += rng.normal(0, noise, X.shape)
         
         # Binary classification için reshape
         if n_classes == 2:
@@ -97,7 +98,8 @@ class DataProcessor:
         if binary:
             # Binary classification: 0 vs diğerleri
             binary_y = (y == 0).astype(int).reshape(-1, 1)
-            self.target_names = ['Rakam 0', 'Diğer Rakamlar']
+            # 0 = diğer rakamlar, 1 = rakam 0
+            self.target_names = ['Diğer Rakamlar', 'Rakam 0']
             print(f"Digits veri seti yüklendi (Binary):")
             print(f"  Örnekler: {X.shape[0]}")
             print(f"  Özellikler: {X.shape[1]} (8x8 piksel)")
@@ -183,7 +185,12 @@ class DataProcessor:
             print("Veri normalizasyonu tamamlandı.")
             return tuple(results) if len(results) > 1 else X_train_processed
         else:
-            return X_train, X_val, X_test
+            results = [X_train]
+            if X_val is not None:
+                results.append(X_val)
+            if X_test is not None:
+                results.append(X_test)
+            return tuple(results) if len(results) > 1 else X_train
     
     def add_noise(self, X, noise_level=0.1):
         """

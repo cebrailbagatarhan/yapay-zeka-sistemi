@@ -25,7 +25,36 @@ class WebResearcher:
         })
         self.knowledge_base = {}
         self.learning_history = []
-        
+        self.timeout = (5, 15)
+        self.max_response_bytes = 2_000_000
+
+    def _get_bytes(self, url, params=None):
+        """Sınırlı boyutta, timeout'lu HTTP GET."""
+        with self.session.get(
+            url,
+            params=params,
+            timeout=self.timeout,
+            stream=True,
+        ) as response:
+            response.raise_for_status()
+            chunks = []
+            total = 0
+            for chunk in response.iter_content(chunk_size=65536):
+                if not chunk:
+                    continue
+                total += len(chunk)
+                if total > self.max_response_bytes:
+                    raise ValueError(
+                        f"Yanıt boyutu sınırı aşıldı: {self.max_response_bytes} byte"
+                    )
+                chunks.append(chunk)
+            return b"".join(chunks)
+
+    def _get_json(self, url, params=None):
+        """Timeout ve boyut sınırı olan JSON GET."""
+        raw = self._get_bytes(url, params=params)
+        return json.loads(raw.decode("utf-8"))
+
     def search_wikipedia(self, query, max_results=3):
         """Wikipedia'da araştırma yap"""
         try:
@@ -106,7 +135,7 @@ class WebResearcher:
             
             for feed_url in news_feeds:
                 try:
-                    feed = feedparser.parse(feed_url)
+                    feed = feedparser.parse(self._get_bytes(feed_url))
                     
                     for entry in feed.entries[:max_results]:
                         if query.lower() in entry.title.lower() or query.lower() in entry.get('summary', '').lower():
@@ -137,10 +166,15 @@ class WebResearcher:
             print(f"🌐 Web araştırması: {query}")
             
             # Basit web araması (DuckDuckGo API kullanarak)
-            search_url = f"https://api.duckduckgo.com/?q={query}&format=json&no_html=1&skip_disambig=1"
-            
-            response = self.session.get(search_url)
-            data = response.json()
+            data = self._get_json(
+                "https://api.duckduckgo.com/",
+                params={
+                    "q": query,
+                    "format": "json",
+                    "no_html": 1,
+                    "skip_disambig": 1,
+                },
+            )
             
             results = []
             
@@ -194,43 +228,46 @@ class WebResearcher:
             
             # GitHub repository arama (public API)
             try:
-                github_url = f"https://api.github.com/search/repositories?q={query}&sort=stars&order=desc"
-                response = self.session.get(github_url)
-                if response.status_code == 200:
-                    github_data = response.json()
-                    
-                    for repo in github_data.get('items', [])[:2]:
-                        academic_results.append({
-                            'title': f"GitHub: {repo['name']}",
-                            'summary': repo.get('description', 'GitHub repository')[:300],
-                            'url': repo['html_url'],
-                            'source': 'github',
-                            'stars': repo.get('stargazers_count', 0),
-                            'timestamp': datetime.now().isoformat()
-                        })
+                github_data = self._get_json(
+                    "https://api.github.com/search/repositories",
+                    params={"q": query, "sort": "stars", "order": "desc"},
+                )
+                for repo in github_data.get('items', [])[:2]:
+                    academic_results.append({
+                        'title': f"GitHub: {repo['name']}",
+                        'summary': repo.get('description', 'GitHub repository')[:300],
+                        'url': repo['html_url'],
+                        'source': 'github',
+                        'stars': repo.get('stargazers_count', 0),
+                        'timestamp': datetime.now().isoformat()
+                    })
                 time.sleep(1)
-            except:
-                pass
+            except Exception as e:
+                print(f"⚠️ GitHub araması başarısız: {e}")
             
             # Stack Overflow arama
             try:
-                so_url = f"https://api.stackexchange.com/2.3/search/advanced?order=desc&sort=votes&q={query}&site=stackoverflow"
-                response = self.session.get(so_url)
-                if response.status_code == 200:
-                    so_data = response.json()
-                    
-                    for question in so_data.get('items', [])[:2]:
-                        academic_results.append({
-                            'title': f"StackOverflow: {question['title']}",
-                            'summary': f"Score: {question.get('score', 0)}, Answers: {question.get('answer_count', 0)}",
-                            'url': question['link'],
-                            'source': 'stackoverflow',
-                            'score': question.get('score', 0),
-                            'timestamp': datetime.now().isoformat()
-                        })
+                so_data = self._get_json(
+                    "https://api.stackexchange.com/2.3/search/advanced",
+                    params={
+                        "order": "desc",
+                        "sort": "votes",
+                        "q": query,
+                        "site": "stackoverflow",
+                    },
+                )
+                for question in so_data.get('items', [])[:2]:
+                    academic_results.append({
+                        'title': f"StackOverflow: {question['title']}",
+                        'summary': f"Score: {question.get('score', 0)}, Answers: {question.get('answer_count', 0)}",
+                        'url': question['link'],
+                        'source': 'stackoverflow',
+                        'score': question.get('score', 0),
+                        'timestamp': datetime.now().isoformat()
+                    })
                 time.sleep(1)
-            except:
-                pass
+            except Exception as e:
+                print(f"⚠️ Stack Overflow araması başarısız: {e}")
             
             return academic_results[:max_results]
             
@@ -314,8 +351,8 @@ class WebResearcher:
         try:
             print(f"🕷️ Web sitesi analizi: {url}")
             
-            response = self.session.get(url, timeout=10)
-            soup = BeautifulSoup(response.content, 'html.parser')
+            content = self._get_bytes(url)
+            soup = BeautifulSoup(content, 'html.parser')
             
             # Metin içeriği çıkar
             for script in soup(["script", "style"]):
@@ -387,7 +424,7 @@ class WebResearcher:
     def save_knowledge_base(self, filepath="data/knowledge_base.json"):
         """Öğrenilen bilgileri kaydet"""
         try:
-            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            os.makedirs(os.path.dirname(filepath) or '.', exist_ok=True)
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(self.knowledge_base, f, ensure_ascii=False, indent=2)
             print(f"💾 Bilgi tabanı kaydedildi: {filepath}")

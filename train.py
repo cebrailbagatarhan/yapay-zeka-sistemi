@@ -467,12 +467,15 @@ def stage_pretrain(model, tokenizer, texts, train_config, args):
     if tokenizer._sp_model is None and len(texts) > 10:
         print("\n  🔤 Tokenizer eğitiliyor...")
         try:
-            tokenizer.train(
+            trained = tokenizer.train(
                 texts=texts,
                 vocab_size=tokenizer.vocab_size,
                 output_path=os.path.join(args.output_dir, "tokenizer"),
             )
-            print("  ✅ Tokenizer eğitimi tamamlandı")
+            if trained:
+                print("  ✅ Tokenizer eğitimi tamamlandı")
+            else:
+                print("  ℹ️ SentencePiece yok; byte-level fallback kullanılıyor")
         except Exception as e:
             print(f"  ⚠️ Tokenizer eğitimi başarısız (byte-fallback devam): {e}")
     
@@ -530,6 +533,8 @@ def stage_pretrain(model, tokenizer, texts, train_config, args):
     print(f"     Mixed precision: {pretrain_config.mixed_precision}")
     
     trainer.train()
+    if trainer.global_step == 0:
+        raise RuntimeError("Pre-training hiç optimizer adımı atmadı; veri/batch ayarlarını kontrol edin.")
     
     print("  ✅ Pre-training tamamlandı!")
     return model
@@ -598,6 +603,8 @@ def stage_sft(model, tokenizer, sft_data, train_config, args):
     print(f"     Learning rate: {sft_config.learning_rate}")
     
     trainer.train()
+    if trainer.global_step == 0:
+        raise RuntimeError("SFT hiç optimizer adımı atmadı; veri/batch ayarlarını kontrol edin.")
     
     print("  ✅ SFT tamamlandı!")
     return model
@@ -665,6 +672,8 @@ def stage_cot(model, tokenizer, cot_data, train_config, args):
     print(f"     Learning rate: {cot_config.learning_rate}")
     
     trainer.train()
+    if trainer.global_step == 0:
+        raise RuntimeError("CoT eğitimi hiç optimizer adımı atmadı; veri/batch ayarlarını kontrol edin.")
     
     print("  ✅ CoT eğitimi tamamlandı!")
     return model
@@ -840,8 +849,8 @@ def parse_args():
     # Çalıştırma modları
     parser.add_argument("--skip_eval", action="store_true",
                         help="Değerlendirmeyi atla")
-    parser.add_argument("--resume", type=str, default=None,
-                        help="Checkpoint'tan devam et (path)")
+    parser.add_argument("--init_from", "--resume", dest="init_from", type=str, default=None,
+                        help="Model ağırlıkları ve tokenizer'ı yükle (optimizer/epoch durumu yüklenmez)")
     
     args = parser.parse_args()
     
@@ -930,22 +939,47 @@ def main():
     print("🔤 TOKENİZER")
     print("="*60)
     
-    tokenizer = ModernTokenizer(vocab_size=model_config.vocab_size)
-    
-    # Tokenizer eğitimi
-    if pretrain_texts and len(pretrain_texts) > 5:
-        print("  Tokenizer eğitiliyor...")
-        try:
-            tokenizer.train(
-                texts=pretrain_texts,
-                vocab_size=model_config.vocab_size,
-                output_path=os.path.join(args.output_dir, "tokenizer"),
+    if args.init_from:
+        # Eski modelin embedding ID'leri yeni bir tokenizer ile uyuşmaz.
+        # Bu nedenle checkpoint ile kaydedilmiş tokenizer zorunludur.
+        candidates = [
+            os.path.join(args.init_from, "tokenizer"),
+            args.init_from,
+        ]
+        tokenizer_dir = next(
+            (
+                path for path in candidates
+                if os.path.isfile(os.path.join(path, "tokenizer_config.json"))
+            ),
+            None,
+        )
+        if tokenizer_dir is None:
+            raise FileNotFoundError(
+                f"{args.init_from} içinde tokenizer bulunamadı. "
+                "Model ağırlıklarıyla eşleşen tokenizer dizinini belirtin."
             )
-            print("  ✅ Tokenizer eğitimi tamamlandı")
-        except Exception as e:
-            print(f"  ⚠️ Tokenizer eğitimi başarısız, byte-fallback: {e}")
+        tokenizer = ModernTokenizer(model_path=tokenizer_dir)
+        print(f"  ✅ Tokenizer yüklendi: {tokenizer_dir}")
     else:
-        print("  ℹ️ Byte-level fallback tokenizer kullanılıyor")
+        tokenizer = ModernTokenizer(vocab_size=model_config.vocab_size)
+
+        # Tokenizer eğitimi
+        if pretrain_texts and len(pretrain_texts) > 5:
+            print("  Tokenizer eğitiliyor...")
+            try:
+                trained = tokenizer.train(
+                    texts=pretrain_texts,
+                    vocab_size=model_config.vocab_size,
+                    output_path=os.path.join(args.output_dir, "tokenizer"),
+                )
+                if trained:
+                    print("  ✅ Tokenizer eğitimi tamamlandı")
+                else:
+                    print("  ℹ️ SentencePiece yok; byte-level fallback kullanılıyor")
+            except Exception as e:
+                print(f"  ⚠️ Tokenizer eğitimi başarısız, byte-fallback: {e}")
+        else:
+            print("  ℹ️ Byte-level fallback tokenizer kullanılıyor")
     
     # Test
     test_text = "Merhaba, ben bir yapay zeka modeliyim."
@@ -959,9 +993,11 @@ def main():
     print("🏗️  MODEL OLUŞTURMA")
     print("="*60)
     
-    if args.resume:
-        print(f"  Checkpoint'tan yükleniyor: {args.resume}")
-        model = ModernLLMForCausalLM.from_pretrained(args.resume)
+    if args.init_from:
+        print(f"  Ağırlıklar yükleniyor: {args.init_from}")
+        model = ModernLLMForCausalLM.from_pretrained(args.init_from)
+        model_config = model.config
+        print("  ℹ️ Yalnızca ağırlıklar yüklendi; optimizer/epoch durumu sıfırdan başlar.")
     else:
         model = ModernLLMForCausalLM(model_config)
     

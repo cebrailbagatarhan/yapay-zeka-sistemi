@@ -130,7 +130,7 @@ class TestDataProcessor(unittest.TestCase):
         np.testing.assert_allclose(np.std(X_train_norm, axis=0), 1, atol=1e-10)
         
         # Normalizasyon olmadan
-        X_train_raw, X_test_raw, _ = self.processor.preprocess_data(
+        X_train_raw, X_test_raw = self.processor.preprocess_data(
             X_train, X_test=X_test, normalize=False
         )
         

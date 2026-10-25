@@ -172,6 +172,8 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0' # oneDNN optimizasyonlarını kapat (i
 
 import sys
 import time
+import json
+from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -1677,23 +1679,40 @@ def knowledge_base_manager():
                 export_choice = input("Seçiminiz (1-3): ").strip()
                 
                 if export_choice == '1':
+                    os.makedirs("data", exist_ok=True)
                     filepath = f"data/export_knowledge_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
                     researcher.save_knowledge_base(filepath)
                     print(f"✅ JSON export: {filepath}")
                     
                 elif export_choice == '2':
-                    from datetime import datetime
+                    os.makedirs("data", exist_ok=True)
                     filepath = f"data/export_knowledge_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
                     with open(filepath, 'w', encoding='utf-8') as f:
                         for topic, data in researcher.knowledge_base.items():
                             f.write(f"KONU: {topic}\n")
-                            f.write(f"TARİH: {data['timestamp']}\n")
-                            for source_type, articles in data['sources'].items():
+                            f.write(f"TARİH: {data.get('timestamp', '')}\n")
+                            for source_type, articles in data.get('sources', {}).items():
                                 f.write(f"\n{source_type.upper()}:\n")
                                 for article in articles:
-                                    f.write(f"- {article['title']}: {article['summary']}\n")
+                                    f.write(f"- {article.get('title', '')}: {article.get('summary', '')}\n")
                             f.write("\n" + "="*80 + "\n\n")
                     print(f"✅ Text export: {filepath}")
+
+                elif export_choice == '3':
+                    filepath = input("İçe aktarılacak JSON dosyası: ").strip()
+                    if not os.path.isfile(filepath):
+                        print("❌ Dosya bulunamadı!")
+                    else:
+                        try:
+                            with open(filepath, 'r', encoding='utf-8') as f:
+                                imported = json.load(f)
+                            if not isinstance(imported, dict):
+                                raise ValueError("Kök JSON nesnesi bir sözlük olmalı.")
+                            researcher.knowledge_base.update(imported)
+                            researcher.save_knowledge_base()
+                            print(f"✅ {len(imported)} konu içe aktarıldı.")
+                        except (OSError, ValueError, json.JSONDecodeError) as e:
+                            print(f"❌ JSON import hatası: {e}")
             
             input("\nDevam etmek için Enter'a basın...")
         
