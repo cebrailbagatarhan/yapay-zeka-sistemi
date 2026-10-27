@@ -59,11 +59,10 @@ class TextDataset(Dataset):
             ids = tokenizer.encode(text, add_bos=True, add_eos=True)
             all_ids.extend(ids)
         
-        # Model loss'u causal shift'i kendi içinde uygular. Bu nedenle
-        # input_ids ve labels aynı sequence olmalıdır.
-        for i in range(0, len(all_ids) - max_length + 1, self.stride):
-            block = all_ids[i:i + max_length]
-            if len(block) == max_length:
+        # Sabit uzunlukta bloklar oluştur
+        for i in range(0, len(all_ids) - max_length, self.stride):
+            block = all_ids[i:i + max_length + 1]  # +1 for labels shift
+            if len(block) == max_length + 1:
                 self.examples.append(block)
     
     def __len__(self):
@@ -71,7 +70,9 @@ class TextDataset(Dataset):
     
     def __getitem__(self, idx):
         block = self.examples[idx]
-        input_ids = torch.tensor(block, dtype=torch.long)
+        input_ids = torch.tensor(block[:-1], dtype=torch.long)
+        # Model, causal LM loss içinde shift işlemini zaten yapar. Etiketleri
+        # burada ayrıca kaydırmak hedefi iki token ileriye taşır.
         labels = input_ids.clone()
         
         return {
@@ -131,34 +132,22 @@ class ChatDataset(Dataset):
         if not messages:
             return None
         
-        # Mesajları ayrı tokenize ederek token sınırlarını kesin olarak koru.
-        # Böylece sonraki user/system turları yanlışlıkla loss'a dahil olmaz.
-        from modern_llm.tokenizer import CHAT_TEMPLATE
+        # Chat template uygula
+        formatted = self.tokenizer.apply_chat_template(messages)
         
-        input_ids = [self.tokenizer.bos_token_id]
-        labels = [-100] if self.mask_user_tokens else [self.tokenizer.bos_token_id]
-        
-        for msg in messages:
-            role = msg.get("role")
-            if role not in CHAT_TEMPLATE or role == "assistant_with_thinking":
-                raise ValueError(f"Desteklenmeyen mesaj rolü: {role}")
-            
-            formatted = CHAT_TEMPLATE[role].format(content=msg.get("content", ""))
-            msg_ids = self.tokenizer.encode(formatted)
-            input_ids.extend(msg_ids)
-            
-            if self.mask_user_tokens and role != "assistant":
-                labels.extend([-100] * len(msg_ids))
-            else:
-                labels.extend(msg_ids)
-        
-        input_ids.append(self.tokenizer.eos_token_id)
-        supervise_eos = not self.mask_user_tokens or messages[-1].get("role") == "assistant"
-        labels.append(self.tokenizer.eos_token_id if supervise_eos else -100)
+        # Tokenize
+        input_ids = self.tokenizer.encode(formatted, add_bos=True, add_eos=True)
         
         # Max length'e kırp
-        input_ids = input_ids[:self.max_length]
-        labels = labels[:self.max_length]
+        if len(input_ids) > self.max_length:
+            input_ids = input_ids[:self.max_length]
+        
+        # Labels oluştur
+        labels = input_ids.copy()
+        
+        # User/system tokenlarını maskele (sadece assistant'ın cevabını eğit)
+        if self.mask_user_tokens:
+            labels = self._mask_non_assistant_tokens(messages, labels)
         
         # Padding
         pad_length = self.max_length - len(input_ids)
@@ -177,33 +166,30 @@ class ChatDataset(Dataset):
         messages: List[Dict[str, str]],
         labels: List[int],
     ) -> List[int]:
-        """Assistant olmayan tokenları -100 ile maskele.
-
-        Geriye dönük uyumluluk için korunur. Yeni örnekler _process_item
-        içinde mesaj bazında tokenleştirilerek maskelenir.
-        """
-        from modern_llm.tokenizer import CHAT_TEMPLATE
-        
+        """Yalnızca assistant mesajlarının token aralıklarını loss'a dahil et."""
         masked_labels = [-100] * len(labels)
-        current_pos = 1  # BOS
-        
+        prefix = ""
+
         for msg in messages:
-            role = msg.get("role")
-            if role not in CHAT_TEMPLATE or role == "assistant_with_thinking":
-                raise ValueError(f"Desteklenmeyen mesaj rolü: {role}")
-            
-            formatted = CHAT_TEMPLATE[role].format(content=msg.get("content", ""))
-            msg_ids = self.tokenizer.encode(formatted)
-            end_pos = min(current_pos + len(msg_ids), len(labels))
-            
-            if role == "assistant":
-                masked_labels[current_pos:end_pos] = labels[current_pos:end_pos]
-            
-            current_pos = end_pos
-        
-        if messages and messages[-1].get("role") == "assistant" and current_pos < len(labels):
-            masked_labels[current_pos] = labels[current_pos]  # EOS
-        
+            # Tam metinle aynı şablonu kullanarak her mesajın gerçek token
+            # sınırlarını bul. BOS, encode(add_bos=True) ile hesaba katılır.
+            formatted = self.tokenizer.apply_chat_template([msg])
+            start = len(self.tokenizer.encode(prefix, add_bos=True))
+            prefix += formatted
+            end = len(self.tokenizer.encode(prefix, add_bos=True))
+
+            if msg.get("role") == "assistant":
+                start = min(start, len(labels))
+                end = min(end, len(labels))
+                if start < end:
+                    masked_labels[start:end] = labels[start:end]
+
+        # Sondaki EOS da assistant cevabının parçası olarak öğrenilir.
+        if messages and messages[-1].get("role") == "assistant":
+            eos_pos = len(self.tokenizer.encode(prefix, add_bos=True))
+            if eos_pos < len(labels):
+                masked_labels[eos_pos] = labels[eos_pos]
+
         return masked_labels
     
     def __len__(self):
@@ -475,6 +461,9 @@ def create_data_collator(tokenizer, max_length: int = 2048):
     Dynamic padding ile batch oluşturma.
     """
     def collate_fn(batch):
+        if not batch:
+            raise ValueError("Boş batch collate edilemez.")
+
         # Batch'teki en uzun sequence'ı bul
         max_len = min(
             max(len(item["input_ids"]) for item in batch),
@@ -492,9 +481,9 @@ def create_data_collator(tokenizer, max_length: int = 2048):
             
             # Padding
             pad_len = max_len - len(ids)
-            ids = torch.cat([ids, torch.full((pad_len,), tokenizer.pad_token_id)])
-            lbl = torch.cat([lbl, torch.full((pad_len,), -100)])
-            mask = torch.cat([mask, torch.zeros(pad_len)])
+            ids = torch.cat([ids, ids.new_full((pad_len,), tokenizer.pad_token_id)])
+            lbl = torch.cat([lbl, lbl.new_full((pad_len,), -100)])
+            mask = torch.cat([mask, mask.new_zeros(pad_len)])
             
             input_ids.append(ids)
             labels.append(lbl)

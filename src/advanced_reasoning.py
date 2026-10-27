@@ -429,26 +429,32 @@ class WebBrowsingEngine:
         }
     
     def intelligent_search(self, query: str, domain: str = "general") -> List[Dict]:
-        """Akıllı web araştırması"""
+        """Gerçek web araması; kaynak yoksa sahte sonuç üretmez."""
         print(f"🌐 {query} için akıllı web araştırması yapılıyor...")
         
         search_queries = self.generate_search_queries(query, domain)
         results = []
-        
-        for search_query in search_queries:
-            print(f"   🔍 Aranan: {search_query}")
-            # Gerçek web araştırması simülasyonu
-            time.sleep(0.5)
-            
-            result = {
-                "query": search_query,
-                "url": f"https://example.com/search?q={search_query.replace(' ', '+')}",
-                "title": f"Result for {search_query}",
-                "snippet": f"Bu {search_query} hakkında detaylı bilgi içerir...",
-                "relevance_score": random.uniform(0.7, 0.95)
-            }
-            results.append(result)
-        
+
+        try:
+            from src.deep_web_researcher import DeepWebResearcher
+
+            researcher = DeepWebResearcher()
+            for search_query in search_queries:
+                print(f"   🔍 Aranan: {search_query}")
+                for rank, item in enumerate(
+                    researcher.search_duckduckgo(search_query, max_results=3)
+                ):
+                    results.append({
+                        "query": search_query,
+                        "url": item["url"],
+                        "title": item["title"],
+                        "snippet": item.get("snippet", ""),
+                        "relevance_score": max(0.5, 1.0 - rank * 0.1),
+                    })
+        except Exception as e:
+            print(f"   ⚠️ Gerçek web araması yapılamadı: {e}")
+            return []
+
         return sorted(results, key=lambda x: x["relevance_score"], reverse=True)
     
     def generate_search_queries(self, query: str, domain: str) -> List[str]:
@@ -721,6 +727,7 @@ def analyze_performance(algorithm_func, test_data):
         """API şablonu üret"""
         return f'''from flask import Flask, request, jsonify
 from functools import wraps
+from datetime import datetime
 import logging
 
 app = Flask(__name__)
@@ -765,7 +772,7 @@ def process_data():
     return jsonify({{
         "status": "success",
         "result": result,
-        "timestamp": "{{datetime.now().isoformat()}}"
+        "timestamp": datetime.now().isoformat()
     }})
 
 def process_input(input_data):
@@ -779,7 +786,7 @@ def health_check():
     return jsonify({{"status": "healthy", "service": "data-processor"}})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=False, port=5000)
 '''
     
     def generate_general_template(self, request: str, language: str) -> str:

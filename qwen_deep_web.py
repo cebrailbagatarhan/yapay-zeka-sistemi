@@ -79,10 +79,9 @@ class QwenDeepWebAssistant:
                 self.model_path,
                 quantization_config=quantization_config,
                 device_map="auto",
-                trust_remote_code=True
             )
             print(f"✅ Model {self.quantization_bits}-bit quantized olarak yüklendi!")
-            print(f"💾 Bellek kullanımı: ~{self.quantization_bits/32 * 100:.0f}% azaltıldı!")
+            print(f"💾 FP32'ye göre bellek: ~%{(1 - self.quantization_bits/32) * 100:.0f} azaltıldı!")
             
         elif self.device == "cuda":
             # GPU var ama quantization yok

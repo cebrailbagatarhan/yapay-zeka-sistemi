@@ -22,6 +22,7 @@ wheels/
 
 # Virtual Environment
 .conda/
+.venv/
 venv/
 env/
 ENV/
@@ -78,11 +79,11 @@ desktop.ini
 temp/
 tmp/
 
-# Test files (gereksiz)
-test_*.py
-quick_test.py
-check_*.py
-compare_*.py
+# Kök dizindeki geçici deneme dosyaları (tests/ altındaki testler izlenir)
+/test_*.py
+/quick_test.py
+/check_*.py
+/compare_*.py
 
 # Documentation (eski)
 CHECKPOINTING_REHBERI.md

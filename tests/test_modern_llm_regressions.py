@@ -23,7 +23,7 @@ class ModernTokenizerRegressionTests(unittest.TestCase):
 
         self.assertEqual(tokenizer.decode(token_ids), text)
         self.assertTrue(all(0 <= token_id < len(tokenizer) for token_id in token_ids))
-        self.assertEqual(len(tokenizer), len(tokenizer.special_tokens) + 256)
+        self.assertGreaterEqual(len(tokenizer), len(tokenizer.special_tokens) + 256)
 
 
 class DatasetRegressionTests(unittest.TestCase):

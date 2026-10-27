@@ -56,13 +56,13 @@ class DatasetManager:
             # Dataset'i yükle - farklı yöntemler dene
             try:
                 if max_samples:
-                    dataset = load_dataset(dataset_name, split=f"{split}[:{max_samples}]", trust_remote_code=True)
+                    dataset = load_dataset(dataset_name, split=f"{split}[:{max_samples}]")
                 else:
-                    dataset = load_dataset(dataset_name, split=split, trust_remote_code=True)
-            except:
+                    dataset = load_dataset(dataset_name, split=split)
+            except Exception:
                 # Alternatif: split belirtmeden dene
                 print(f"⚠️ Split sorunlu, alternatif yöntem deneniyor...")
-                full_dataset = load_dataset(dataset_name, trust_remote_code=True)
+                full_dataset = load_dataset(dataset_name)
                 if 'train' in full_dataset:
                     dataset = full_dataset['train']
                 else:
@@ -229,9 +229,10 @@ class ModelTrainer:
         
         if self.training_config['test_mode']:
             print("🧪 TEST MODU: Küçük veri seti ile çalışılıyor")
-            # Test için sadece CAMEL Math kullan
-            configs = [self.training_config['datasets'][0]]
-            configs[0]['max_samples'] = 100  # Çok küçük test
+            # Test için sadece CAMEL Math kullan. Sözlüğü kopyala ki
+            # test modu kalıcı yapılandırmayı 100 örnekle sınırlamasın.
+            configs = [dict(self.training_config['datasets'][0])]
+            configs[0]['max_samples'] = 100
         else:
             configs = self.training_config['datasets']
         

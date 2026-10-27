@@ -118,13 +118,21 @@ Yeni bir “tamamlandı” sonucu eklemeden önce aşağıdakiler kaydedilmelidi
 7. Kesintisiz log ve yüklenebilir checkpoint
 8. CoT için ayrı, veri sızıntısından arındırılmış reasoning benchmarkı
 
+## Testler
+
+Kurulumdan sonra çekirdek model, tokenizer, veri pipeline'ı, trainer ve eski kod regresyonları şu komutla çalıştırılabilir:
+
+```bash
+python -m unittest discover -s tests -t . -v
+```
+
 ## Bilinen Sorunlar
 
 - Commit edilmiş ana ModernLLM notebook'unda başarısız, yeniden denenmiş ve kesilmiş hücreler birlikte bulunuyor.
-- Kaydedilmiş tokenizer çalıştırmasında SentencePiece eğitimi hata veriyor ve byte-level fallback kullanılıyor.
 - Bazı harici veri setleri notebook çıktısında bulunamıyor, erişim gerektiriyor veya güncel `datasets` sürümüyle yüklenemiyor.
 - Extended koşularda OOM, collator hataları, checkpointing hataları ve manuel kesintiler bulunuyor.
 - Qwen notebook sonuçları, ModernLLM sonuç tablosuna dahil edilmemelidir.
+- `smart_train.py` ve `src/gpt4_clone.py` boş dosyalardır; bu iki giriş noktası henüz uygulanmamıştır.
 
 ## Proje Yapısı
 
@@ -138,7 +146,7 @@ qwen_deep_web.py             # Qwen + web araştırma uygulaması
 qwen_web_assistant.py        # Qwen web yardımcı kodu
 src/                         # Eski/ayrı deneyler
 results/                     # Eski/demonstrasyon JSON çıktıları
-tests/                       # Mevcut temel testler
+tests/                       # ModernLLM, tokenizer, trainer ve eski kod testleri
 ```
 
 ## Lisans

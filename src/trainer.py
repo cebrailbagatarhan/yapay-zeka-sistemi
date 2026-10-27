@@ -12,7 +12,7 @@ from typing import Tuple, List, Optional
 import os
 import datetime
 
-from .model import NeuralNetwork
+from .model import Activation, NeuralNetwork
 
 
 class ModelTrainer:
@@ -49,16 +49,38 @@ class ModelTrainer:
         Returns:
             Tuple: (X_train, X_val, X_test, y_train, y_val, y_test)
         """
+        n_samples = len(y)
+        if not 0 < test_size < 1 or not 0 < validation_size < 1:
+            raise ValueError("test_size ve validation_size 0 ile 1 arasında olmalı.")
+        if test_size + validation_size >= 1:
+            raise ValueError("test_size + validation_size 1'den küçük olmalı.")
+        if n_samples < 3:
+            raise ValueError("Train/validation/test bölümü için en az 3 örnek gerekli.")
+
+        def can_stratify(labels, n_test):
+            unique, counts = np.unique(labels, return_counts=True)
+            return (
+                len(unique) > 1
+                and counts.min() >= 2
+                and n_test >= len(unique)
+            )
+
+        n_test = int(np.ceil(n_samples * test_size))
+        stratify_first = y if can_stratify(y, n_test) else None
+
         # Önce train+val ve test'i ayır
         X_temp, X_test, y_temp, y_test = train_test_split(
-            X, y, test_size=test_size, random_state=random_state, stratify=y
+            X, y, test_size=test_size, random_state=random_state,
+            stratify=stratify_first,
         )
         
         # Sonra train ve validation'ı ayır
         val_size_adjusted = validation_size / (1 - test_size)
+        n_val = int(np.ceil(len(y_temp) * val_size_adjusted))
+        stratify_second = y_temp if can_stratify(y_temp, n_val) else None
         X_train, X_val, y_train, y_val = train_test_split(
-            X_temp, y_temp, test_size=val_size_adjusted, 
-            random_state=random_state, stratify=y_temp
+            X_temp, y_temp, test_size=val_size_adjusted,
+            random_state=random_state, stratify=stratify_second,
         )
         
         print(f"Veri bölümü:")
@@ -129,7 +151,7 @@ class ModelTrainer:
         for epoch in range(epochs):
             # Training
             train_output = self.model.forward(X_train)
-            train_loss = np.mean((train_output - y_train) ** 2)
+            train_loss = Activation.binary_cross_entropy(y_train, train_output)
             train_accuracy = self.model.evaluate(X_train, y_train)
             
             # Backpropagation
@@ -137,7 +159,7 @@ class ModelTrainer:
             
             # Validation
             val_output = self.model.forward(X_val)
-            val_loss = np.mean((val_output - y_val) ** 2)
+            val_loss = Activation.binary_cross_entropy(y_val, val_output)
             val_accuracy = self.model.evaluate(X_val, y_val)
             
             # Geçmişe kaydet
@@ -168,12 +190,13 @@ class ModelTrainer:
             if patience_counter >= early_stopping_patience:
                 print(f"\nEarly stopping triggered at epoch {epoch}")
                 print(f"Best validation loss: {best_val_loss:.4f}")
-                
-                # En iyi ağırlıkları geri yükle
-                if best_weights is not None:
-                    self.model.weights = best_weights
-                    self.model.biases = best_biases
                 break
+
+        # Erken durma tetiklenmese de son epoch'un ağırlıkları yerine en iyi
+        # validation ağırlıklarını bırak.
+        if best_weights is not None:
+            self.model.weights = best_weights
+            self.model.biases = best_biases
         
         print("\nEğitim tamamlandı!")
         

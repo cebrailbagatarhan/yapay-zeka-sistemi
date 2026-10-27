@@ -9,6 +9,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import quote
 import os
 import time
 
@@ -75,10 +76,23 @@ class QwenWebAssistant:
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
             
-            response = requests.get(url, headers=headers, timeout=timeout)
-            response.raise_for_status()
-            
-            soup = BeautifulSoup(response.content, 'html.parser')
+            max_bytes = 2_000_000
+            with requests.get(
+                url,
+                headers=headers,
+                timeout=timeout,
+                stream=True,
+            ) as response:
+                response.raise_for_status()
+                content = bytearray()
+                for chunk in response.iter_content(chunk_size=65536):
+                    if not chunk:
+                        continue
+                    content.extend(chunk)
+                    if len(content) > max_bytes:
+                        raise ValueError("Sayfa boyutu 2 MB sınırını aşıyor.")
+
+            soup = BeautifulSoup(bytes(content), 'html.parser')
             
             # Başlık
             title = soup.find('title')
@@ -203,30 +217,54 @@ Ana noktaları çıkararak kısa bir özet yaz (maksimum 200 kelime):"""
     
     def research_topic(self, topic, num_sources=3):
         """
-        Bir konuyu araştır (Wikipedia + Google)
+        Bir konuyu Wikipedia araması üzerinden araştır.
         
         Args:
             topic: Araştırma konusu
-            num_sources: Kaç kaynak kullanılacak
+            num_sources: Kullanılacak en fazla kaynak sayısı
             
         Returns:
             str: Araştırma özeti
         """
         print(f"\n🔍 '{topic}' konusu araştırılıyor...")
-        
-        # Wikipedia'dan başla
-        wiki_url = f"https://tr.wikipedia.org/wiki/{topic.replace(' ', '_')}"
-        
+        num_sources = max(1, int(num_sources))
         sources = []
-        result = self.fetch_webpage(wiki_url)
-        
-        if result['success']:
-            sources.append({
-                'url': wiki_url,
-                'title': result['title'],
-                'text': result['text'][:2000]
-            })
-            print(f"✅ Wikipedia kaynağı eklendi")
+
+        # Doğrudan tek sayfa tahmin etmek yerine Wikipedia arama API'siyle
+        # konuyla ilgili birden fazla madde bul.
+        try:
+            search_data = requests.get(
+                "https://tr.wikipedia.org/w/api.php",
+                params={
+                    "action": "query",
+                    "list": "search",
+                    "srsearch": topic,
+                    "format": "json",
+                    "utf8": 1,
+                    "srlimit": num_sources,
+                },
+                timeout=10,
+            ).json()
+            titles = [
+                item["title"]
+                for item in search_data.get("query", {}).get("search", [])
+            ]
+        except Exception as e:
+            print(f"⚠️ Wikipedia araması başarısız: {e}")
+            titles = [topic]
+
+        for title in titles:
+            if len(sources) >= num_sources:
+                break
+            wiki_url = f"https://tr.wikipedia.org/wiki/{quote(title.replace(' ', '_'))}"
+            result = self.fetch_webpage(wiki_url)
+            if result['success']:
+                sources.append({
+                    'url': wiki_url,
+                    'title': result['title'],
+                    'text': result['text'][:2000]
+                })
+                print(f"✅ Wikipedia kaynağı eklendi: {title}")
         
         # Tüm kaynakları birleştir
         if not sources:

@@ -17,6 +17,7 @@ Modern LLM için BPE (Byte-Pair Encoding) tokenizer.
 
 import os
 import json
+import re
 from typing import List, Optional, Dict, Any
 
 
@@ -35,6 +36,7 @@ SPECIAL_TOKENS = {
     "<|assistant|>": 10,
     "<|tool|>": 11,
     "<|tool_result|>": 12,
+    "\n": 13,
 }
 
 # Chat format şablonları
@@ -60,38 +62,67 @@ class ModernTokenizer:
         vocab_size: int = 32256,
         model_path: Optional[str] = None,
     ):
-        self.requested_vocab_size = vocab_size
         self.vocab_size = vocab_size
         self.special_tokens = SPECIAL_TOKENS.copy()
         self._sp_model = None
+        self._sp_model_path: Optional[str] = None
         self._token_to_id: Dict[str, int] = {}
         self._id_to_token: Dict[int, str] = {}
-        
-        if model_path and os.path.exists(model_path):
+        self._build_special_pattern()
+
+        if model_path:
+            if not os.path.isdir(model_path):
+                raise FileNotFoundError(f"Tokenizer dizini bulunamadı: {model_path}")
             self.load(model_path)
         else:
             # Varsayılan olarak byte-level fallback tokenizer
             self._init_byte_fallback()
-    
+
+    def _build_special_pattern(self):
+        """Özel tokenları en uzun eşleşme önceliğiyle bulan regex."""
+        alternatives = sorted(self.special_tokens, key=len, reverse=True)
+        self._special_pattern = re.compile(
+            "|".join(re.escape(token) for token in alternatives)
+        )
+        self._special_offset = len(self.special_tokens)
+
     def _init_byte_fallback(self):
-        """Tüm Unicode metinleri UTF-8 byte'ları üzerinden kayıpsız kodla."""
+        """Tüm Unicode metinleri kayıpsız taşıyan byte-level tokenizer."""
         self._sp_model = None
+        self._sp_model_path = None
         self._token_to_id = {}
         self._id_to_token = {}
-        
+
+        # Özel tokenlar 0..N-1 aralığını kullanır.
         for token, idx in self.special_tokens.items():
             self._token_to_id[token] = idx
             self._id_to_token[idx] = token
-        
-        byte_offset = len(self.special_tokens)
-        for byte in range(256):
-            token = f"<0x{byte:02X}>"
-            token_id = byte_offset + byte
-            self._token_to_id[token] = token_id
-            self._id_to_token[token_id] = token
-        
-        # Fallback model yalnızca gerçekten kodlayabildiği vocabulary'yi raporlar.
-        self.vocab_size = len(self.special_tokens) + 256
+
+        # UTF-8 byte'ları N..N+255 aralığına eşlenir. Böylece emoji, CJK,
+        # kontrol karakterleri ve tüm Türkçe karakterler round-trip edilir.
+        offset = self._special_offset
+        for byte_value in range(256):
+            token = f"<0x{byte_value:02X}>"
+            self._token_to_id[token] = offset + byte_value
+            self._id_to_token[offset + byte_value] = token
+
+    def _encode_plain_text(self, text: str) -> List[int]:
+        """Özel olmayan metin parçasını token ID'lerine çevir."""
+        if not text:
+            return []
+
+        if self._sp_model is not None:
+            ids = []
+            unk_id = self._sp_model.unk_id()
+            for sp_id in self._sp_model.encode(text, out_type=int):
+                if sp_id == unk_id:
+                    ids.append(self.special_tokens["<unk>"])
+                else:
+                    ids.append(sp_id + self._special_offset)
+            return ids
+
+        # Byte-level fallback: her Unicode karakteri UTF-8 byte'larına ayır.
+        return [self._special_offset + byte for byte in text.encode("utf-8")]
     
     def train(
         self,
@@ -109,109 +140,102 @@ class ModernTokenizer:
         """
         try:
             import sentencepiece as spm
-        except ImportError as exc:
-            raise RuntimeError(
-                "Tokenizer eğitimi için sentencepiece gereklidir: "
-                "pip install sentencepiece"
-            ) from exc
-        
+        except ImportError:
+            print("⚠️ sentencepiece yüklü değil. pip install sentencepiece")
+            print("   Byte-level fallback tokenizer kullanılıyor.")
+            return False
+
+        if not texts:
+            raise ValueError("Tokenizer eğitimi için en az bir metin gerekli.")
+
         if vocab_size is None:
-            vocab_size = self.requested_vocab_size
-        
-        minimum_vocab_size = len(self.special_tokens) + 256
-        if vocab_size < minimum_vocab_size:
-            raise ValueError(
-                f"byte_fallback için vocab_size en az {minimum_vocab_size} olmalıdır"
-            )
-        
+            vocab_size = self.vocab_size
+
         os.makedirs(output_path, exist_ok=True)
-        
+
         # Eğitim verisini dosyaya yaz
         train_file = os.path.join(output_path, "train_data.txt")
         with open(train_file, 'w', encoding='utf-8') as f:
             for text in texts:
                 f.write(text.strip() + '\n')
-        
-        # İlk dört token SentencePiece meta tokenlarıdır. Kalan tokenlar
-        # sözlükteki sırayla 4..N ID'lerini alır.
-        user_defined_symbols = [
-            token
-            for token, token_id in sorted(
-                self.special_tokens.items(),
-                key=lambda item: item[1],
-            )
-            if token_id >= 4
-        ]
-        
-        # SentencePiece modeli eğit
+
+        # Özel tokenlar SentencePiece'in dışında yönetilir. Böylece sabit
+        # 0..13 ID'leri korunur ve SP vocabulary'si ile çakışmaz.
         model_prefix = os.path.join(output_path, "tokenizer")
-        
-        spm.SentencePieceTrainer.train(
-            input=train_file,
-            model_prefix=model_prefix,
-            vocab_size=vocab_size,
-            model_type="bpe",
-            character_coverage=0.9999,  # Türkçe için yüksek coverage
-            num_threads=os.cpu_count() or 4,
-            split_digits=True,
-            byte_fallback=True,
-            max_sentence_length=8192,
-            user_defined_symbols=user_defined_symbols,
-            pad_id=0,
-            bos_id=1,
-            eos_id=2,
-            unk_id=3,
-            normalization_rule_name="identity",  # NFD/NFKC yapma
-            hard_vocab_limit=False,
-        )
-        
-        # Modeli yükle
-        self._sp_model = spm.SentencePieceProcessor()
-        self._sp_model.load(model_prefix + ".model")
-        
+        sp_vocab_size = vocab_size - len(self.special_tokens)
+        if sp_vocab_size < 256:
+            raise ValueError(
+                "SentencePiece + byte fallback için vocab_size en az "
+                f"{len(self.special_tokens) + 256} olmalı."
+            )
+
+        try:
+            spm.SentencePieceTrainer.train(
+                input=train_file,
+                model_prefix=model_prefix,
+                vocab_size=sp_vocab_size,
+                model_type="bpe",
+                character_coverage=0.9999,
+                num_threads=os.cpu_count() or 4,
+                split_digits=True,
+                byte_fallback=True,
+                max_sentence_length=8192,
+                pad_id=-1,
+                bos_id=-1,
+                eos_id=-1,
+                unk_id=0,
+                hard_vocab_limit=False,
+                normalization_rule_name="identity",
+                minloglevel=2,
+            )
+
+            self._sp_model = spm.SentencePieceProcessor()
+            self._sp_model.load(model_prefix + ".model")
+            self._sp_model_path = model_prefix + ".model"
+        finally:
+            # Başarısız eğitimden kalan geçici dosyayı da temizle.
+            if os.path.exists(train_file):
+                os.remove(train_file)
+
         # Token map güncelle
         self._update_token_maps()
-        
+
         # Config kaydet
         config = {
-            "vocab_size": self.vocab_size,
-            "requested_vocab_size": vocab_size,
+            "vocab_size": vocab_size,
             "model_type": "bpe",
             "special_tokens": self.special_tokens,
-            "has_sp_model": True,
+            "sentencepiece_special_tokens_external": True,
         }
         with open(os.path.join(output_path, "tokenizer_config.json"), 'w', encoding='utf-8') as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
-        
+
+        actual_vocab = len(self._id_to_token)
         print(f"✅ Tokenizer eğitildi: {output_path}")
-        print(f"   Vocabulary: {self.vocab_size}")
-        
-        # Temizlik
-        if os.path.exists(train_file):
-            os.remove(train_file)
+        print(f"   Vocabulary: {actual_vocab} (hedef: {vocab_size})")
+        return True
     
     def _update_token_maps(self):
-        """SentencePiece ID'lerini offset uygulamadan doğrudan kullan."""
+        """SentencePiece modelinden token map güncelle."""
         if self._sp_model is None:
             return
         
         self._token_to_id = {}
         self._id_to_token = {}
         
-        for token, expected_id in self.special_tokens.items():
-            actual_id = self._sp_model.piece_to_id(token)
-            if actual_id != expected_id:
-                raise ValueError(
-                    f"Özel token ID uyumsuzluğu: {token} "
-                    f"beklenen={expected_id}, alınan={actual_id}"
-                )
+        # Özel tokenlar
+        for token, idx in self.special_tokens.items():
+            self._token_to_id[token] = idx
+            self._id_to_token[idx] = token
         
-        for token_id in range(self._sp_model.get_piece_size()):
-            token = self._sp_model.id_to_piece(token_id)
-            self._token_to_id[token] = token_id
-            self._id_to_token[token_id] = token
-        
-        self.vocab_size = self._sp_model.get_piece_size()
+        # SentencePiece tokenları (özel token adlarıyla çakışanları atla)
+        for i in range(self._sp_model.get_piece_size()):
+            token = self._sp_model.id_to_piece(i)
+            idx = i + self._special_offset
+            if token in self.special_tokens:
+                continue
+            self._token_to_id[token] = idx
+            self._id_to_token[idx] = token
     
     def encode(
         self,
@@ -231,88 +255,87 @@ class ModernTokenizer:
             Token ID listesi
         """
         ids = []
-        
+
         if add_bos:
             ids.append(self.special_tokens["<bos>"])
-        
-        if self._sp_model is not None:
-            ids.extend(self._sp_model.encode(text, out_type=int))
-        else:
-            # Özel tokenları koru; diğer tüm karakterleri UTF-8 byte'larına çevir.
-            remaining = text
-            byte_offset = len(self.special_tokens)
-            sorted_special_tokens = sorted(
-                self.special_tokens.keys(),
-                key=len,
-                reverse=True,
-            )
-            
-            while remaining:
-                matched_token = next(
-                    (
-                        token
-                        for token in sorted_special_tokens
-                        if remaining.startswith(token)
-                    ),
-                    None,
-                )
-                if matched_token is not None:
-                    ids.append(self.special_tokens[matched_token])
-                    remaining = remaining[len(matched_token):]
-                    continue
-                
-                char = remaining[0]
-                ids.extend(byte_offset + byte for byte in char.encode("utf-8"))
-                remaining = remaining[1:]
-        
+
+        # Özel tokenları normal metinden ayır; böylece <think>, <|im_end|>
+        # gibi işaretler alt kelime parçalarına bölünmez.
+        cursor = 0
+        for match in self._special_pattern.finditer(text):
+            ids.extend(self._encode_plain_text(text[cursor:match.start()]))
+            ids.append(self.special_tokens[match.group(0)])
+            cursor = match.end()
+        ids.extend(self._encode_plain_text(text[cursor:]))
+
         if add_eos:
             ids.append(self.special_tokens["<eos>"])
-        
+
         return ids
     
     def decode(self, ids: List[int], skip_special_tokens: bool = True) -> str:
-        """Token ID'lerini metne dönüştür."""
-        special_ids = set(self.special_tokens.values())
+        """
+        Token ID'lerini metne dönüştür.
         
+        Args:
+            ids: Token ID listesi
+            skip_special_tokens: Özel tokenları atla
+        
+        Returns:
+            Decoded metin
+        """
+        special_ids = set(self.special_tokens.values())
+        newline_id = self.special_tokens.get("\n")
+        parts: List[str] = []
+
         if self._sp_model is not None:
-            if skip_special_tokens:
-                clean_ids = [token_id for token_id in ids if token_id not in special_ids]
-                return self._sp_model.decode(clean_ids)
-            
-            parts = []
-            sp_buffer = []
+            sp_buffer: List[int] = []
+
+            def flush_sp():
+                if sp_buffer:
+                    parts.append(self._sp_model.decode(sp_buffer))
+                    sp_buffer.clear()
+
             for token_id in ids:
                 if token_id in special_ids:
-                    if sp_buffer:
-                        parts.append(self._sp_model.decode(sp_buffer))
-                        sp_buffer = []
-                    parts.append(self._id_to_token.get(token_id, "<unk>"))
-                else:
-                    sp_buffer.append(token_id)
-            if sp_buffer:
-                parts.append(self._sp_model.decode(sp_buffer))
+                    flush_sp()
+                    if token_id == newline_id:
+                        parts.append("\n")
+                    elif not skip_special_tokens:
+                        parts.append(self._id_to_token.get(token_id, ""))
+                elif token_id >= self._special_offset:
+                    sp_id = token_id - self._special_offset
+                    if sp_id < self._sp_model.get_piece_size():
+                        sp_buffer.append(sp_id)
+                    else:
+                        flush_sp()
+                elif not skip_special_tokens:
+                    parts.append(self._id_to_token.get(token_id, ""))
+
+            flush_sp()
             return "".join(parts)
-        
-        byte_offset = len(self.special_tokens)
-        parts = []
+
+        # Byte-level fallback decode: ardışık byte tokenlarını birlikte
+        # çözerek çok baytlı UTF-8 karakterleri geri kur.
         byte_buffer = bytearray()
-        
+
         def flush_bytes():
             if byte_buffer:
                 parts.append(byte_buffer.decode("utf-8", errors="replace"))
                 byte_buffer.clear()
-        
+
         for token_id in ids:
             if token_id in special_ids:
                 flush_bytes()
-                if not skip_special_tokens:
-                    parts.append(self._id_to_token.get(token_id, "<unk>"))
-            elif byte_offset <= token_id < byte_offset + 256:
-                byte_buffer.append(token_id - byte_offset)
-            else:
-                flush_bytes()
-                parts.append("\uFFFD")
-        
+                if token_id == newline_id:
+                    parts.append("\n")
+                elif not skip_special_tokens:
+                    parts.append(self._id_to_token.get(token_id, ""))
+            elif self._special_offset <= token_id < self._special_offset + 256:
+                byte_buffer.append(token_id - self._special_offset)
+            elif not skip_special_tokens:
+                parts.append(self._id_to_token.get(token_id, ""))
+
         flush_bytes()
         return "".join(parts)
     
@@ -363,34 +386,36 @@ class ModernTokenizer:
         
         config = {
             "vocab_size": self.vocab_size,
-            "requested_vocab_size": self.requested_vocab_size,
             "special_tokens": self.special_tokens,
             "has_sp_model": self._sp_model is not None,
+            "sentencepiece_special_tokens_external": True,
         }
-        
+
         with open(os.path.join(path, "tokenizer_config.json"), 'w', encoding='utf-8') as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
-        
+
         if self._sp_model is not None:
+            # load/save aynı modeli serileştirsin; dizin API'sine bağımlı olma.
             sp_model_path = os.path.join(path, "tokenizer.model")
-            with open(sp_model_path, "wb") as model_file:
-                model_file.write(self._sp_model.serialized_model_proto())
-    
+            with open(sp_model_path, "wb") as f:
+                f.write(self._sp_model.serialized_model_proto())
+            self._sp_model_path = sp_model_path
+
     def load(self, path: str):
         """Tokenizer'ı yükle."""
+        self._sp_model = None
+        self._sp_model_path = None
+        self._token_to_id = {}
+        self._id_to_token = {}
+
         config_path = os.path.join(path, "tokenizer_config.json")
         if os.path.exists(config_path):
             with open(config_path, 'r', encoding='utf-8') as f:
                 config = json.load(f)
-            self.requested_vocab_size = config.get(
-                "requested_vocab_size",
-                config.get("vocab_size", self.requested_vocab_size),
-            )
-            loaded_special_tokens = config.get("special_tokens", self.special_tokens)
-            # Eski config'lerde newline ayrı special token olarak tutuluyordu.
-            loaded_special_tokens.pop("\n", None)
-            self.special_tokens = loaded_special_tokens
-        
+            self.vocab_size = config.get("vocab_size", self.vocab_size)
+            self.special_tokens = config.get("special_tokens", self.special_tokens)
+        self._build_special_pattern()
+
         # SentencePiece model yükle
         sp_model_path = os.path.join(path, "tokenizer.model")
         if os.path.exists(sp_model_path):
@@ -398,6 +423,7 @@ class ModernTokenizer:
                 import sentencepiece as spm
                 self._sp_model = spm.SentencePieceProcessor()
                 self._sp_model.load(sp_model_path)
+                self._sp_model_path = sp_model_path
                 self._update_token_maps()
             except ImportError:
                 print("⚠️ sentencepiece yüklü değil, byte-level fallback kullanılıyor")

@@ -1,49 +1,40 @@
-# Gerekli Python Paketleri - Yapay Zeka Modeli
+# Temel veri ve görselleştirme
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+seaborn>=0.12
+scikit-learn>=1.3
 
-# Temel matematik ve veri işleme
-numpy>=1.21.0
-pandas>=1.3.0
-matplotlib>=3.4.0
-seaborn>=0.11.0
+# ModernLLM ve eğitim
+torch>=2.3
+sentencepiece>=0.2
+datasets>=2.18
+accelerate>=0.30
+wandb>=0.17
 
-# Makine öğrenmesi ve deep learning
-scikit-learn>=1.0.0
-tensorflow>=2.8.0
-torch>=2.1.0
-sentencepiece>=0.2.0
-torchvision>=0.12.0
+# Qwen / LoRA deneyleri (opsiyonel yollar)
+transformers>=4.40
+peft>=0.10
+bitsandbytes>=0.43
+gymnasium>=0.29
 
-# 🚀 Model Optimizasyonu - Quantization
-bitsandbytes>=0.41.0  # GPU quantization için
-accelerate>=0.20.0    # Model yükleme optimizasyonu
+# Web araştırması
+requests>=2.31
+httpx>=0.25
+beautifulsoup4>=4.12
+lxml>=4.9
+wikipedia>=1.4
+feedparser>=6.0
+ddgs>=9.0
 
-# ⚡ Async Web Scraping - Paralel HTTP
-httpx>=0.25.0         # Async HTTP client
+# Web arayüzü
+streamlit>=1.30
+gradio>=4.0
+plotly>=5.18
+tqdm>=4.66
+joblib>=1.3
+Pillow>=10.0
 
-# Web Scraping ve Arama
-requests>=2.28.0
-beautifulsoup4>=4.11.0
-duckduckgo-search>=4.0.0  # ddgs
-wikipedia>=1.4.0
-
-# Jupyter notebook geliştirme
-jupyter>=1.0.0
-ipykernel>=6.0.0
-
-# Veri görselleştirme
-plotly>=5.0.0
-
-# Progress bar ve utilities
-tqdm>=4.62.0
-
-# Model kaydetme ve yükleme
-joblib>=1.1.0
-pickle5>=0.0.11
-
-# Image processing
-Pillow>=8.3.0
-opencv-python>=4.5.0
-
-# Web interface (opsiyonel)
-streamlit>=1.10.0
-gradio>=3.0.0
+# Notebook geliştirme
+jupyter>=1.0
+ipykernel>=6.25

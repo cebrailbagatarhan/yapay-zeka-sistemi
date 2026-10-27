@@ -20,15 +20,13 @@ import os
 import json
 import time
 import math
-import inspect
-from contextlib import nullcontext
 from typing import Optional, Dict, Any, List
 from dataclasses import asdict
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
-from torch.cuda.amp import GradScaler
+from torch.amp import autocast, GradScaler
 
 from modern_llm.config import ModelConfig, TrainingConfig
 
@@ -67,24 +65,35 @@ class Trainer:
         self.tokenizer = tokenizer
         self.collate_fn = collate_fn
         
+        if train_dataset is None or len(train_dataset) == 0:
+            raise ValueError("Eğitim dataset'i boş olamaz.")
+
         # Device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.model.to(self.device)
-        
-        # Mixed precision. CPU FP16 autocast desteklenmediği için FP32'ye düşer.
-        requested_amp = self.config.mixed_precision in ("bf16", "fp16")
-        cpu_fp16 = self.device.type == "cpu" and self.config.mixed_precision == "fp16"
-        self.use_amp = requested_amp and not cpu_fp16
+
+        # Mixed precision yalnızca CUDA'da anlamlı. CPU'da autocast'i açmak
+        # özellikle fp16'da sayısal hatalara ve yavaşlamaya yol açar.
+        self.use_amp = (
+            self.device.type == "cuda"
+            and self.config.mixed_precision in ("bf16", "fp16")
+        )
+        if self.config.mixed_precision == "bf16" and self.use_amp:
+            if not torch.cuda.is_bf16_supported():
+                print("⚠️ GPU BF16 desteklemiyor; FP16'a geçiliyor.")
+                self.config.mixed_precision = "fp16"
         self.amp_dtype = (
             torch.bfloat16
             if self.config.mixed_precision == "bf16"
             else torch.float16
         )
-        self.use_grad_scaler = (
-            self.device.type == "cuda"
-            and self.config.mixed_precision == "fp16"
+        self.scaler = GradScaler(
+            "cuda",
+            enabled=(
+                self.device.type == "cuda"
+                and self.config.mixed_precision == "fp16"
+            ),
         )
-        self.scaler = GradScaler(enabled=self.use_grad_scaler)
         
         # Optimizer
         self.optimizer = self._create_optimizer()
@@ -93,11 +102,12 @@ class Trainer:
         self.train_loader = self._create_dataloader(train_dataset, shuffle=True)
         self.eval_loader = self._create_dataloader(eval_dataset, shuffle=False) if eval_dataset else None
         
-        # Learning rate scheduler. Son kısmi accumulation grubu da bir step'tir.
-        updates_per_epoch = math.ceil(
+        # Learning rate scheduler. Her epoch sonunda artakalan accumulation
+        # penceresi de flush edildiği için ceil kullanılır.
+        steps_per_epoch = math.ceil(
             len(self.train_loader) / self.config.gradient_accumulation_steps
         )
-        self.total_steps = max(1, updates_per_epoch * self.config.num_epochs)
+        self.total_steps = max(1, steps_per_epoch * self.config.num_epochs)
         self.scheduler = self._create_scheduler()
         
         # Training state
@@ -138,29 +148,20 @@ class Trainer:
             {"params": no_decay_params, "weight_decay": 0.0},
         ]
         
+        # Fused AdamW yalnızca destekleyen PyTorch/CUDA kombinasyonunda.
+        import inspect
         optimizer_kwargs = {
             "lr": self.config.learning_rate,
             "betas": (self.config.adam_beta1, self.config.adam_beta2),
             "eps": self.config.adam_epsilon,
         }
-        
-        # fused yalnızca destekleyen PyTorch sürümlerinde ve CUDA'da gönderilir.
         if (
             self.device.type == "cuda"
             and "fused" in inspect.signature(torch.optim.AdamW).parameters
         ):
             optimizer_kwargs["fused"] = True
-        
+
         return torch.optim.AdamW(param_groups, **optimizer_kwargs)
-    
-    def _autocast_context(self):
-        """Cihaz ve precision için geçerli autocast context'i döndür."""
-        if not self.use_amp:
-            return nullcontext()
-        return torch.autocast(
-            device_type=self.device.type,
-            dtype=self.amp_dtype,
-        )
     
     def _create_scheduler(self):
         """Cosine learning rate scheduler with warmup."""
@@ -197,7 +198,7 @@ class Trainer:
     
     def _create_dataloader(self, dataset, shuffle: bool = True) -> Optional[DataLoader]:
         """DataLoader oluştur."""
-        if dataset is None:
+        if dataset is None or len(dataset) == 0:
             return None
         
         return DataLoader(
@@ -207,6 +208,8 @@ class Trainer:
             num_workers=min(self.config.num_workers, os.cpu_count() or 1),
             pin_memory=True if self.device.type == "cuda" else False,
             collate_fn=self.collate_fn,
+            # Küçük dataset'lerde tüm batch'i atmak optimizer adımının hiç
+            # atılmamasına neden oluyordu.
             drop_last=False,
         )
     
@@ -254,37 +257,36 @@ class Trainer:
         self.model.train()
         self.optimizer.zero_grad(set_to_none=True)
         start_time = time.time()
-        
+        num_batches = len(self.train_loader)
+        accumulation = self.config.gradient_accumulation_steps
+
         for epoch in range(self.config.num_epochs):
             self.epoch = epoch
             epoch_loss = 0.0
             epoch_steps = 0
-            
-            num_batches = len(self.train_loader)
-            remainder = num_batches % self.config.gradient_accumulation_steps
-            
+
             for batch_idx, batch in enumerate(self.train_loader):
                 # Batch'i device'a taşı
                 batch = {k: v.to(self.device) for k, v in batch.items()}
-                
-                in_partial_group = (
-                    remainder > 0 and batch_idx >= num_batches - remainder
-                )
-                accumulation_divisor = (
-                    remainder
-                    if in_partial_group
-                    else self.config.gradient_accumulation_steps
-                )
-                
+
+                # Epoch sonundaki eksik accumulation penceresini gerçek
+                # pencere boyutuyla normalize et; aksi halde son adımın
+                # gradyanı olduğundan küçük olur.
+                window_start = (batch_idx // accumulation) * accumulation
+                window_size = min(accumulation, num_batches - window_start)
+
                 # Forward pass (mixed precision)
-                with self._autocast_context():
+                with autocast(
+                    device_type=self.device.type,
+                    dtype=self.amp_dtype,
+                    enabled=self.use_amp,
+                ):
                     outputs = self.model(
                         input_ids=batch["input_ids"],
                         attention_mask=batch.get("attention_mask"),
                         labels=batch["labels"],
                     )
-                    raw_loss = outputs.loss
-                    loss = raw_loss / accumulation_divisor
+                    loss = outputs.loss / window_size
                 
                 # Backward pass
                 if self.scaler.is_enabled():
@@ -292,15 +294,14 @@ class Trainer:
                 else:
                     loss.backward()
                 
-                epoch_loss += raw_loss.item()
+                epoch_loss += loss.item() * window_size
                 epoch_steps += 1
                 
+                # Gradient accumulation (son eksik pencereyi de uygula)
                 should_step = (
-                    (batch_idx + 1) % self.config.gradient_accumulation_steps == 0
-                    or batch_idx + 1 == num_batches
+                    (batch_idx + 1) % accumulation == 0
+                    or (batch_idx + 1) == num_batches
                 )
-                
-                # Gradient accumulation
                 if should_step:
                     # Gradient clipping
                     if self.scaler.is_enabled():
@@ -378,6 +379,9 @@ class Trainer:
             if self.eval_loader:
                 eval_loss = self.evaluate()
                 self.model.train()
+                if eval_loss < self.best_eval_loss:
+                    self.best_eval_loss = eval_loss
+                    self.save_checkpoint("best")
             
             # Epoch checkpoint
             self.save_checkpoint(f"epoch_{epoch + 1}")
@@ -419,7 +423,11 @@ class Trainer:
         for batch in self.eval_loader:
             batch = {k: v.to(self.device) for k, v in batch.items()}
             
-            with self._autocast_context():
+            with autocast(
+                device_type=self.device.type,
+                dtype=self.amp_dtype,
+                enabled=self.use_amp,
+            ):
                 outputs = self.model(
                     input_ids=batch["input_ids"],
                     attention_mask=batch.get("attention_mask"),

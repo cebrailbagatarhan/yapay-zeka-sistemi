@@ -95,10 +95,12 @@ class ModernLLMModel(nn.Module):
         mask = torch.full(
             (tgt_len, tgt_len),
             torch.finfo(dtype).min,
+            dtype=dtype,
             device=device,
         )
         mask_cond = torch.arange(tgt_len, device=device)
-        mask.masked_fill_(mask_cond >= (mask_cond + 1).view(-1, 1), 0)
+        # Satır i, yalnızca 0..i sütunlarına (geçmiş + mevcut token) bakabilir.
+        mask.masked_fill_(mask_cond < (mask_cond + 1).view(-1, 1), 0)
         
         # Past key values için genişlet
         if past_key_values_length > 0:
@@ -413,6 +415,14 @@ class ModernLLMForCausalLM(nn.Module):
             pad_token_id = self.config.pad_token_id
         if stop_token_ids is None:
             stop_token_ids = [eos_token_id]
+        if max_new_tokens < 0:
+            raise ValueError("max_new_tokens negatif olamaz.")
+        if temperature < 0:
+            raise ValueError("temperature negatif olamaz.")
+        if repetition_penalty <= 0:
+            raise ValueError("repetition_penalty sıfırdan büyük olmalı.")
+        if do_sample and temperature == 0:
+            do_sample = False
         
         batch_size = input_ids.shape[0]
         device = input_ids.device

@@ -8,6 +8,7 @@ Farklı GPU'lar için optimize edilmiş preset konfigürasyonlar içerir.
 
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any
+from copy import deepcopy
 import json
 import os
 
@@ -87,11 +88,32 @@ class ModelConfig:
     max_thinking_tokens: int = 1024  # Düşünme için max token
     
     def __post_init__(self):
-        """Konfigürasyon doğrulama."""
-        assert self.hidden_size % self.num_attention_heads == 0, \
-            f"hidden_size ({self.hidden_size}) num_attention_heads ({self.num_attention_heads}) ile bölünebilir olmalı"
-        assert self.num_attention_heads % self.num_kv_heads == 0, \
-            f"num_attention_heads ({self.num_attention_heads}) num_kv_heads ({self.num_kv_heads}) ile bölünebilir olmalı"
+        """Konfigürasyon doğrulama (assert yerine her zaman çalışan ValueError)."""
+        positive_fields = {
+            "vocab_size": self.vocab_size,
+            "hidden_size": self.hidden_size,
+            "num_layers": self.num_layers,
+            "num_attention_heads": self.num_attention_heads,
+            "num_kv_heads": self.num_kv_heads,
+            "intermediate_size": self.intermediate_size,
+            "max_position_embeddings": self.max_position_embeddings,
+        }
+        for name, value in positive_fields.items():
+            if value <= 0:
+                raise ValueError(f"{name} sıfırdan büyük olmalı (gelen: {value}).")
+
+        if self.hidden_size % self.num_attention_heads != 0:
+            raise ValueError(
+                f"hidden_size ({self.hidden_size}) num_attention_heads "
+                f"({self.num_attention_heads}) ile bölünebilir olmalı."
+            )
+        if self.num_attention_heads % self.num_kv_heads != 0:
+            raise ValueError(
+                f"num_attention_heads ({self.num_attention_heads}) num_kv_heads "
+                f"({self.num_kv_heads}) ile bölünebilir olmalı."
+            )
+        if self.head_dim % 2 != 0:
+            raise ValueError("RoPE için head_dim çift sayı olmalı.")
     
     @property
     def head_dim(self) -> int:
@@ -208,7 +230,29 @@ class TrainingConfig:
     
     # ===== Eğitim Aşamaları =====
     stage: str = "sft"  # pretrain, sft, dpo, cot
-    
+
+    def __post_init__(self):
+        """Eğitim döngüsünü kilitleyebilecek geçersiz değerleri reddet."""
+        positive_fields = {
+            "num_epochs": self.num_epochs,
+            "batch_size": self.batch_size,
+            "gradient_accumulation_steps": self.gradient_accumulation_steps,
+            "max_seq_length": self.max_seq_length,
+            "logging_steps": self.logging_steps,
+            "eval_steps": self.eval_steps,
+            "save_steps": self.save_steps,
+        }
+        for name, value in positive_fields.items():
+            if value <= 0:
+                raise ValueError(f"{name} sıfırdan büyük olmalı (gelen: {value}).")
+
+        if not 0.0 <= self.warmup_ratio <= 1.0:
+            raise ValueError("warmup_ratio 0 ile 1 arasında olmalı.")
+        if not 0.0 <= self.min_lr_ratio <= 1.0:
+            raise ValueError("min_lr_ratio 0 ile 1 arasında olmalı.")
+        if self.mixed_precision not in ("bf16", "fp16", "fp32"):
+            raise ValueError("mixed_precision bf16, fp16 veya fp32 olmalı.")
+
     def to_dict(self) -> Dict[str, Any]:
         return {k: v for k, v in self.__dict__.items()}
 
@@ -316,12 +360,14 @@ def get_config_for_gpu(gpu_name: str) -> tuple:
     for key in GPU_PRESETS:
         if key in gpu_name:
             preset = GPU_PRESETS[key]
-            model_config = PRESET_CONFIGS[preset["model"]]
-            train_config = preset["training"]
+            # Preset nesneleri paylaşılmamalı; bir koşudaki değişiklik
+            # sonraki koşuların yapılandırmasını etkilememeli.
+            model_config = deepcopy(PRESET_CONFIGS[preset["model"]])
+            train_config = deepcopy(preset["training"])
             return model_config, train_config
     
     # Bilinmeyen GPU - en küçük modeli kullan
-    return PRESET_CONFIGS["nano"], TrainingConfig(
+    return deepcopy(PRESET_CONFIGS["nano"]), TrainingConfig(
         batch_size=2,
         max_seq_length=512,
         mixed_precision="fp16",

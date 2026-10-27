@@ -23,6 +23,27 @@ import time
 import sys
 
 
+_CONTROL_TOKENS = (
+    "<|im_end|>",
+    "<|im_start|>",
+    "<|assistant|>",
+    "<|system|>",
+    "<|user|>",
+    "<|tool|>",
+    "<|tool_result|>",
+    "<bos>",
+    "<eos>",
+    "<pad>",
+)
+
+
+def _strip_control_tokens(text: str) -> str:
+    """Sohbet kontrol tokenlarını metinden temizle; <think> korunur."""
+    for token in _CONTROL_TOKENS:
+        text = text.replace(token, "")
+    return text.strip()
+
+
 @dataclass
 class GenerationConfig:
     """Text generation ayarları."""
@@ -43,6 +64,20 @@ class GenerationConfig:
     
     # Streaming
     stream: bool = False
+
+    def __post_init__(self):
+        if self.max_new_tokens < 0:
+            raise ValueError("max_new_tokens negatif olamaz.")
+        if self.temperature < 0:
+            raise ValueError("temperature negatif olamaz.")
+        if not 0.0 < self.top_p <= 1.0:
+            raise ValueError("top_p 0'dan büyük ve 1'e eşit/küçük olmalı.")
+        if self.top_k < 0:
+            raise ValueError("top_k negatif olamaz.")
+        if self.repetition_penalty <= 0:
+            raise ValueError("repetition_penalty sıfırdan büyük olmalı.")
+        if self.num_beams < 1:
+            raise ValueError("num_beams en az 1 olmalı.")
 
 
 class TextGenerator:
@@ -76,6 +111,7 @@ class TextGenerator:
         top_p: Optional[float] = None,
         repetition_penalty: Optional[float] = None,
         do_sample: Optional[bool] = None,
+        skip_special_tokens: bool = True,
     ) -> str:
         """
         Metin üret.
@@ -90,6 +126,7 @@ class TextGenerator:
             top_p: Top-p nucleus filtre (kısayol)
             repetition_penalty: Tekrar cezası (kısayol)
             do_sample: Sampling aç/kapa (kısayol)
+            skip_special_tokens: Kontrol tokenlarını çıktıdan çıkar
             
         Returns:
             Üretilen metin
@@ -116,7 +153,7 @@ class TextGenerator:
         # Tokenize
         if hasattr(self.tokenizer, 'apply_chat_template'):
             input_text = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True)
-            input_ids = self.tokenizer.encode(input_text, add_special_tokens=False)
+            input_ids = self.tokenizer.encode(input_text)
         else:
             input_ids = self.tokenizer.encode(prompt)
         
@@ -127,7 +164,10 @@ class TextGenerator:
         
         # Decode
         new_tokens = output_ids[0, input_ids.shape[1]:]
-        response = self.tokenizer.decode(new_tokens.tolist())
+        response = self.tokenizer.decode(
+            new_tokens.tolist(),
+            skip_special_tokens=skip_special_tokens,
+        )
         
         return response
     
@@ -166,7 +206,14 @@ class TextGenerator:
             "sonra yanıtını ver."
         )
         
-        full_response = self.generate(prompt, config, think_system)
+        # <think> etiketlerini kaybetmemek için ham özel tokenlarla decode et.
+        full_response = self.generate(
+            prompt,
+            config,
+            think_system,
+            skip_special_tokens=False,
+        )
+        full_response = _strip_control_tokens(full_response)
         
         # Thinking ve response ayır
         thinking = ""
@@ -214,49 +261,55 @@ class TextGenerator:
         # Tokenize
         if hasattr(self.tokenizer, 'apply_chat_template'):
             input_text = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True)
-            input_ids = self.tokenizer.encode(input_text, add_special_tokens=False)
+            input_ids = self.tokenizer.encode(input_text)
         else:
             input_ids = self.tokenizer.encode(prompt)
-        
+
         input_ids = torch.tensor([input_ids], dtype=torch.long, device=self.device)
-        
-        # Token token üret
+        yield from self._stream_tokens(input_ids, config)
+
+    @torch.no_grad()
+    def _stream_tokens(
+        self,
+        input_ids: torch.Tensor,
+        config: GenerationConfig,
+    ) -> Generator[str, None, None]:
+        """Hazır token ID'lerinden streaming üretim yap."""
+        if config.num_beams != 1:
+            raise NotImplementedError(
+                "Beam search henüz uygulanmadı; num_beams=1 kullanın."
+            )
+
         past_key_values = None
         generated = input_ids
-        
+        eos_token_id = getattr(self.tokenizer, "eos_token_id", None)
+
         for _ in range(config.max_new_tokens):
-            # Forward
-            if past_key_values is not None:
-                # Sadece son token
-                model_input = generated[:, -1:]
-            else:
-                model_input = generated
-            
+            model_input = generated if past_key_values is None else generated[:, -1:]
             outputs = self.model(
                 input_ids=model_input,
                 past_key_values=past_key_values,
                 use_cache=True,
             )
-            
+
             logits = outputs.logits[:, -1, :]
-            past_key_values = outputs.past_key_values if hasattr(outputs, 'past_key_values') else None
-            
-            # Sampling
+            past_key_values = getattr(outputs, 'past_key_values', None)
+
             next_token = self._sample_token(logits, generated, config)
             generated = torch.cat([generated, next_token.unsqueeze(0)], dim=-1)
-            
-            # EOS kontrolü
-            if next_token.item() == self.tokenizer.eos_token_id:
+
+            if eos_token_id is not None and next_token.item() == eos_token_id:
                 break
-            
-            # Stop tokens kontrolü
             if next_token.item() in config.stop_tokens:
                 break
-            
-            # Decode ve yield
-            token_text = self.tokenizer.decode([next_token.item()])
-            yield token_text
-    
+
+            token_text = self.tokenizer.decode(
+                [next_token.item()],
+                skip_special_tokens=False,
+            )
+            if token_text not in _CONTROL_TOKENS:
+                yield token_text
+
     def _generate_tokens(
         self,
         input_ids: torch.Tensor,
@@ -267,6 +320,11 @@ class TextGenerator:
         
         KV-Cache kullanarak verimli autoregressive üretim.
         """
+        if config.num_beams != 1:
+            raise NotImplementedError(
+                "Beam search henüz uygulanmadı; num_beams=1 kullanın."
+            )
+
         generated = input_ids
         past_key_values = None
         
@@ -320,8 +378,8 @@ class TextGenerator:
         if config.repetition_penalty != 1.0:
             logits = self._apply_repetition_penalty(logits, generated, config.repetition_penalty)
         
-        # Greedy decoding
-        if not config.do_sample:
+        # temperature=0, sampling'in özel durumu değil; greedy decoding'dir.
+        if not config.do_sample or config.temperature == 0:
             return logits.argmax(dim=-1)
         
         # (2) Temperature
@@ -349,8 +407,11 @@ class TextGenerator:
         penalty: float,
     ) -> torch.Tensor:
         """Tekrar cezası uygula."""
-        # Daha önce üretilen token'lara ceza
+        # Daha önce üretilen token'lara ceza. Bozuk/uyumsuz prompt ID'leri
+        # logits sözlüğü dışındaysa sessizce atla.
         for token_id in set(generated[0].tolist()):
+            if not 0 <= token_id < logits.size(-1):
+                continue
             if logits[0, token_id] > 0:
                 logits[0, token_id] /= penalty
             else:
@@ -362,7 +423,11 @@ class TextGenerator:
         top_k = min(k, logits.size(-1))
         values, _ = torch.topk(logits, top_k)
         min_value = values[:, -1].unsqueeze(-1)
-        logits = torch.where(logits < min_value, torch.tensor(float('-inf'), device=logits.device), logits)
+        logits = torch.where(
+            logits < min_value,
+            torch.full_like(logits, float('-inf')),
+            logits,
+        )
         return logits
     
     def _top_p_filter(self, logits: torch.Tensor, p: float) -> torch.Tensor:
@@ -457,9 +522,11 @@ class ChatInterface:
         # Üretim
         output_ids = self.generator._generate_tokens(input_ids, self.generation_config)
         
-        # Decode
+        # Decode (thinking etiketlerini kaybetmeden)
         new_tokens = output_ids[0, input_ids.shape[1]:]
-        response = self.tokenizer.decode(new_tokens.tolist())
+        response = _strip_control_tokens(
+            self.tokenizer.decode(new_tokens.tolist(), skip_special_tokens=False)
+        )
         
         # Thinking extract
         thinking = ""
@@ -490,41 +557,57 @@ class ChatInterface:
         Token token yanıt üretir.
         """
         self.history.append({"role": "user", "content": user_message})
+        if len(self.history) > self.max_history_turns * 2:
+            self.history = self.history[-(self.max_history_turns * 2):]
         
         messages = [{"role": "system", "content": self.system_prompt}] + self.history
         
+        # Prompt'u yalnızca burada biçimlendir; stream_generate'a hazır token
+        # ID'leri vererek chat template'in ikinci kez uygulanmasını önle.
         if hasattr(self.tokenizer, 'apply_chat_template'):
             prompt_text = self.tokenizer.apply_chat_template(
                 messages, add_generation_prompt=True
             )
         else:
             prompt_text = self._format_messages(messages)
+
+        input_ids = torch.tensor(
+            [self.tokenizer.encode(prompt_text)],
+            dtype=torch.long,
+            device=self.generator.device,
+        )
         
         full_response = ""
         in_thinking = False
         
-        for token in self.generator.stream_generate(
-            prompt_text,
-            self.generation_config,
-        ):
+        for token in self.generator._stream_tokens(input_ids, self.generation_config):
             full_response += token
-            
-            # Thinking durumunu takip et
-            if "<think>" in full_response and not in_thinking:
+
+            stripped = token.strip()
+            if stripped == "<think>":
                 in_thinking = True
                 if show_thinking:
                     yield "\n💭 Düşünüyor...\n"
-            
-            if "</think>" in full_response and in_thinking:
+                continue
+
+            if stripped == "</think>":
                 in_thinking = False
                 if show_thinking:
                     yield "\n📝 Yanıt:\n"
                 continue
-            
+
             if not in_thinking or show_thinking:
                 yield token
         
-        self.history.append({"role": "assistant", "content": full_response})
+        # Geçmişe ham <think> etiketleriyle değil, kullanıcıya gösterilen
+        # nihai cevapla devam et.
+        clean_response = full_response
+        if "<think>" in full_response and "</think>" in full_response:
+            clean_response = full_response.split("</think>", 1)[1]
+        self.history.append({
+            "role": "assistant",
+            "content": _strip_control_tokens(clean_response),
+        })
     
     def _format_messages(self, messages: List[Dict[str, str]]) -> str:
         """Basit mesaj formatlama (chat template yoksa)."""
