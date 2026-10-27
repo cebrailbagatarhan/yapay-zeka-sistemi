@@ -277,20 +277,54 @@ class GroupedQueryAttention(nn.Module):
         
         kv_seq_len = key_states.shape[2]
         
+        # Causal ve sliding-window kuralları her iki attention yolunda da
+        # aynı maskeye uygulanır. Query'lerin mutlak pozisyonu cache
+        # uzunluğu hesaba katılarak belirlenir.
+        query_positions = torch.arange(
+            kv_seq_len - q_len,
+            kv_seq_len,
+            device=hidden_states.device,
+        ).unsqueeze(-1)
+        key_positions = torch.arange(
+            kv_seq_len,
+            device=hidden_states.device,
+        ).unsqueeze(0)
+        allowed_positions = key_positions <= query_positions
+        
+        if self.sliding_window is not None:
+            if self.sliding_window <= 0:
+                raise ValueError("sliding_window pozitif bir tamsayı olmalıdır")
+            allowed_positions &= (
+                key_positions >= query_positions - self.sliding_window + 1
+            )
+        
+        allowed_positions = allowed_positions.unsqueeze(0).unsqueeze(0)
+        if attention_mask is None:
+            attention_mask = allowed_positions
+        elif attention_mask.shape[-2:] != (q_len, kv_seq_len):
+            raise ValueError(
+                "attention_mask son iki boyutu "
+                f"({q_len}, {kv_seq_len}) olmalıdır; "
+                f"alınan: {tuple(attention_mask.shape[-2:])}"
+            )
+        elif attention_mask.dtype == torch.bool:
+            attention_mask = attention_mask & allowed_positions
+        else:
+            attention_mask = attention_mask.masked_fill(
+                ~allowed_positions,
+                torch.finfo(attention_mask.dtype).min,
+            )
+        
         # === Attention Hesaplama ===
         # PyTorch scaled dot-product attention (SDPA)
         if self.use_flash_attention and hasattr(F, 'scaled_dot_product_attention') and not output_attentions:
-            # SDPA causal mask otomatik uygular
-            if attention_mask is not None and attention_mask.shape[-1] != kv_seq_len:
-                attention_mask = None
-            
             attn_output = F.scaled_dot_product_attention(
                 query_states,
                 key_states,
                 value_states,
                 attn_mask=attention_mask,
                 dropout_p=self.attention_dropout if self.training else 0.0,
-                is_causal=(attention_mask is None and q_len > 1),
+                is_causal=False,
             )
             attn_weights = None
         else:
@@ -298,19 +332,13 @@ class GroupedQueryAttention(nn.Module):
             scale = 1.0 / math.sqrt(self.head_dim)
             attn_weights = torch.matmul(query_states, key_states.transpose(-2, -1)) * scale
             
-            # Sliding window mask
-            if self.sliding_window is not None and q_len > 1:
-                # Sadece son sliding_window pozisyona attend et
-                window_mask = torch.ones(q_len, kv_seq_len, dtype=torch.bool, device=hidden_states.device)
-                for i in range(q_len):
-                    start = max(0, kv_seq_len - q_len + i - self.sliding_window + 1)
-                    end = kv_seq_len - q_len + i + 1
-                    window_mask[i, start:end] = False
-                window_mask = window_mask.unsqueeze(0).unsqueeze(0) * torch.finfo(attn_weights.dtype).min
-                attn_weights = attn_weights + window_mask
-            
-            # Causal mask
-            if attention_mask is not None:
+            # Causal, padding ve sliding-window maskesi
+            if attention_mask.dtype == torch.bool:
+                attn_weights = attn_weights.masked_fill(
+                    ~attention_mask,
+                    torch.finfo(attn_weights.dtype).min,
+                )
+            else:
                 attn_weights = attn_weights + attention_mask
             
             # Softmax (float32'de hesapla, sonra dtype'a dönüştür)
