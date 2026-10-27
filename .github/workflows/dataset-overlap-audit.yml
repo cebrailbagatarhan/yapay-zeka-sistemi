@@ -1,0 +1,24 @@
+name: Dataset overlap audit tests
+
+on:
+  pull_request:
+    paths:
+      - 'tools/audit_dataset_overlap.py'
+      - 'tests/test_dataset_overlap_audit.py'
+      - '.github/workflows/dataset-overlap-audit.yml'
+  push:
+    paths:
+      - 'tools/audit_dataset_overlap.py'
+      - 'tests/test_dataset_overlap_audit.py'
+      - '.github/workflows/dataset-overlap-audit.yml'
+
+jobs:
+  audit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest -v tests.test_dataset_overlap_audit
+      - run: python -m py_compile tools/audit_dataset_overlap.py tests/test_dataset_overlap_audit.py
