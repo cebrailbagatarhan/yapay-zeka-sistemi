@@ -60,6 +60,30 @@ class TrainingRecordAuditTests(unittest.TestCase):
         self.put("turkish_general_dataset.json", [{"instruction": "q", "output": "a", "input": 2}])
         self.assertEqual(audit_directory(self.directory)["errors"], 1)
 
+    def test_min_records_flags_short_datasets(self):
+        report = audit_directory(self.directory, min_records=2)
+        self.assertEqual((report["records"], report["errors"]), (4, 4))
+        self.assertTrue(all(
+            any("at least 2 records" in issue for issue in entry["issues"])
+            for entry in report["files"]
+        ))
+
+    def test_min_records_accepts_sufficient_records(self):
+        for filename, (prompt, answers) in SCHEMAS.items():
+            self.put(filename, [
+                {prompt: "first", **{field: "answer one" for field in answers}},
+                {prompt: "second", **{field: "answer two" for field in answers}},
+            ])
+        self.assertEqual(audit_directory(self.directory, min_records=2)["errors"], 0)
+
+    def test_min_records_cli_exit_and_validation(self):
+        self.assertEqual(main(["--directory", str(self.directory), "--min-records", "2"]), 1)
+        with self.assertRaises(SystemExit) as error:
+            main(["--min-records", "0"])
+        self.assertEqual(error.exception.code, 2)
+        with self.assertRaises(ValueError):
+            audit_directory(self.directory, min_records=0)
+
     def test_nonempty_exit_status(self):
         self.put("code_examples_dataset.json", [None])
         self.assertEqual(main(["--directory", str(self.directory)]), 1)
