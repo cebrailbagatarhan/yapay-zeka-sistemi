@@ -5,6 +5,7 @@ No model is instantiated and no GPU/PyTorch dependency is required.
 
 import argparse
 import json
+import math
 
 from modern_llm.config import PRESET_CONFIGS
 
@@ -31,6 +32,16 @@ def estimate_preset(preset: str, dtype: str = "bf16") -> dict:
     }
 
 
+def _positive_gib(value: str) -> float:
+    try:
+        amount = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError('Weight budget must be a positive finite GiB value') from exc
+    if not math.isfinite(amount) or amount <= 0:
+        raise argparse.ArgumentTypeError('Weight budget must be a positive finite GiB value')
+    return amount
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         description="Estimate ModernLLM preset weight memory without loading a model."
@@ -38,15 +49,22 @@ def main(argv=None) -> int:
     parser.add_argument("--preset", choices=sorted(PRESET_CONFIGS), help="Default: all presets")
     parser.add_argument("--dtype", choices=sorted(BYTES_PER_PARAMETER), default="bf16")
     parser.add_argument("--json", action="store_true", help="Machine-readable output")
+    parser.add_argument("--max-weight-gib", type=_positive_gib,
+                        help="Only show presets whose estimated weights fit this GiB budget (not total VRAM)")
     args = parser.parse_args(argv)
 
     presets = [args.preset] if args.preset else sorted(PRESET_CONFIGS)
     rows = [estimate_preset(name, args.dtype) for name in presets]
+    if args.max_weight_gib is not None:
+        budget_bytes = args.max_weight_gib * GIB
+        rows = [row for row in rows if row["weight_bytes"] <= budget_bytes]
     if args.json:
         print(json.dumps({"estimates": rows, "scope": "weights_only"}, ensure_ascii=False, indent=2))
     else:
         for row in rows:
             print(f"{row['preset']:7} {row['parameters']:,} params | {row['weight_gib']:.3f} GiB ({row['dtype']})")
+        if not rows:
+            print("No preset meets the weights-only budget.")
         print("Weights only: excludes gradients, optimizer, activations, KV cache and runtime overhead.")
     return 0
 
