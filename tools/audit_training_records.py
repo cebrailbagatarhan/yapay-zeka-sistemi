@@ -13,8 +13,10 @@ SCHEMAS = {
 }
 
 
-def audit_directory(directory: Path) -> dict:
+def audit_directory(directory: Path, min_records: int = 1) -> dict:
     """Return counts and field-level issues without exposing dataset text."""
+    if min_records < 1:
+        raise ValueError("min_records must be at least 1")
     report = {"records": 0, "files": [], "errors": 0}
     for filename, (prompt_field, response_fields) in SCHEMAS.items():
         entry = {"file": filename, "records": 0, "issues": []}
@@ -34,6 +36,10 @@ def audit_directory(directory: Path) -> dict:
 
         entry["records"] = len(records)
         report["records"] += len(records)
+        if len(records) < min_records:
+            entry["issues"].append(
+                f"Expected at least {min_records} records; found {len(records)}"
+            )
         seen = set()
         for index, record in enumerate(records, start=1):
             if not isinstance(record, dict):
@@ -59,8 +65,11 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", type=Path, default=Path(__file__).resolve().parents[1] / "data" / "training")
     parser.add_argument("--json", action="store_true", help="Print machine-readable summary (never dataset content)")
+    parser.add_argument("--min-records", type=int, default=1, help="Minimum records required per dataset (default: 1)")
     args = parser.parse_args(argv)
-    report = audit_directory(args.directory)
+    if args.min_records < 1:
+        parser.error("--min-records must be at least 1")
+    report = audit_directory(args.directory, min_records=args.min_records)
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
