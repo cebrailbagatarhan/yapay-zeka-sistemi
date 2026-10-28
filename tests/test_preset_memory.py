@@ -37,6 +37,26 @@ class PresetMemoryTests(unittest.TestCase):
         self.assertEqual(result["scope"], "weights_only")
         self.assertEqual([r["preset"] for r in result["estimates"]], ["small"])
 
+    def test_budget_filters_using_exact_bytes_not_rounded_gib(self):
+        nano_bytes = estimate_preset("nano")["weight_bytes"]
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(main(["--max-weight-gib", str(nano_bytes / 1024 ** 3), "--json"]), 0)
+        self.assertEqual([r["preset"] for r in json.loads(output.getvalue())["estimates"]], ["nano"])
+
+    def test_tiny_budget_returns_empty_json_list(self):
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(main(["--max-weight-gib", "0.00001", "--json"]), 0)
+        self.assertEqual(json.loads(output.getvalue())["estimates"], [])
+
+    def test_invalid_budgets_rejected(self):
+        for invalid in ("0", "-1", "nan", "inf", "not-a-number"):
+            with self.subTest(value=invalid), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit) as raised:
+                    main(["--max-weight-gib", invalid])
+                self.assertEqual(raised.exception.code, 2)
+
     def test_all_presets_are_reported(self):
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
